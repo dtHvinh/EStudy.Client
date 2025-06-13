@@ -1,22 +1,12 @@
 "use client";
 
-import { deleteCookie, getCookie, setCookie } from "cookies-next/client";
+import { deleteCookie, getCookie } from "cookies-next/client";
 import { useRouter } from "next/navigation";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import api, { ACCESS_TOKEN_COOKIE } from "../utils/requestUtils";
+import { ACCESS_TOKEN_COOKIE } from "../utils/requestUtils";
 
 interface AuthContextType {
   isLoading: boolean;
-  login: (
-    username: string,
-    password: string,
-    rememberMe?: boolean
-  ) => Promise<void>;
-  register: (
-    fullName: string,
-    username: string,
-    password: string
-  ) => Promise<void>;
   logout: () => void;
 }
 
@@ -46,62 +36,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth();
   }, []);
 
-  const login = async (
-    username: string,
-    password: string,
-    rememberMe = false
-  ) => {
-    setIsLoading(true);
-    try {
-      const response = await api.post<{ accessToken: string }>(
-        "/api/account/login",
-        {
-          username,
-          password,
-        }
-      );
-
-      // Save token to cookie
-      const tokenExpiry = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days or 24 hours
-      setCookie(ACCESS_TOKEN_COOKIE, response.accessToken, {
-        maxAge: tokenExpiry,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-      });
-    } catch (error) {
-      console.error("111-Login failed:", error);
-      throw error; // Re-throw to be handled by the login component
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const register = async (
-    fullName: string,
-    username: string,
-    password: string
-  ) => {
-    setIsLoading(true);
-    try {
-      await api.post("/api/account/register", {
-        name: fullName,
-        username,
-        password,
-      });
-    } catch (error) {
-      console.error("111-Registration failed:", error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const logout = () => {
     deleteCookie(ACCESS_TOKEN_COOKIE);
+    router.push("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ isLoading, logout }}>
       {children}
     </AuthContext.Provider>
   );

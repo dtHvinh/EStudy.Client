@@ -70,7 +70,7 @@ export function LoginForm({
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
       });
-      router.push("/");
+      router.push("/dashboard");
     } catch (error) {
       setFormErrors(error, form.setError);
     } finally {

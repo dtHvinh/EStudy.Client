@@ -7,3 +7,7 @@ export default interface PagedResponse<T> {
   hasPrevious: boolean;
   hasNext: boolean;
 }
+
+export interface LoadingableComponentProps {
+  loading?: boolean;
+}

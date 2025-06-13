@@ -38,7 +38,7 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Flash cards",
+      title: "Flash card sets",
       url: "fc",
       icon: IconScript,
     },
@@ -76,7 +76,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <Link href="dashboard">
                 <div className="relative size-28 py-2">
-                  <Image src="/logo2.png" fill alt="Logo" />
+                  <Image
+                    src="/logo2.png"
+                    fill
+                    alt="Logo"
+                    className="dark:invert"
+                  />
                 </div>
               </Link>
             </SidebarMenuButton>

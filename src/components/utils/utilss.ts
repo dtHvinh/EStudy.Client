@@ -16,3 +16,8 @@ export default function getInitials(name: string): string {
       .join("");
   }
 }
+
+export function isSelectedNav(path: string, link: string): string {
+  const segments = path.split("/").filter(Boolean); // removes empty strings
+  return (segments[0] || null) === link ? "bg-accent" : "";
+}

@@ -11,6 +11,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { isSelectedNav } from "./utils/utilss";
 
 export function NavMain({
   items,
@@ -21,6 +23,8 @@ export function NavMain({
     icon?: Icon;
   }[];
 }) {
+  const path = usePathname();
+
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -46,7 +50,10 @@ export function NavMain({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title}>
+              <SidebarMenuButton
+                className={`${isSelectedNav(path, item.url)}`}
+                tooltip={item.title}
+              >
                 <Link href={item.url} className="flex items-center gap-2">
                   {item.icon && <item.icon className="size-4" />}
                   <span>{item.title}</span>

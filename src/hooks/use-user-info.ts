@@ -9,10 +9,15 @@ type UserInfoResponseType = {
 };
 
 export function useUserInfo() {
-  const { data, error, isLoading } = useSWR<UserInfoResponseType>(
+  const { data, error, isLoading, mutate } = useSWR<UserInfoResponseType>(
     "/api/user/me",
     api.get
   );
 
-  return { user: data, getUserError: error, isUserLoading: isLoading };
+  return {
+    user: data,
+    getUserError: error,
+    isUserLoading: isLoading,
+    reload: mutate,
+  };
 }

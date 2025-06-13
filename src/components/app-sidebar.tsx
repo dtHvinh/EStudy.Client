@@ -34,6 +34,7 @@ import {
 import { useUserInfo } from "@/hooks/use-user-info";
 import Image from "next/image";
 import Link from "next/link";
+import DataErrorAlert from "./data-error-alert";
 
 const data = {
   user: {
@@ -153,7 +154,7 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user, getUserError, isUserLoading } = useUserInfo();
+  const { user, getUserError, isUserLoading, reload } = useUserInfo();
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -179,7 +180,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        {isUserLoading ? <NavUserSkeleton /> : user && <NavUser user={user} />}
+        {isUserLoading ? (
+          <NavUserSkeleton />
+        ) : getUserError ? (
+          <DataErrorAlert
+            onReload={reload}
+            title="Failed to load user."
+            description="Please contact support or try again."
+          />
+        ) : (
+          user && <NavUser user={user} />
+        )}
       </SidebarFooter>
     </Sidebar>
   );

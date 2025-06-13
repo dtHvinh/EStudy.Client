@@ -1,6 +1,8 @@
-import { Badge } from "@/components/ui/badge";
 import { FlashCardSetResponseType } from "@/hooks/useMyFlashCardSet";
 import { IconTrendingUp } from "@tabler/icons-react";
+import { Star } from "lucide-react";
+import { toast } from "sonner";
+import ButtonIcon from "./button-icon";
 import {
   Card,
   CardAction,
@@ -19,10 +21,11 @@ export default function FlashCardSet({ ...props }: FlashCardSetResponseType) {
         </CardTitle>
         <CardDescription>{props.description}</CardDescription>
         <CardAction>
-          <Badge variant="outline">
-            <IconTrendingUp />
-            +12.5%
-          </Badge>
+          <ButtonIcon
+            icon={<Star />}
+            tooltip={"Add to favorite"}
+            onClick={() => toast.success("ee")}
+          />
         </CardAction>
       </CardHeader>
       <CardFooter className="flex-col items-start gap-1.5 text-sm">

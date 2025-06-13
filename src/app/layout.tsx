@@ -39,7 +39,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Toaster position="bottom-right" richColors />
+          <Toaster position="bottom-right" richColors theme="dark" />
           {children}
         </ThemeProvider>
       </body>

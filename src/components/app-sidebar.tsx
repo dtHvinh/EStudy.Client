@@ -39,7 +39,7 @@ const data = {
     },
     {
       title: "Flash card sets",
-      url: "fc",
+      url: "sets",
       icon: IconScript,
     },
     {

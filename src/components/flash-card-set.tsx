@@ -1,5 +1,5 @@
 import { FlashCardSetResponseType } from "@/hooks/useMyFlashCardSet";
-import { IconStar, IconStarFilled } from "@tabler/icons-react";
+import { IconPlayerPlay, IconStar, IconStarFilled } from "@tabler/icons-react";
 import ButtonIcon from "./button-icon";
 import {
   Card,
@@ -9,10 +9,16 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "./ui/context-menu";
 import { Progress } from "./ui/progress";
 import { Skeleton } from "./ui/skeleton";
 
-export interface FlashCardSetProps {
+export interface FlashCardSetProps extends FlashCardSetResponseType {
   onAddToFavorite: () => void;
   onRemoveFromFavorite: () => void;
 }
@@ -21,7 +27,25 @@ export default function FlashCardSet({
   onAddToFavorite,
   onRemoveFromFavorite,
   ...props
-}: FlashCardSetResponseType & FlashCardSetProps) {
+}: FlashCardSetProps) {
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger>
+        <FlashCardSetDisplay
+          {...props}
+          onAddToFavorite={onAddToFavorite}
+          onRemoveFromFavorite={onRemoveFromFavorite}
+        />
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem>Edit</ContextMenuItem>
+        <ContextMenuItem>Delete</ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
+  );
+}
+
+function FlashCardSetDisplay({ ...props }: FlashCardSetProps) {
   return (
     <Card className="@container/card">
       <CardHeader>
@@ -35,20 +59,27 @@ export default function FlashCardSet({
             props.description
           )}
         </CardDescription>
-        <CardAction>
+        <CardAction className="gap-2 grid grid-cols-2">
           {props.isFavorite ? (
             <ButtonIcon
               icon={<IconStarFilled />}
               tooltip={"Remove from favorite"}
-              onClick={onRemoveFromFavorite}
+              onClick={props.onRemoveFromFavorite}
             />
           ) : (
             <ButtonIcon
               icon={<IconStar />}
               tooltip={"Add to favorite"}
-              onClick={onAddToFavorite}
+              onClick={props.onAddToFavorite}
             />
           )}
+          <ButtonIcon
+            icon={<IconPlayerPlay />}
+            tooltip={"Start learning"}
+            onClick={props.onAddToFavorite}
+            href="/flash-cards/learn"
+            target="_blank"
+          />
         </CardAction>
       </CardHeader>
       <FlashCardSetFooter {...props} />

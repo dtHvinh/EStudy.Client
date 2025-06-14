@@ -11,8 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { TooltipContent, TooltipTrigger } from "@radix-ui/react-tooltip";
-import { Tooltip } from "./ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export function ThemeProvider({
   children,

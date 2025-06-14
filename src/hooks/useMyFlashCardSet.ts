@@ -1,6 +1,7 @@
 import api from "@/components/utils/requestUtils";
 import PagedResponse from "@/components/utils/types";
 import { useState } from "react";
+import { toast } from "sonner";
 import useSWR from "swr";
 
 export interface FlashCardSetResponseType {
@@ -36,6 +37,15 @@ export default function useMyFlashCardSet({
   const nonFavoriteSets = data
     ? data.items.filter((set) => !set.isFavorite)
     : [];
+
+  function refresh() {
+    mutate();
+    setP({
+      page: 1,
+      pageSize: p.pageSize,
+    });
+    setHasMore(true);
+  }
 
   function scrollNext() {
     if (hasMore)
@@ -76,12 +86,39 @@ export default function useMyFlashCardSet({
     }));
   }
 
+  async function addToFavorite(cardSet: FlashCardSetResponseType) {
+    try {
+      const response = await api.post(
+        `/api/flash-card-sets/${cardSet.id}/favorite`
+      );
+      toast.success(`Added "${cardSet.title}" to favorite`);
+    } catch (error) {
+      console.error("Failed to add to favorite:", error);
+    }
+  }
+
+  async function removeFromFavorite(cardSet: FlashCardSetResponseType) {
+    try {
+      const response = await api.delete(
+        `/api/flash-card-sets/${cardSet.id}/favorite`
+      );
+      toast.success(`Removed "${cardSet.title}" to favorite`);
+    } catch (error) {
+      console.error("Failed to add to favorite:", error);
+    }
+  }
+
   return {
     favoriteSets,
     nonFavoriteSets,
+    getSetError: error,
+    isSetLoading: isLoading,
     scrollNext,
     scrollPrev,
     resetPage,
+    refresh,
     changePageSize,
+    addToFavorite,
+    removeFromFavorite,
   };
 }

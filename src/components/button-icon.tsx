@@ -1,9 +1,5 @@
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@radix-ui/react-tooltip";
 import { Button } from "./ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export default function ButtonIcon({
   className,
@@ -16,7 +12,12 @@ export default function ButtonIcon({
   tooltip?: string | React.ComponentProps<typeof TooltipContent>;
 } & React.ComponentProps<"button">) {
   const button = (
-    <Button variant="secondary" size="icon" className="size-8" {...props}>
+    <Button
+      variant="secondary"
+      size="icon"
+      className="size-8 active:scale-85"
+      {...props}
+    >
       {icon}
     </Button>
   );
@@ -27,13 +28,13 @@ export default function ButtonIcon({
 
   if (typeof tooltip === "string") {
     tooltip = {
-      children: tooltip,
+      children: <>{tooltip}</>,
     };
   }
   return (
     <Tooltip>
       <TooltipTrigger asChild>{button}</TooltipTrigger>
-      <TooltipContent side="right" align="center" hidden={false} {...tooltip} />
+      <TooltipContent {...tooltip} />
     </Tooltip>
   );
 }

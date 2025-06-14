@@ -5,13 +5,14 @@ export default function DataErrorAlert({
   title,
   description,
   onReload,
+  ...props
 }: {
   title?: string;
   description?: string;
   onReload?: () => void;
-}) {
+} & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <Alert variant="destructive">
+    <Alert variant="destructive" {...props}>
       <AlertCircleIcon />
       <AlertTitle className="flex justify-between">
         {title ?? "Error"}

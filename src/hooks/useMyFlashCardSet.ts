@@ -1,6 +1,6 @@
 import api from "@/components/utils/requestUtils";
 import PagedResponse from "@/components/utils/types";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import useSWR from "swr";
 
@@ -86,27 +86,56 @@ export default function useMyFlashCardSet({
     }));
   }
 
-  async function addToFavorite(cardSet: FlashCardSetResponseType) {
-    try {
-      const response = await api.post(
-        `/api/flash-card-sets/${cardSet.id}/favorite`
-      );
-      toast.success(`Added "${cardSet.title}" to favorite`);
-    } catch (error) {
-      console.error("Failed to add to favorite:", error);
-    }
-  }
+  const addToFavorite = useCallback(
+    async (cardSet: FlashCardSetResponseType) => {
+      try {
+        await api.post(`/api/flash-card-sets/${cardSet.id}/favorite`, {});
+        toast.success(`Added "${cardSet.title}" to favorite`);
+        mutate((prevData) => {
+          if (!prevData) return prevData;
 
-  async function removeFromFavorite(cardSet: FlashCardSetResponseType) {
-    try {
-      const response = await api.delete(
-        `/api/flash-card-sets/${cardSet.id}/favorite`
-      );
-      toast.success(`Removed "${cardSet.title}" to favorite`);
-    } catch (error) {
-      console.error("Failed to add to favorite:", error);
-    }
-  }
+          const updatedItems = prevData.items.map((set) =>
+            set.id === cardSet.id ? { ...set, isFavorite: true } : set
+          );
+
+          return {
+            ...prevData,
+            items: updatedItems,
+          };
+        }, false);
+      } catch (error) {
+        console.error("Failed to add to favorite:", error);
+        toast.error(`Failed to add "${cardSet.title}" to favorite`);
+      }
+    },
+    [mutate]
+  );
+
+  const removeFromFavorite = useCallback(
+    async (cardSet: FlashCardSetResponseType) => {
+      console.log("Removing from favorite:", cardSet);
+      try {
+        await api.delete(`/api/flash-card-sets/${cardSet.id}/favorite`);
+        toast.success(`Removed "${cardSet.title}" from favorite`);
+        mutate((prevData) => {
+          if (!prevData) return prevData;
+
+          const updatedItems = prevData.items.map((set) =>
+            set.id === cardSet.id ? { ...set, isFavorite: false } : set
+          );
+
+          return {
+            ...prevData,
+            items: updatedItems,
+          };
+        });
+      } catch (error) {
+        console.error("Failed to remove from favorite:", error); // Fixed error message
+        toast.error(`Failed to remove "${cardSet.title}" from favorite`);
+      }
+    },
+    []
+  );
 
   return {
     favoriteSets,

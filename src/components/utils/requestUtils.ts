@@ -33,20 +33,20 @@ axiosInstance.interceptors.request.use((config) => {
       config.headers.Authorization = `Bearer ${token}`;
     }
   }
+
   return config;
 });
 
-// Add response interceptor for global error handling
 axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error: AxiosError) => {
+  function (response) {
+    return response;
+  },
+  function (error: AxiosError) {
     // Skip error handling if explicitly requested
     const customConfig = error.config as RequestOptions;
     if (customConfig?.skipErrorHandling) {
       return Promise.reject(error);
     }
-
-    console.error("API request failed:", error.response?.data || error.message);
     return Promise.reject(error);
   }
 );
@@ -122,128 +122,106 @@ const prepareFormData = (data: any): FormData => {
 /**
  * HTTP GET request
  */
-export function get<T = any>(
+export async function get<T = any>(
   url: string,
   options: RequestOptions = {}
 ): Promise<T> {
-  return axiosInstance
-    .get(url, options)
-    .then((response) => handleResponse<T>(response));
+  const response = await axiosInstance.get(url, options);
+  return handleResponse<T>(response);
 }
 
 /**
  * HTTP POST request
  */
-export function post<T = any>(
+export async function post<T = any>(
   url: string,
   data?: any,
   options: RequestOptions = {}
 ): Promise<T> {
-  // Handle file uploads automatically
-  if (data && containsFiles(data)) {
-    const formData = prepareFormData(data);
-    return axiosInstance
-      .post(url, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        ...options,
-      })
-      .then((response) => handleResponse<T>(response));
-  }
-
-  // Regular JSON post
-  return axiosInstance
-    .post(url, data, options)
-    .then((response) => handleResponse<T>(response));
+  const response = await axiosInstance.post(url, data, options);
+  return handleResponse<T>(response);
 }
 
-export function postWithFormData<T = any>(
+export async function postWithFormData<T = any>(
   url: string,
   data: any,
   options: RequestOptions = {}
 ): Promise<T> {
   const formData = prepareFormData(data);
-  return axiosInstance
-    .post(url, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      ...options,
-    })
-    .then((response) => handleResponse<T>(response));
+  const response = await axiosInstance.post(url, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+    ...options,
+  });
+  return handleResponse<T>(response);
 }
 
-export function putWithFormData<T = any>(
+export async function putWithFormData<T = any>(
   url: string,
   data: any,
   options: RequestOptions = {}
 ): Promise<T> {
   const formData = prepareFormData(data);
-  return axiosInstance
-    .put(url, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      ...options,
-    })
-    .then((response) => handleResponse<T>(response));
+  const response = await axiosInstance.put(url, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+    ...options,
+  });
+  return handleResponse<T>(response);
 }
 
 /**
  * HTTP PUT request
  */
-export function put<T = any>(
+export async function put<T = any>(
   url: string,
   data?: any,
   options: RequestOptions = {}
 ): Promise<T> {
-  return axiosInstance
-    .put(url, data, options)
-    .then((response) => handleResponse<T>(response));
+  const response = await axiosInstance.put(url, data, options);
+  return handleResponse<T>(response);
 }
 
 /**
  * HTTP PATCH request
  */
-export function patch<T = any>(
+export async function patch<T = any>(
   url: string,
   data?: any,
   options: RequestOptions = {}
 ): Promise<T> {
-  return axiosInstance
-    .patch(url, data, options)
-    .then((response) => handleResponse<T>(response));
+  const response = await axiosInstance.patch(url, data, options);
+  return handleResponse<T>(response);
 }
 
 /**
  * HTTP DELETE request
  */
-export function del<T = any>(
+export async function del<T = any>(
   url: string,
   options: RequestOptions = {}
 ): Promise<T> {
-  return axiosInstance
-    .delete(url, options)
-    .then((response) => handleResponse<T>(response));
+  const response = await axiosInstance.delete(url, options);
+  return handleResponse<T>(response);
 }
 
 /**
  * Upload files using FormData
  */
-export function uploadFile<T = any>(
+export async function uploadFile<T = any>(
   url: string,
   formData: FormData,
   options: RequestOptions = {}
 ): Promise<T> {
-  return axiosInstance
-    .post(url, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      ...options,
-    })
-    .then((response) => handleResponse<T>(response));
+  const response = await axiosInstance.post(url, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+    ...options,
+  });
+  return handleResponse<T>(response);
 }
 
 // Export functions as an object for easier imports

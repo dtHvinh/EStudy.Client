@@ -1,6 +1,6 @@
 import { ThemeProvider } from "@/components/theme-toggle";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Montserrat } from "next/font/google";
+import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -14,7 +14,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const montserrat = Montserrat({
+const popins = Poppins({
+  weight: ["400"],
   subsets: ["latin"],
 });
 
@@ -31,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${popins.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider
           attribute="class"

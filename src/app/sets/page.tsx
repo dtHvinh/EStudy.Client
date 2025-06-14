@@ -8,11 +8,18 @@ import H3 from "@/components/ui/h3";
 import useMyFlashCardSet from "@/hooks/useMyFlashCardSet";
 
 export default function Page() {
-  const { favoriteSets, nonFavoriteSets, getSetError, refresh, isSetLoading } =
-    useMyFlashCardSet({
-      page: 1,
-      pageSize: 10,
-    });
+  const {
+    favoriteSets,
+    nonFavoriteSets,
+    getSetError,
+    refresh,
+    isSetLoading,
+    addToFavorite,
+    removeFromFavorite,
+  } = useMyFlashCardSet({
+    page: 1,
+    pageSize: 10,
+  });
 
   if (isSetLoading) {
     return (
@@ -36,17 +43,21 @@ export default function Page() {
 
   return (
     <MainLayout>
-      <H3 className="px-4">My favorite</H3>
-      <FlashCardSetList
-        sets={favoriteSets}
-        onAddToFavorite={async () => {}}
-        onRemoveFromFavorite={async () => {}}
-      />
+      {!!favoriteSets.length && (
+        <>
+          <H3 className="px-4">My favorite</H3>
+          <FlashCardSetList
+            sets={favoriteSets}
+            onAddToFavorite={addToFavorite}
+            onRemoveFromFavorite={removeFromFavorite}
+          />
+        </>
+      )}
       <H3 className="px-4">My sets</H3>
       <FlashCardSetList
         sets={nonFavoriteSets}
-        onAddToFavorite={async () => {}}
-        onRemoveFromFavorite={async () => {}}
+        onAddToFavorite={addToFavorite}
+        onRemoveFromFavorite={removeFromFavorite}
       />
     </MainLayout>
   );

@@ -7,8 +7,8 @@ export default function FlashCardSetList({
   onRemoveFromFavorite,
 }: {
   sets: FlashCardSetResponseType[];
-  onAddToFavorite: () => void;
-  onRemoveFromFavorite: () => void;
+  onAddToFavorite: (cardSet: FlashCardSetResponseType) => void;
+  onRemoveFromFavorite: (cardSet: FlashCardSetResponseType) => void;
 }) {
   return (
     <div className="dark:*:data-[slot=card]:bg-card grid grid-cols-2 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-3 @5xl/main:grid-cols-4">
@@ -16,8 +16,8 @@ export default function FlashCardSetList({
         <FlashCardSet
           {...set}
           key={set.id}
-          onAddToFavorite={onAddToFavorite}
-          onRemoveFromFavorite={onRemoveFromFavorite}
+          onAddToFavorite={() => onAddToFavorite(set)}
+          onRemoveFromFavorite={() => onRemoveFromFavorite(set)}
         />
       ))}
     </div>

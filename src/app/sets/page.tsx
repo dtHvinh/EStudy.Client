@@ -54,11 +54,19 @@ export default function Page() {
         </>
       )}
       <H3 className="px-4">My sets</H3>
-      <FlashCardSetList
-        sets={nonFavoriteSets}
-        onAddToFavorite={addToFavorite}
-        onRemoveFromFavorite={removeFromFavorite}
-      />
+      {!!nonFavoriteSets.length ? (
+        <FlashCardSetList
+          sets={nonFavoriteSets}
+          onAddToFavorite={addToFavorite}
+          onRemoveFromFavorite={removeFromFavorite}
+        />
+      ) : (
+        <div className="px-4">
+          <p className="text-muted-foreground">
+            You have no sets yet. Create a new set to get started.
+          </p>
+        </div>
+      )}
     </MainLayout>
   );
 }

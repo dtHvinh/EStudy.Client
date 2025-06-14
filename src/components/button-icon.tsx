@@ -8,16 +8,20 @@ export default function ButtonIcon({
   tooltip,
   href,
   target,
+  asChild,
   ...props
 }: {
   icon: React.ReactNode;
   text?: string;
   href?: string;
+  asChild?: boolean;
   target?: HTMLAttributeAnchorTarget;
   tooltip?: string | React.ComponentProps<typeof TooltipContent>;
 } & React.ComponentProps<"button">) {
+  const Comp = asChild ? "span" : Button;
+
   const button = (
-    <Button
+    <Comp
       variant="secondary"
       size="icon"
       className="size-8 active:scale-85"
@@ -36,7 +40,7 @@ export default function ButtonIcon({
       ) : (
         <span className="flex items-center justify-center">{icon}</span>
       )}
-    </Button>
+    </Comp>
   );
 
   if (!tooltip) {

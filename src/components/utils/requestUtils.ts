@@ -47,6 +47,7 @@ axiosInstance.interceptors.response.use(
     if (customConfig?.skipErrorHandling) {
       return Promise.reject(error);
     }
+
     return Promise.reject(error);
   }
 );

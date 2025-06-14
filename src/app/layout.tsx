@@ -1,6 +1,6 @@
 import { ThemeProvider } from "@/components/theme-toggle";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Poppins } from "next/font/google";
+import { EB_Garamond, Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -13,9 +13,8 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
-const popins = Poppins({
-  weight: ["400"],
+// roboto_serif
+const best = EB_Garamond({
   subsets: ["latin"],
 });
 
@@ -32,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${popins.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${best.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider
           attribute="class"

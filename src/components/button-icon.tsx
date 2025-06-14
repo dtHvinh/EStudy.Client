@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import { VariantProps } from "class-variance-authority";
-import { HTMLAttributeAnchorTarget } from "react";
 import { Button, buttonVariants } from "./ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
@@ -8,15 +7,13 @@ export default function ButtonIcon({
   className,
   icon,
   tooltip,
-  target,
   asChild,
-  variant,
+  variant = "outline",
   ...props
 }: {
   icon: React.ReactNode;
   text?: string;
   asChild?: boolean;
-  target?: HTMLAttributeAnchorTarget;
   tooltip?: string | React.ComponentProps<typeof TooltipContent>;
 } & React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {

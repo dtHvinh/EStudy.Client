@@ -1,6 +1,8 @@
+import { setFormErrors } from "@/components/utils/errorUtils";
 import api from "@/components/utils/requestUtils";
 import PagedResponse from "@/components/utils/types";
 import { useCallback, useState } from "react";
+import { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 import useSWR from "swr";
 
@@ -137,6 +139,36 @@ export default function useMyFlashCardSet({
     []
   );
 
+  const addSet = useCallback(
+    async (
+      data: { title: string; description?: string },
+      form: UseFormReturn<typeof data>
+    ): Promise<boolean> => {
+      try {
+        const newSet = await api.post<FlashCardSetResponseType>(
+          "/api/flash-card-sets",
+          data
+        );
+        toast.success(`Created "${newSet.title}" flash card set`);
+        mutate((prevData) => {
+          if (!prevData) return prevData;
+
+          return {
+            ...prevData,
+            items: [newSet, ...prevData.items],
+          };
+        });
+        return true;
+      } catch (error) {
+        console.error("Failed to create flash card set:", error);
+        setFormErrors(error, form.setError);
+        toast.error("Failed to create flash card set");
+        return false;
+      }
+    },
+    [mutate]
+  );
+
   return {
     favoriteSets,
     nonFavoriteSets,
@@ -149,5 +181,6 @@ export default function useMyFlashCardSet({
     changePageSize,
     addToFavorite,
     removeFromFavorite,
+    addSet,
   };
 }

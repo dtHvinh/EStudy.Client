@@ -19,7 +19,12 @@ export default function LogoutButton() {
   return (
     <AlertDialog>
       <AlertDialogTrigger>
-        <ButtonIcon asChild icon={<IconDoorExit />} tooltip={"Leave"} />
+        <ButtonIcon
+          variant={"outline"}
+          asChild
+          icon={<IconDoorExit />}
+          tooltip={"Leave"}
+        />
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

@@ -21,3 +21,8 @@ export function isSelectedNav(path: string, link: string): string {
   const segments = path.split("/").filter(Boolean); // removes empty strings
   return (segments[0] || null) === link ? "bg-accent" : "";
 }
+
+export function isSelected(path: string, link: string): boolean {
+  const segments = path.split("/").filter(Boolean); // removes empty strings
+  return (segments[0] || null) === link;
+}

@@ -1,5 +1,6 @@
 import { FlashCardSetResponseType } from "@/hooks/useMyFlashCardSet";
 import { IconPlayerPlay, IconStar, IconStarFilled } from "@tabler/icons-react";
+import Link from "next/link";
 import ButtonIcon from "./button-icon";
 import {
   Card,
@@ -47,7 +48,7 @@ export default function FlashCardSet({
 
 function FlashCardSetDisplay({ ...props }: FlashCardSetProps) {
   return (
-    <Card className="@container/card">
+    <Card className="@container/card hover:bg-accent/35 transition-colors">
       <CardHeader>
         <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-xl">
           {props.title}
@@ -65,21 +66,19 @@ function FlashCardSetDisplay({ ...props }: FlashCardSetProps) {
               icon={<IconStarFilled />}
               tooltip={"Remove from favorite"}
               onClick={props.onRemoveFromFavorite}
+              variant={"outline"}
             />
           ) : (
             <ButtonIcon
               icon={<IconStar />}
               tooltip={"Add to favorite"}
               onClick={props.onAddToFavorite}
+              variant={"outline"}
             />
           )}
-          <ButtonIcon
-            icon={<IconPlayerPlay />}
-            tooltip={"Start learning"}
-            onClick={props.onAddToFavorite}
-            href="/flash-cards/learn"
-            target="_blank"
-          />
+          <Link href={`/flash-cards/${props.id}`}>
+            <ButtonIcon icon={<IconPlayerPlay />} tooltip={"Start learning"} />
+          </Link>
         </CardAction>
       </CardHeader>
       <FlashCardSetFooter {...props} />

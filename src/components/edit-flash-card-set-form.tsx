@@ -8,12 +8,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "./ui/dialog";
 
 import { EditFlashCardSetParamType } from "@/hooks/useMyFlashCardSet";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -32,16 +30,16 @@ const requestSchema = z.object({
 });
 
 export default function EditFlashCardSetForm({
-  trigger,
+  opened,
+  onOpenChange,
   onSubmit,
   defaultValues,
 }: {
-  trigger: React.ReactNode;
+  opened: boolean;
+  onOpenChange: (open: boolean) => void;
   defaultValues: z.infer<typeof requestSchema>;
   onSubmit: (data: EditFlashCardSetParamType) => Promise<boolean>;
 }) {
-  const [open, setOpen] = React.useState(false);
-
   const form = useForm<z.infer<typeof requestSchema>>({
     resolver: zodResolver(requestSchema),
     defaultValues,
@@ -56,18 +54,17 @@ export default function EditFlashCardSetForm({
 
     if (await onSubmit({ data: updateData, form })) {
       form.reset();
-      setOpen(false);
+      onOpenChange(false);
     }
   };
 
   const _onOpenChange = (open: boolean) => {
-    setOpen(open);
+    onOpenChange?.(open);
     if (!open) form.reset();
   };
 
   return (
-    <Dialog open={open} onOpenChange={_onOpenChange}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+    <Dialog open={opened} onOpenChange={_onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Edit flash card set</DialogTitle>

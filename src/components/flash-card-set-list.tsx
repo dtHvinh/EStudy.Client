@@ -9,10 +9,12 @@ export default function FlashCardSetList({
   onAddToFavorite,
   onRemoveFromFavorite,
   onEdit,
+  onDelete,
 }: {
   sets: FlashCardSetResponseType[];
   onAddToFavorite: (cardSet: FlashCardSetResponseType) => void;
   onRemoveFromFavorite: (cardSet: FlashCardSetResponseType) => void;
+  onDelete: (cardSet: FlashCardSetResponseType) => void;
   onEdit: (cardSet: EditFlashCardSetParamType) => Promise<boolean>;
 }) {
   return (
@@ -24,6 +26,7 @@ export default function FlashCardSetList({
           onAddToFavorite={() => onAddToFavorite(set)}
           onRemoveFromFavorite={() => onRemoveFromFavorite(set)}
           onEdit={onEdit}
+          onDelete={() => onDelete(set)}
         />
       ))}
     </div>

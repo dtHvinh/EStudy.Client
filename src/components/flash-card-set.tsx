@@ -1,11 +1,29 @@
+import { useGenericToggle } from "@/hooks/use-generic-toggle";
 import {
   EditFlashCardSetParamType,
   FlashCardSetResponseType,
 } from "@/hooks/useMyFlashCardSet";
-import { IconPlayerPlay, IconStar, IconStarFilled } from "@tabler/icons-react";
+
+import {
+  IconPlayerPlay,
+  IconSettings,
+  IconStar,
+  IconStarFilled,
+  IconTrash,
+} from "@tabler/icons-react";
 import Link from "next/link";
 import ButtonIcon from "./button-icon";
 import EditFlashCardSetForm from "./edit-flash-card-set-form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
 import {
   Card,
   CardAction,
@@ -21,11 +39,13 @@ import {
   ContextMenuTrigger,
 } from "./ui/context-menu";
 import { Progress } from "./ui/progress";
+import { Separator } from "./ui/separator";
 import { Skeleton } from "./ui/skeleton";
 
 export interface FlashCardSetProps extends FlashCardSetResponseType {
   onAddToFavorite: () => void;
   onRemoveFromFavorite: () => void;
+  onDelete: () => void;
   onEdit: (data: EditFlashCardSetParamType) => Promise<boolean>;
 }
 
@@ -33,8 +53,12 @@ export default function FlashCardSet({
   onAddToFavorite,
   onRemoveFromFavorite,
   onEdit,
+  onDelete,
   ...props
 }: FlashCardSetProps) {
+  const [editOpened, openEdit, openChange] = useGenericToggle();
+  const [deleteOpend, openDelete, openDeleteChange] = useGenericToggle();
+
   return (
     <>
       <ContextMenu>
@@ -44,19 +68,38 @@ export default function FlashCardSet({
             onAddToFavorite={onAddToFavorite}
             onRemoveFromFavorite={onRemoveFromFavorite}
             onEdit={onEdit}
+            onDelete={onDelete}
           />
         </ContextMenuTrigger>
         <ContextMenuContent>
-          <ContextMenuItem>Edit</ContextMenuItem>
-          <ContextMenuItem>Delete</ContextMenuItem>
+          <ContextMenuItem onClick={openEdit}>
+            <IconSettings /> Edit
+          </ContextMenuItem>
+
+          <Separator />
+          <ContextMenuItem
+            className="hover:bg-destructive/10 focus:bg-destructive/10"
+            onClick={openDelete}
+          >
+            <IconTrash className="text-destructive" />{" "}
+            <span className="text-destructive">Delete</span>
+          </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
 
-      {/* Edit flash card set form */}
+      {/* Forms and dialog section */}
       <EditFlashCardSetForm
-        trigger={<div className="hidden"></div>}
+        opened={editOpened}
+        onOpenChange={openChange}
         onSubmit={onEdit}
         defaultValues={props}
+      />
+
+      <DeleteFlashCardSetAlert
+        opened={deleteOpend}
+        onOpenChange={openDeleteChange}
+        onDelete={onDelete}
+        title={props.title}
       />
     </>
   );
@@ -128,6 +171,38 @@ function FlashCardSetFooter({
         <Progress value={progress} />
       </div>
     </CardFooter>
+  );
+}
+
+function DeleteFlashCardSetAlert({
+  onDelete,
+  title,
+  opened,
+  onOpenChange,
+}: {
+  onDelete: () => void;
+  title: string;
+  opened: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <AlertDialog open={opened} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            Are you sure to delete <span className="italic">"{title}"</span> ?
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete your
+            flash card set.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Let me think!</AlertDialogCancel>
+          <AlertDialogAction onClick={onDelete}>Yes</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 

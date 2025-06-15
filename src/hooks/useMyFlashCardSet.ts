@@ -218,6 +218,29 @@ export default function useMyFlashCardSet({
     [mutate]
   );
 
+  const deleteSet = useCallback(
+    async (cardSet: FlashCardSetResponseType): Promise<boolean> => {
+      try {
+        await api.delete(`/api/flash-card-sets/${cardSet.id}`);
+        toast.success(`Deleted flash card set`);
+        mutate((prevData) => {
+          if (!prevData) return prevData;
+
+          return {
+            ...prevData,
+            items: prevData.items.filter((set) => set.id !== cardSet.id),
+          };
+        });
+        return true;
+      } catch (error) {
+        console.error("Failed to delete flash card set:", error);
+        toast.error("Failed to delete flash card set");
+        return false;
+      }
+    },
+    [mutate]
+  );
+
   return {
     favoriteSets,
     nonFavoriteSets,
@@ -232,5 +255,6 @@ export default function useMyFlashCardSet({
     removeFromFavorite,
     addSet,
     editSet,
+    deleteSet,
   };
 }

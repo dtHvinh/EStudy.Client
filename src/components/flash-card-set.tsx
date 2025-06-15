@@ -1,7 +1,11 @@
-import { FlashCardSetResponseType } from "@/hooks/useMyFlashCardSet";
+import {
+  EditFlashCardSetParamType,
+  FlashCardSetResponseType,
+} from "@/hooks/useMyFlashCardSet";
 import { IconPlayerPlay, IconStar, IconStarFilled } from "@tabler/icons-react";
 import Link from "next/link";
 import ButtonIcon from "./button-icon";
+import EditFlashCardSetForm from "./edit-flash-card-set-form";
 import {
   Card,
   CardAction,
@@ -22,27 +26,39 @@ import { Skeleton } from "./ui/skeleton";
 export interface FlashCardSetProps extends FlashCardSetResponseType {
   onAddToFavorite: () => void;
   onRemoveFromFavorite: () => void;
+  onEdit: (data: EditFlashCardSetParamType) => Promise<boolean>;
 }
 
 export default function FlashCardSet({
   onAddToFavorite,
   onRemoveFromFavorite,
+  onEdit,
   ...props
 }: FlashCardSetProps) {
   return (
-    <ContextMenu>
-      <ContextMenuTrigger>
-        <FlashCardSetDisplay
-          {...props}
-          onAddToFavorite={onAddToFavorite}
-          onRemoveFromFavorite={onRemoveFromFavorite}
-        />
-      </ContextMenuTrigger>
-      <ContextMenuContent>
-        <ContextMenuItem>Edit</ContextMenuItem>
-        <ContextMenuItem>Delete</ContextMenuItem>
-      </ContextMenuContent>
-    </ContextMenu>
+    <>
+      <ContextMenu>
+        <ContextMenuTrigger>
+          <FlashCardSetDisplay
+            {...props}
+            onAddToFavorite={onAddToFavorite}
+            onRemoveFromFavorite={onRemoveFromFavorite}
+            onEdit={onEdit}
+          />
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuItem>Edit</ContextMenuItem>
+          <ContextMenuItem>Delete</ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+
+      {/* Edit flash card set form */}
+      <EditFlashCardSetForm
+        trigger={<div className="hidden"></div>}
+        onSubmit={onEdit}
+        defaultValues={props}
+      />
+    </>
   );
 }
 

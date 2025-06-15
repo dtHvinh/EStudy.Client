@@ -1,7 +1,7 @@
+import { ToasterProvider } from "@/components/contexts/ToasterContext";
 import { ThemeProvider } from "@/components/theme-toggle";
 import type { Metadata } from "next";
 import { EB_Garamond, Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -39,8 +39,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Toaster position="bottom-right" richColors theme="dark" />
-          {children}
+          <ToasterProvider>{children}</ToasterProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -11,9 +11,10 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 
+import { EditFlashCardSetParamType } from "@/hooks/useMyFlashCardSet";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
-import { useForm, UseFormReturn } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -25,32 +26,35 @@ import {
 import { Input } from "./ui/input";
 
 const requestSchema = z.object({
+  id: z.number(), //
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
 });
 
-export default function AddFlashCardSetForm({
+export default function EditFlashCardSetForm({
   trigger,
   onSubmit,
+  defaultValues,
 }: {
   trigger: React.ReactNode;
-  onSubmit: (
-    data: z.infer<typeof requestSchema>,
-    form: UseFormReturn<typeof data>
-  ) => Promise<boolean>;
+  defaultValues: z.infer<typeof requestSchema>;
+  onSubmit: (data: EditFlashCardSetParamType) => Promise<boolean>;
 }) {
   const [open, setOpen] = React.useState(false);
 
   const form = useForm<z.infer<typeof requestSchema>>({
     resolver: zodResolver(requestSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-    },
+    defaultValues,
   });
 
   const _onSubmit = async (data: z.infer<typeof requestSchema>) => {
-    if (await onSubmit(data, form)) {
+    const updateData = {
+      id: defaultValues.id,
+      title: data.title,
+      description: data.description,
+    };
+
+    if (await onSubmit({ data: updateData, form })) {
       form.reset();
       setOpen(false);
     }
@@ -66,9 +70,10 @@ export default function AddFlashCardSetForm({
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create a new flash card set</DialogTitle>
+          <DialogTitle>Edit flash card set</DialogTitle>
           <DialogDescription>
-            Create a new flash card set to organize your flash cards.
+            Update the details of your flash card set. Make sure to save your
+            changes.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -119,7 +124,7 @@ export default function AddFlashCardSetForm({
               <DialogClose asChild>
                 <Button variant="outline">Cancel</Button>
               </DialogClose>
-              <Button type="submit">Create</Button>
+              <Button type="submit">Save change</Button>
             </DialogFooter>
           </form>
         </Form>

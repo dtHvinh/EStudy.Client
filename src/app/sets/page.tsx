@@ -20,6 +20,7 @@ export default function Page() {
     addToFavorite,
     removeFromFavorite,
     addSet,
+    editSet,
   } = useMyFlashCardSet({
     page: 1,
     pageSize: 10,
@@ -54,6 +55,7 @@ export default function Page() {
             sets={favoriteSets}
             onAddToFavorite={addToFavorite}
             onRemoveFromFavorite={removeFromFavorite}
+            onEdit={editSet}
           />
         </>
       )}
@@ -76,6 +78,7 @@ export default function Page() {
           sets={nonFavoriteSets}
           onAddToFavorite={addToFavorite}
           onRemoveFromFavorite={removeFromFavorite}
+          onEdit={editSet}
         />
       ) : (
         <div className="px-4">

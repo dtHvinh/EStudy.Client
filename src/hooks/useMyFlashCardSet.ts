@@ -9,7 +9,7 @@ import useSWR from "swr";
 export interface FlashCardSetResponseType {
   id: number;
   title: string;
-  description: string;
+  description?: string;
   lastAccess: string | null;
   progress: number;
   isFavorite: boolean;
@@ -21,6 +21,17 @@ export interface GetUserFlashCardSetProps {
   pageSize: number;
   onScrollFail?: () => void;
 }
+
+type EditFlashCardSetData = {
+  id: number;
+  title: string;
+  description?: string;
+};
+
+export type EditFlashCardSetParamType = {
+  data: EditFlashCardSetData;
+  form: UseFormReturn<EditFlashCardSetData>;
+};
 
 export default function useMyFlashCardSet({
   ...props
@@ -169,6 +180,44 @@ export default function useMyFlashCardSet({
     [mutate]
   );
 
+  const editSet = useCallback(
+    async ({ data, form }: EditFlashCardSetParamType): Promise<boolean> => {
+      try {
+        await api.put<FlashCardSetResponseType>(
+          `/api/flash-card-sets/${data.id}`,
+          {
+            title: data.title,
+            description: data.description,
+          }
+        );
+        toast.success(`Flash card set updated`);
+        mutate((prevData) => {
+          if (!prevData) return prevData;
+
+          return {
+            ...prevData,
+            items: prevData.items.map((set) =>
+              set.id === data.id
+                ? {
+                    ...set,
+                    title: data.title,
+                    description: data.description,
+                  }
+                : set
+            ),
+          };
+        });
+        return true;
+      } catch (error) {
+        console.error("Failed to update flash card set:", error);
+        setFormErrors(error, form.setError);
+        toast.error("Failed to update flash card set");
+        return false;
+      }
+    },
+    [mutate]
+  );
+
   return {
     favoriteSets,
     nonFavoriteSets,
@@ -182,5 +231,6 @@ export default function useMyFlashCardSet({
     addToFavorite,
     removeFromFavorite,
     addSet,
+    editSet,
   };
 }

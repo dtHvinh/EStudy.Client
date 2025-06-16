@@ -26,6 +26,7 @@ const MAX_UPLOAD_SIZE = 1024 * 1024 * 3; // 3MB
 const ACCEPTED_FILE_TYPES = ["image/png"];
 
 const requestSchema = z.object({
+  id: z.number(),
   term: z.string().min(1, "Term is required"),
   definition: z.string().min(1, "Definition is required"),
   partOfSpeech: z.string().optional(),
@@ -46,6 +47,7 @@ export default function EditCardForm({
   opened,
   onOpenChange,
   onSubmit,
+  defaultValues,
 }: {
   opened: boolean;
   onOpenChange: (open: boolean) => void;
@@ -53,16 +55,12 @@ export default function EditCardForm({
     data: z.infer<typeof requestSchema>,
     form: UseFormReturn<typeof data>
   ) => Promise<boolean>;
+  defaultValues: z.infer<typeof requestSchema>;
 }) {
   const form = useForm<z.infer<typeof requestSchema>>({
     resolver: zodResolver(requestSchema),
-    defaultValues: {
-      term: "",
-      definition: "",
-      example: "",
-      partOfSpeech: "",
-      note: "",
-      image: undefined,
+    values: {
+      ...defaultValues,
     },
   });
 
@@ -217,7 +215,7 @@ export default function EditCardForm({
               <DialogClose asChild>
                 <Button variant="outline">Cancel</Button>
               </DialogClose>
-              <Button type="submit">Create</Button>
+              <Button type="submit">Save Change</Button>
             </DialogFooter>
           </form>
         </Form>

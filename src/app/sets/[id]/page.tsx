@@ -24,14 +24,7 @@ export default function Page() {
     }
   }, [inView]);
 
-  const {
-    cards,
-    isCardLoading,
-    scrollNext,
-    scrollPrev,
-    createCard,
-    deleteCard,
-  } = useSetCards({
+  const { cards, scrollNext, createCard, deleteCard, editCard } = useSetCards({
     id: id,
     pageSize: isMobile ? 10 : 20,
   });
@@ -51,12 +44,13 @@ export default function Page() {
           />
         </div>
 
-        <div className="px-2 grid grid-cols-3 gap-2">
+        <div className="px-2 grid grid-cols-2 sm:grid-col-4 md:grid-cols-6 gap-8">
           {!!cards.length ? (
             cards.map((card) => (
               <FlashCard
                 key={card.id}
                 {...card}
+                onEdit={editCard}
                 onDelete={() => deleteCard(card)}
               />
             ))

@@ -1,8 +1,13 @@
-import { FlashCardResponseType } from "@/hooks/use-set-cards";
+import {
+  EditFlashCardRequestType,
+  FlashCardResponseType,
+} from "@/hooks/use-set-cards";
 
 import { useGenericToggle } from "@/hooks/use-generic-toggle";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { Pen, Trash } from "lucide-react";
+import { UseFormReturn } from "react-hook-form";
+import EditCardForm from "./edit-card-form";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,9 +39,14 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 export default function FlashCard({
   className,
   onDelete,
+  onEdit,
   ...props
 }: {
   onDelete: () => void;
+  onEdit: (
+    data: EditFlashCardRequestType,
+    form: UseFormReturn<typeof data>
+  ) => Promise<boolean>;
   className?: string;
 } & FlashCardResponseType) {
   const {
@@ -55,6 +65,7 @@ export default function FlashCard({
     <>
       <FlashCardContextMenu
         onDeleteClick={deleteOpen}
+        onEditClick={editOpen}
         className={className}
         {...props}
       />
@@ -65,6 +76,13 @@ export default function FlashCard({
         onOpenChange={deleteOpenChange}
         onDelete={onDelete}
       />
+
+      <EditCardForm
+        opened={editOpened}
+        onOpenChange={editOpenChange}
+        defaultValues={props}
+        onSubmit={onEdit}
+      />
     </>
   );
 }
@@ -72,8 +90,10 @@ export default function FlashCard({
 const FlashCardContextMenu = ({
   className,
   onDeleteClick,
+  onEditClick,
   ...props
 }: {
+  onEditClick: () => void;
   onDeleteClick: () => void;
   className?: string;
 } & FlashCardResponseType) => {
@@ -83,7 +103,7 @@ const FlashCardContextMenu = ({
         <FlashCardDisplay className={className} {...props} />
       </ContextMenuTrigger>
       <ContextMenuContent className="w-52">
-        <ContextMenuItem inset>
+        <ContextMenuItem onClick={onEditClick} inset>
           Edit
           <ContextMenuShortcut>
             <Pen />
@@ -114,9 +134,9 @@ const FlashCardDisplay = ({
 } & FlashCardResponseType) => {
   return (
     <HoverCard>
-      <HoverCardTrigger>
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="text-xl font-bold text-foreground leading-tight">
+      <HoverCardTrigger asChild>
+        <div className="flex items-start justify-between gap-3 border-[.5px] p-3 rounded-lg bg-card hover:bg-muted/50 transition-colors duration-200 cursor-pointer shadow-sm hover:shadow-md">
+          <h3 className="text-xl font-bold text-foreground leading-tight truncate">
             {props.term}
           </h3>
           {props.partOfSpeech && (
@@ -127,7 +147,7 @@ const FlashCardDisplay = ({
         </div>
       </HoverCardTrigger>
 
-      <HoverCardContent className="w-80">
+      <HoverCardContent sideOffset={10} className="w-96 space-y-5">
         <div className="flex items-start justify-between gap-3">
           <h3 className="text-xl font-bold text-foreground leading-tight">
             {props.term}
@@ -162,19 +182,6 @@ const FlashCardDisplay = ({
           </div>
         )}
 
-        {props.imageUrl && (
-          <AspectRatio
-            ratio={16 / 9}
-            className="overflow-hidden rounded-lg border"
-          >
-            <img
-              src={props.imageUrl || "/placeholder.svg"}
-              alt={props.term}
-              className="object-cover w-full h-full transition-transform duration-200"
-            />
-          </AspectRatio>
-        )}
-
         {props.note && (
           <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 rounded-md p-3">
             <div className="flex items-start gap-2">
@@ -191,6 +198,19 @@ const FlashCardDisplay = ({
               </div>
             </div>
           </div>
+        )}
+
+        {props.imageUrl && (
+          <AspectRatio
+            ratio={16 / 9}
+            className="overflow-hidden rounded-lg border"
+          >
+            <img
+              src={props.imageUrl || "/placeholder.svg"}
+              alt={props.term}
+              className="object-cover w-full h-full transition-transform duration-200"
+            />
+          </AspectRatio>
         )}
       </HoverCardContent>
     </HoverCard>

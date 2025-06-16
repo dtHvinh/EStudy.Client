@@ -25,7 +25,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 
 const MAX_UPLOAD_SIZE = 1024 * 1024 * 3; // 3MB
-const ACCEPTED_FILE_TYPES = ["image/png"];
+const ACCEPTED_FILE_TYPES = ["image/png", "image/jpeg", "image/jpg"];
 
 const requestSchema = z.object({
   term: z.string().min(1, "Term is required"),

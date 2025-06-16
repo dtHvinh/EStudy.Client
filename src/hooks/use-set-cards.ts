@@ -29,6 +29,16 @@ export type CreateFlashCardRequestType = {
   image?: File;
 };
 
+export type EditFlashCardRequestType = {
+  id: number;
+  term: string;
+  definition: string;
+  partOfSpeech?: string;
+  example?: string;
+  note?: string;
+  imageUrl?: string;
+};
+
 export default function useSetCards({ ...props }: UseGetCardProps) {
   const getKey = (
     pageIndex: number,
@@ -87,6 +97,25 @@ export default function useSetCards({ ...props }: UseGetCardProps) {
     [mutate]
   );
 
+  const editCard = useCallback(
+    async (
+      newData: EditFlashCardRequestType,
+      form: UseFormReturn<EditFlashCardRequestType>
+    ) => {
+      try {
+        await api.putWithFormData(`/api/flash-cards/${newData.id}`, newData);
+        toast.success("Card edited successfully!");
+        mutate();
+        return true;
+      } catch (error) {
+        toast.error("Failed to edit card.");
+        setFormErrors(error, form.setError);
+        return false;
+      }
+    },
+    [mutate]
+  );
+
   return {
     cards: cards ? cards.flat() : [],
     isCardLoading: isLoading,
@@ -94,5 +123,6 @@ export default function useSetCards({ ...props }: UseGetCardProps) {
     scrollPrev,
     createCard,
     deleteCard,
+    editCard,
   };
 }

@@ -1,10 +1,9 @@
 import { setFormErrors } from "@/components/utils/errorUtils";
 import api from "@/components/utils/requestUtils";
-import PagedResponse from "@/components/utils/types";
 import { useCallback, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
-import useSWR from "swr";
+import useSWRInfinite from "swr/infinite";
 
 export interface FlashCardSetResponseType {
   id: number;
@@ -36,67 +35,28 @@ export type EditFlashCardSetParamType = {
 export default function useMyFlashCardSet({
   ...props
 }: GetUserFlashCardSetProps) {
-  const [p, setP] = useState({
-    page: props.page,
-    pageSize: props.pageSize,
-  });
-  const [hasMore, setHasMore] = useState(true);
-  const { data, error, isLoading, mutate } = useSWR<
-    PagedResponse<FlashCardSetResponseType>
-  >(`/api/flash-card-sets/mine?page=${p.page}&pageSize=${p.pageSize}`, api.get);
+  const [page, setPage] = useState(props.page);
+  const [pageSize, setPageSize] = useState(props.pageSize);
+  const { data, error, size, setSize, isLoading, mutate } = useSWRInfinite<
+    FlashCardSetResponseType[]
+  >(
+    (index) =>
+      `/api/flash-card-sets/mine?page=${index + 1}&pageSize=${pageSize}`,
+    api.get
+  );
 
-  const favoriteSets = data ? data.items.filter((set) => set.isFavorite) : [];
+  const items = data ? data.flat() : [];
 
-  const nonFavoriteSets = data
-    ? data.items.filter((set) => !set.isFavorite)
-    : [];
+  function scrollNext() {
+    setSize(size + 1);
+  }
 
   function refresh() {
     mutate();
-    setP({
-      page: 1,
-      pageSize: p.pageSize,
-    });
-    setHasMore(true);
-  }
-
-  function scrollNext() {
-    if (hasMore)
-      setP({
-        page: p.page + 1,
-        pageSize: p.pageSize,
-      });
-    else {
-      props.onScrollFail?.();
-    }
-
-    if (data && data.items.length < p.pageSize) {
-      setHasMore(false);
-    } else {
-      setHasMore(true);
-    }
   }
 
   function scrollPrev() {
-    if (p.page > 1)
-      setP({
-        page: p.page - 1,
-        pageSize: p.pageSize,
-      });
-  }
-
-  function changePageSize(newPage: number) {
-    setP({
-      page: 1,
-      pageSize: newPage,
-    });
-  }
-
-  function resetPage() {
-    setP((prev) => ({
-      ...prev,
-      page: 1,
-    }));
+    setSize(size - 1);
   }
 
   const addToFavorite = useCallback(
@@ -104,18 +64,7 @@ export default function useMyFlashCardSet({
       try {
         await api.post(`/api/flash-card-sets/${cardSet.id}/favorite`, {});
         toast.success(`Added "${cardSet.title}" to favorite`);
-        mutate((prevData) => {
-          if (!prevData) return prevData;
-
-          const updatedItems = prevData.items.map((set) =>
-            set.id === cardSet.id ? { ...set, isFavorite: true } : set
-          );
-
-          return {
-            ...prevData,
-            items: updatedItems,
-          };
-        }, false);
+        mutate();
       } catch (error) {
         console.error("Failed to add to favorite:", error);
         toast.error(`Failed to add "${cardSet.title}" to favorite`);
@@ -130,18 +79,7 @@ export default function useMyFlashCardSet({
       try {
         await api.delete(`/api/flash-card-sets/${cardSet.id}/favorite`);
         toast.success(`Removed "${cardSet.title}" from favorite`);
-        mutate((prevData) => {
-          if (!prevData) return prevData;
-
-          const updatedItems = prevData.items.map((set) =>
-            set.id === cardSet.id ? { ...set, isFavorite: false } : set
-          );
-
-          return {
-            ...prevData,
-            items: updatedItems,
-          };
-        });
+        mutate();
       } catch (error) {
         console.error("Failed to remove from favorite:", error); // Fixed error message
         toast.error(`Failed to remove "${cardSet.title}" from favorite`);
@@ -161,14 +99,7 @@ export default function useMyFlashCardSet({
           data
         );
         toast.success(`Created "${newSet.title}" flash card set`);
-        mutate((prevData) => {
-          if (!prevData) return prevData;
-
-          return {
-            ...prevData,
-            items: [newSet, ...prevData.items],
-          };
-        });
+        mutate();
         return true;
       } catch (error) {
         console.error("Failed to create flash card set:", error);
@@ -191,22 +122,12 @@ export default function useMyFlashCardSet({
           }
         );
         toast.success(`Flash card set updated`);
-        mutate((prevData) => {
-          if (!prevData) return prevData;
-
-          return {
-            ...prevData,
-            items: prevData.items.map((set) =>
-              set.id === data.id
-                ? {
-                    ...set,
-                    title: data.title,
-                    description: data.description,
-                  }
-                : set
-            ),
-          };
-        });
+        items.map((set) =>
+          set.id === data.id
+            ? { ...set, title: data.title, description: data.description }
+            : set
+        );
+        mutate();
         return true;
       } catch (error) {
         console.error("Failed to update flash card set:", error);
@@ -223,14 +144,7 @@ export default function useMyFlashCardSet({
       try {
         await api.delete(`/api/flash-card-sets/${cardSet.id}`);
         toast.success(`Deleted flash card set`);
-        mutate((prevData) => {
-          if (!prevData) return prevData;
-
-          return {
-            ...prevData,
-            items: prevData.items.filter((set) => set.id !== cardSet.id),
-          };
-        });
+        mutate();
         return true;
       } catch (error) {
         console.error("Failed to delete flash card set:", error);
@@ -242,15 +156,12 @@ export default function useMyFlashCardSet({
   );
 
   return {
-    favoriteSets,
-    nonFavoriteSets,
+    sets: data ? data.flat() : [],
     getSetError: error,
     isSetLoading: isLoading,
     scrollNext,
     scrollPrev,
-    resetPage,
     refresh,
-    changePageSize,
     addToFavorite,
     removeFromFavorite,
     addSet,

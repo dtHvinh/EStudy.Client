@@ -1,12 +1,13 @@
 import React from "react";
 
-export function useGenericToggle() {
-  const [opened, setOpened] = React.useState(false);
+export function useGenericToggle(defaultOpen: boolean = false) {
+  const [opened, setOpened] = React.useState(defaultOpen);
 
-  const open = () => setOpened((prev) => !prev);
-  const close = () => setOpened(false);
-  const toggle = () => setOpened((prev) => !prev);
-  const openChange = (open: boolean) => setOpened(open);
-
-  return [opened, open, close, openChange, toggle] as const;
+  return {
+    opened,
+    open: () => setOpened(true),
+    close: () => setOpened(false),
+    toggle: () => setOpened((prev) => !prev),
+    openChange: (open: boolean) => setOpened(open),
+  };
 }

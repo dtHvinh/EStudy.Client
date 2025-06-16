@@ -54,7 +54,7 @@ export function NavMain({
                 className={`${isSelectedNav(path, item.url)}`}
                 tooltip={item.title}
               >
-                <Link href={item.url} className="flex items-center gap-2">
+                <Link href={"/" + item.url} className="flex items-center gap-2">
                   {item.icon && <item.icon className="size-4" />}
                   <span>{item.title}</span>
                 </Link>

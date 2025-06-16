@@ -11,3 +11,12 @@ export default interface PagedResponse<T> {
 export interface LoadingableComponentProps {
   loading?: boolean;
 }
+
+export type ButtonVariant =
+  | "link"
+  | "default"
+  | "destructive"
+  | "outline"
+  | "secondary"
+  | "ghost"
+  | null;

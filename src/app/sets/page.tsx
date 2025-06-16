@@ -2,17 +2,24 @@
 
 import AddFlashCardSetForm from "@/components/add-flash-card-set-form";
 import DataErrorAlert from "@/components/data-error-alert";
-import { FlashCardSetSkeleton } from "@/components/flash-card-set";
 import FlashCardSetList from "@/components/flash-card-set-list";
 import MainLayout from "@/components/layouts/MainLayout";
 import { Button } from "@/components/ui/button";
 import H3 from "@/components/ui/h3";
+import { useGenericToggle } from "@/hooks/use-generic-toggle";
+import { useIsMobile } from "@/hooks/use-mobile";
 import useMyFlashCardSet from "@/hooks/useMyFlashCardSet";
+import { useEffect } from "react";
+import { useInView } from "react-intersection-observer";
 
 export default function Page() {
+  const isMobile = useIsMobile();
+  const { opened: isSelect, toggle: toggleSelect } = useGenericToggle();
+  const PAGE_SIZE = isMobile ? 6 : 16;
+  const { ref, inView } = useInView();
+
   const {
-    favoriteSets,
-    nonFavoriteSets,
+    sets,
     getSetError,
     refresh,
     isSetLoading,
@@ -21,20 +28,17 @@ export default function Page() {
     addSet,
     editSet,
     deleteSet,
+    scrollNext,
   } = useMyFlashCardSet({
     page: 1,
-    pageSize: 10,
+    pageSize: PAGE_SIZE,
   });
 
-  if (isSetLoading) {
-    return (
-      <MainLayout>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5 px-4">
-          <FlashCardSetSkeleton number={4} />
-        </div>
-      </MainLayout>
-    );
-  }
+  useEffect(() => {
+    if (inView) {
+      scrollNext();
+    }
+  }, [inView]);
 
   if (getSetError) {
     return (
@@ -50,46 +54,37 @@ export default function Page() {
     <MainLayout>
       <div className="flex items-baseline justify-between px-4">
         <H3>My sets</H3>
-        <AddFlashCardSetForm
-          trigger={
-            <Button
-              className="ml-4"
-              variant={"outline"}
-              type="button"
-              children="Add new set"
-            />
-          }
-          onSubmit={addSet}
-        />
+        <div className="flex">
+          <AddFlashCardSetForm
+            trigger={
+              <Button
+                className="ml-4"
+                variant={"outline"}
+                type="button"
+                children="Add new set"
+              />
+            }
+            onSubmit={addSet}
+          />
+        </div>
       </div>
-      {!!nonFavoriteSets.length ? (
-        <FlashCardSetList
-          sets={nonFavoriteSets}
-          onAddToFavorite={addToFavorite}
-          onRemoveFromFavorite={removeFromFavorite}
-          onDelete={deleteSet}
-          onEdit={editSet}
-        />
-      ) : (
+      {!isSetLoading && !sets.length && (
         <div className="px-4">
           <p className="text-muted-foreground">
             You have no sets yet. Create a new set to get started.
           </p>
         </div>
       )}
-
-      {!!favoriteSets.length && (
-        <>
-          <H3 className="px-4">My favorite</H3>
-          <FlashCardSetList
-            sets={favoriteSets}
-            onAddToFavorite={addToFavorite}
-            onRemoveFromFavorite={removeFromFavorite}
-            onDelete={deleteSet}
-            onEdit={editSet}
-          />
-        </>
+      {!!sets.length && (
+        <FlashCardSetList
+          sets={sets}
+          onAddToFavorite={addToFavorite}
+          onRemoveFromFavorite={removeFromFavorite}
+          onDelete={deleteSet}
+          onEdit={editSet}
+        />
       )}
+      <div ref={ref} />
     </MainLayout>
   );
 }

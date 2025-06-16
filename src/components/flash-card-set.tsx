@@ -11,9 +11,9 @@ import {
   IconStarFilled,
   IconTrash,
 } from "@tabler/icons-react";
-import Link from "next/link";
 import ButtonIcon from "./button-icon";
 import EditFlashCardSetForm from "./edit-flash-card-set-form";
+import RelativeLink from "./relative-link";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,11 +36,14 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuShortcut,
   ContextMenuTrigger,
 } from "./ui/context-menu";
 import { Progress } from "./ui/progress";
-import { Separator } from "./ui/separator";
 import { Skeleton } from "./ui/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+
+export type FlashCardSetMode = "select" | "default";
 
 export interface FlashCardSetProps extends FlashCardSetResponseType {
   onAddToFavorite: () => void;
@@ -56,8 +59,12 @@ export default function FlashCardSet({
   onDelete,
   ...props
 }: FlashCardSetProps) {
-  const [editOpened, openEdit, openChange] = useGenericToggle();
-  const [deleteOpend, openDelete, openDeleteChange] = useGenericToggle();
+  const { opened: editOpened, open: openEdit, openChange } = useGenericToggle();
+  const {
+    opened: deleteOpend,
+    open: openDelete,
+    openChange: openDeleteChange,
+  } = useGenericToggle();
 
   return (
     <>
@@ -71,18 +78,23 @@ export default function FlashCardSet({
             onDelete={onDelete}
           />
         </ContextMenuTrigger>
-        <ContextMenuContent>
-          <ContextMenuItem onClick={openEdit}>
-            <IconSettings /> Edit
+        <ContextMenuContent className="w-52">
+          <ContextMenuItem onClick={openEdit} inset>
+            Edit
+            <ContextMenuShortcut>
+              <IconSettings />
+            </ContextMenuShortcut>
           </ContextMenuItem>
 
-          <Separator />
           <ContextMenuItem
+            inset
             className="hover:bg-destructive/10 focus:bg-destructive/10"
             onClick={openDelete}
           >
-            <IconTrash className="text-destructive" />{" "}
             <span className="text-destructive">Delete</span>
+            <ContextMenuShortcut>
+              <IconTrash className="text-destructive" />
+            </ContextMenuShortcut>
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
@@ -109,16 +121,12 @@ function FlashCardSetDisplay({ ...props }: FlashCardSetProps) {
   return (
     <Card className="@container/card hover:bg-accent/35 transition-colors">
       <CardHeader>
-        <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-xl">
-          {props.title}
+        <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-xl gap-2">
+          <RelativeLink className="hover:underline" href={`${props.id}`}>
+            {props.title}
+          </RelativeLink>
         </CardTitle>
-        <CardDescription>
-          {!props.description ? (
-            <span className="italic">No description</span>
-          ) : (
-            props.description
-          )}
-        </CardDescription>
+        <FlashCardSetDescription description={props.description} />
         <CardAction className="gap-2 grid grid-cols-2">
           {props.isFavorite ? (
             <ButtonIcon
@@ -135,13 +143,36 @@ function FlashCardSetDisplay({ ...props }: FlashCardSetProps) {
               variant={"outline"}
             />
           )}
-          <Link href={`/flash-cards/${props.id}`}>
+          <RelativeLink href={`study/${props.id}`}>
             <ButtonIcon icon={<IconPlayerPlay />} tooltip={"Start learning"} />
-          </Link>
+          </RelativeLink>
         </CardAction>
       </CardHeader>
       <FlashCardSetFooter {...props} />
     </Card>
+  );
+}
+
+function FlashCardSetDescription({
+  description,
+}: {
+  description: string | undefined;
+}) {
+  return (
+    <Tooltip>
+      <CardDescription>
+        {!description ? (
+          <span className="italic">No description</span>
+        ) : (
+          <TooltipTrigger className="text-left line-clamp-2">
+            {description}
+          </TooltipTrigger>
+        )}
+      </CardDescription>
+      <TooltipContent>
+        <span className="text-sm">{description}</span>
+      </TooltipContent>
+    </Tooltip>
   );
 }
 

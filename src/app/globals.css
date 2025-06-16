@@ -120,10 +120,13 @@
     @apply bg-background text-foreground;
   }
 }
+html {
+  overflow-y: scroll;
+}
 
 /* Custom Scrollbar Styling */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 4px;
   height: 8px;
 }
 
@@ -157,7 +160,7 @@
   scrollbar-color: gray;
 }
 
-/* Thin scrollbar variant for smaller areas */
+/* Thin scrollbar variant for smaller areas
 .scrollbar-thin::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -170,7 +173,7 @@
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: rgba(59, 130, 246, 0.8);
-}
+}*/
 
 /* Hide scrollbar but keep functionality */
 .scrollbar-hide {

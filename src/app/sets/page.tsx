@@ -57,12 +57,9 @@ export default function Page() {
         <div className="flex">
           <AddFlashCardSetForm
             trigger={
-              <Button
-                className="ml-4"
-                variant={"outline"}
-                type="button"
-                children="Add new set"
-              />
+              <Button className="ml-4" variant={"outline"} type="button">
+                Add new set
+              </Button>
             }
             onSubmit={addSet}
           />

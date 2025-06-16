@@ -1,11 +1,8 @@
 import { FlashCardResponseType } from "@/hooks/use-set-cards";
-import { cn } from "@/lib/utils";
 
 import { useGenericToggle } from "@/hooks/use-generic-toggle";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
-import { motion } from "framer-motion";
 import { Pen, Trash } from "lucide-react";
-import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +14,6 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { Badge } from "./ui/badge";
-import { Card, CardContent, CardHeader } from "./ui/card";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -28,6 +24,7 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "./ui/context-menu";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 
 /**
  * TODO:
@@ -42,20 +39,30 @@ export default function FlashCard({
   onDelete: () => void;
   className?: string;
 } & FlashCardResponseType) {
-  const { opened, openChange, open } = useGenericToggle(false);
+  const {
+    opened: deleteOpened,
+    openChange: deleteOpenChange,
+    open: deleteOpen,
+  } = useGenericToggle(false);
+
+  const {
+    opened: editOpened,
+    openChange: editOpenChange,
+    open: editOpen,
+  } = useGenericToggle(false);
 
   return (
     <>
       <FlashCardContextMenu
-        onDeleteClick={open}
+        onDeleteClick={deleteOpen}
         className={className}
         {...props}
       />
 
       <DeleteCardAlert
         term={props.term}
-        opened={opened}
-        onOpenChange={openChange}
+        opened={deleteOpened}
+        onOpenChange={deleteOpenChange}
         onDelete={onDelete}
       />
     </>
@@ -105,104 +112,88 @@ const FlashCardDisplay = ({
   isFold?: boolean;
   className?: string;
 } & FlashCardResponseType) => {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
-    <motion.div
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setTimeout(() => setIsHovered(false), 500)}
-    >
-      <Card
-        className={cn(
-          "group overflow-hidden transition-all duration-200 hover:shadow-lg",
-          className
-        )}
-      >
-        <CardHeader>
-          <div className="flex items-start justify-between gap-3">
-            <h3 className="text-xl font-bold text-foreground leading-tight">
-              {props.term}
-            </h3>
-            {props.partOfSpeech && (
-              <Badge variant="secondary" className="shrink-0 text-xs">
-                {props.partOfSpeech}
-              </Badge>
-            )}
+    <HoverCard>
+      <HoverCardTrigger>
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="text-xl font-bold text-foreground leading-tight">
+            {props.term}
+          </h3>
+          {props.partOfSpeech && (
+            <Badge variant="secondary" className="shrink-0 text-xs">
+              {props.partOfSpeech}
+            </Badge>
+          )}
+        </div>
+      </HoverCardTrigger>
+
+      <HoverCardContent className="w-80">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="text-xl font-bold text-foreground leading-tight">
+            {props.term}
+          </h3>
+          {props.partOfSpeech && (
+            <Badge variant="secondary" className="shrink-0 text-xs">
+              {props.partOfSpeech}
+            </Badge>
+          )}
+        </div>
+
+        <p className="text-muted-foreground leading-relaxed">
+          {props.definition}
+        </p>
+
+        {props.example && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-semibold text-foreground">Examples:</h4>
+            <div className="bg-muted/50 p-3 border-l-4 border-primary/20">
+              <ul className="space-y-1 text-sm text-muted-foreground">
+                {props.example
+                  .split("\n")
+                  .filter((line) => line.trim())
+                  .map((line, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <span className="text-primary/60 mt-1.5 text-xs">•</span>
+                      <span className="flex-1">{line.trim()}</span>
+                    </li>
+                  ))}
+              </ul>
+            </div>
           </div>
-        </CardHeader>
+        )}
 
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground leading-relaxed">
-            {props.definition}
-          </p>
-
-          <motion.div
-            exit={{ opacity: 0, height: 0 }}
-            className="space-y-4 overflow-hidden"
-            variants={{
-              hidden: { opacity: 0, height: 0 },
-              visible: { opacity: 1, height: "auto" },
-            }}
-            initial="hidden"
-            animate={isHovered ? "visible" : "hidden"}
+        {props.imageUrl && (
+          <AspectRatio
+            ratio={16 / 9}
+            className="overflow-hidden rounded-lg border"
           >
-            {props.example && (
-              <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-foreground">
-                  Examples:
-                </h4>
-                <div className="bg-muted/50 p-3 border-l-4 border-primary/20">
-                  <ul className="space-y-1 text-sm text-muted-foreground">
-                    {props.example
-                      .split("\n")
-                      .filter((line) => line.trim())
-                      .map((line, index) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <span className="text-primary/60 mt-1.5 text-xs">
-                            •
-                          </span>
-                          <span className="flex-1">{line.trim()}</span>
-                        </li>
-                      ))}
-                  </ul>
-                </div>
-              </div>
-            )}
+            <img
+              src={props.imageUrl || "/placeholder.svg"}
+              alt={props.term}
+              className="object-cover w-full h-full transition-transform duration-200"
+            />
+          </AspectRatio>
+        )}
 
-            {props.imageUrl && (
-              <AspectRatio
-                ratio={16 / 9}
-                className="overflow-hidden rounded-lg border"
-              >
-                <img
-                  src={props.imageUrl || "/placeholder.svg"}
-                  alt={props.term}
-                  className="object-cover w-full h-full transition-transform duration-200"
-                />
-              </AspectRatio>
-            )}
-
-            {props.note && (
-              <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 rounded-md p-3">
-                <div className="flex items-start gap-2">
-                  <span className="text-amber-600 dark:text-amber-400 text-sm font-medium">
-                    💡
-                  </span>
-                  <div>
-                    <p className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-1">
-                      Note
-                    </p>
-                    <p className="text-sm text-amber-700 dark:text-amber-300">
-                      {props.note}
-                    </p>
-                  </div>
-                </div>
+        {props.note && (
+          <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 rounded-md p-3">
+            <div className="flex items-start gap-2">
+              <span className="text-amber-600 dark:text-amber-400 text-sm font-medium">
+                💡
+              </span>
+              <div>
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-1">
+                  Note
+                </p>
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  {props.note}
+                </p>
               </div>
-            )}
-          </motion.div>
-        </CardContent>
-      </Card>
-    </motion.div>
+            </div>
+          </div>
+        )}
+      </HoverCardContent>
+    </HoverCard>
   );
 };
 

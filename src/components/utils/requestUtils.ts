@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { getCookie } from "cookies-next/client";
 
 // API base URL from environment variables
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Cookie name for storing the access token
 export const ACCESS_TOKEN_COOKIE = "accessToken";

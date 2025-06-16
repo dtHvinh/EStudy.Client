@@ -51,7 +51,7 @@ export default function Page() {
           />
         </div>
 
-        <div className="px-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+        <div className="px-2 grid grid-cols-3 gap-2">
           {!!cards.length ? (
             cards.map((card) => (
               <FlashCard

@@ -25,7 +25,12 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 
 const MAX_UPLOAD_SIZE = 1024 * 1024 * 3; // 3MB
-const ACCEPTED_FILE_TYPES = ["image/png", "image/jpeg", "image/jpg"];
+const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
 
 const requestSchema = z.object({
   term: z.string().min(1, "Term is required"),
@@ -40,8 +45,8 @@ const requestSchema = z.object({
       return !file || file.size <= MAX_UPLOAD_SIZE;
     }, "Image must be less than 3MB")
     .refine((file) => {
-      return !file || ACCEPTED_FILE_TYPES.includes(file.type);
-    }, "Image must be a PNG file"),
+      return !file || ACCEPTED_IMAGE_TYPES.includes(file.type);
+    }, "Only .jpg, .jpeg, .png and .webp formats are supported."),
 });
 
 export default function AddCardForm({

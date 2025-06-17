@@ -72,3 +72,33 @@ export function insertElement<T extends { id: number }>(
 
   return array;
 }
+
+export const speakUS = (text: string) => {
+  if (!text) return;
+
+  const utterance = new SpeechSynthesisUtterance();
+  utterance.text = text;
+  utterance.rate = 0.8; // Set speech rate (1 is normal speed)
+
+  const voice = speechSynthesis
+    .getVoices()
+    .find((v) => v.name === "Google US English");
+
+  utterance.voice = voice || speechSynthesis.getVoices()[0]; // Fallback to first available voice
+  speechSynthesis.speak(utterance);
+};
+
+export const speakUK = (text: string) => {
+  if (!text) return;
+
+  const utterance = new SpeechSynthesisUtterance();
+  utterance.text = text;
+  utterance.rate = 0.8; // Set speech rate (1 is normal speed)
+
+  const voice = speechSynthesis
+    .getVoices()
+    .find((v) => v.name === "Google UK English Female");
+
+  utterance.voice = voice || speechSynthesis.getVoices()[0]; // Fallback to first available voice
+  speechSynthesis.speak(utterance);
+};

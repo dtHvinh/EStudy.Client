@@ -5,8 +5,10 @@ import {
 
 import { useGenericToggle } from "@/hooks/use-generic-toggle";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
+import { IconVolume } from "@tabler/icons-react";
 import { Pen, Trash } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
+import ButtonIcon from "./button-icon";
 import EditCardForm from "./edit-card-form";
 import {
   AlertDialog,
@@ -30,6 +32,7 @@ import {
   ContextMenuTrigger,
 } from "./ui/context-menu";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
+import { speakUK, speakUS } from "./utils/utilss";
 
 /**
  * TODO:
@@ -135,7 +138,7 @@ const FlashCardDisplay = ({
   return (
     <HoverCard>
       <HoverCardTrigger asChild>
-        <div className="flex items-start justify-between gap-3 border-[.5px] p-3 rounded-lg bg-card hover:bg-muted/50 transition-colors duration-200 cursor-pointer shadow-sm hover:shadow-md">
+        <div className="flex items-center justify-between gap-3 border-[.5px] p-3 rounded-lg bg-card hover:bg-muted/50 transition-colors duration-200 cursor-pointer shadow-sm hover:shadow-md">
           <h3 className="text-xl font-bold text-foreground leading-tight truncate">
             {props.term}
           </h3>
@@ -144,6 +147,20 @@ const FlashCardDisplay = ({
               {props.partOfSpeech}
             </Badge>
           )}
+          <div className="flex overflow-hidden">
+            <ButtonIcon
+              tooltip={"US Voice"}
+              className="border-0"
+              icon={<IconVolume />}
+              onClick={() => speakUS(props.term)}
+            />
+            <ButtonIcon
+              tooltip={"UK Voice"}
+              className="border-0"
+              icon={<IconVolume />}
+              onClick={() => speakUK(props.term)}
+            />
+          </div>
         </div>
       </HoverCardTrigger>
 
@@ -172,10 +189,7 @@ const FlashCardDisplay = ({
                   .split("\n")
                   .filter((line) => line.trim())
                   .map((line, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <span className="text-primary/60 mt-1.5 text-xs">•</span>
-                      <span className="flex-1">{line.trim()}</span>
-                    </li>
+                    <FlashCardExample key={index} line={line} />
                   ))}
               </ul>
             </div>
@@ -244,5 +258,23 @@ const DeleteCardAlert = ({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  );
+};
+
+const FlashCardExample = ({ ...props }: { line: string }) => {
+  return (
+    <li className="flex items-center gap-2">
+      <span className="text-primary/60 mt-1.5 text-xs">•</span>
+      <span className="flex-1">{props.line.trim()}</span>
+      <span className="text-primary/60 mt-1.5 text-xs">
+        &nbsp;
+        <ButtonIcon
+          tooltip={"UK Voice"}
+          className="border-0 p-0"
+          icon={<IconVolume />}
+          onClick={() => speakUK(props.line)}
+        />
+      </span>
+    </li>
   );
 };

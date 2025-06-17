@@ -6,7 +6,7 @@ import MainLayout from "@/components/layouts/MainLayout";
 import NavigateBack from "@/components/navigate-back";
 import { Button } from "@/components/ui/button";
 import H3 from "@/components/ui/h3";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { Input } from "@/components/ui/input";
 import useSetCards from "@/hooks/use-set-cards";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
@@ -15,7 +15,6 @@ import { useInView } from "react-intersection-observer";
 export default function Page() {
   const params = useParams();
   const id = params.id as string;
-  const isMobile = useIsMobile();
   const { ref, inView } = useInView();
 
   useEffect(() => {
@@ -26,7 +25,7 @@ export default function Page() {
 
   const { cards, scrollNext, createCard, deleteCard, editCard } = useSetCards({
     id: id,
-    pageSize: isMobile ? 10 : 20,
+    pageSize: 20,
   });
 
   return (
@@ -38,13 +37,17 @@ export default function Page() {
             <H3>Cards</H3>
           </div>
 
-          <AddCardForm
-            trigger={<Button variant={"outline"}>Add Card</Button>}
-            onSubmit={createCard}
-          />
+          <div className="flex items-center gap-2">
+            <AddCardForm
+              trigger={<Button variant={"outline"}>Add Card</Button>}
+              onSubmit={createCard}
+            />
+
+            <Input type="search" placeholder="Search cards..." />
+          </div>
         </div>
 
-        <div className="px-2 grid grid-cols-2 sm:grid-col-4 md:grid-cols-6 gap-8">
+        <div className="px-2 grid grid-cols-2 sm:grid-col-4 md:grid-cols-5 gap-8">
           {!!cards.length ? (
             cards.map((card) => (
               <FlashCard

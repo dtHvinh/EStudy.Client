@@ -1,5 +1,5 @@
+import FloatingToolboxProvider from "@/components/contexts/FloatingToolboxContext";
 import { ToasterProvider } from "@/components/contexts/ToasterContext";
-import FloatingToolboxProvider from "@/components/floating-toolbox";
 import { ThemeProvider } from "@/components/theme-toggle";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import type { Metadata } from "next";

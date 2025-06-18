@@ -4,49 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Bell, Clock, GripVertical, Home, Plus } from "lucide-react";
-import React, { createContext, useEffect, useRef, useState } from "react";
-import FocusTimer from "./focus-timer";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { useEffect, useRef, useState } from "react";
+import { ToolProps } from "./contexts/FloatingToolboxContext";
 import { playSound } from "./utils/utilss";
 
 interface Position {
   x: number;
   y: number;
 }
-
-interface ToolProps {
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-}
-
-interface FloatingToolboxContextType {
-  addTool: (tools: ToolProps[]) => void;
-}
-
-const FloatingToolboxContext = createContext<
-  FloatingToolboxContextType | undefined
->(undefined);
-
-const FloatingToolboxProvider = ({
-  children,
-}: {
-  children: React.ReactNode | React.ReactNode[];
-}) => {
-  return (
-    <FloatingToolboxContext.Provider
-      value={{
-        addTool: (tools: ToolProps[]) => {
-          // Logic to add tools dynamically can be implemented here
-          console.log("Tools added:", tools);
-        },
-      }}
-    >
-      <FloatingToolbox />
-      {children}
-    </FloatingToolboxContext.Provider>
-  );
-};
 
 const defaultTools: ToolProps[] = [
   {
@@ -64,7 +29,7 @@ const defaultTools: ToolProps[] = [
   },
 ];
 
-function FloatingToolbox({
+export default function FloatingToolbox({
   additionalTools,
 }: {
   additionalTools?: ToolProps[];
@@ -142,7 +107,7 @@ function FloatingToolbox({
         className="fixed z-50 cursor-grab"
       >
         <Card
-          className={`bg-white/95 backdrop-blur-sm border rounded-none shadow-lg transition-all duration-200 w-12 py-0 border-t-8 ${
+          className={`bg-white/95 backdrop-blur-sm border shadow-lg transition-all duration-200 w-12 py-0 ${
             isCollapsed ? "" : "hover:shadow-lg"
           }`}
         >
@@ -180,7 +145,14 @@ function FloatingToolbox({
                   {tool.icon}
                 </Button>
               ))}
-              <CountDownTimer />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full h-8 p-0 hover:bg-blue-50 transition-colors"
+                title="Focus Timer"
+              >
+                <Clock className="w-4 h-4" />
+              </Button>
             </motion.div>
           </div>
         </Card>
@@ -188,29 +160,3 @@ function FloatingToolbox({
     </>
   );
 }
-
-function CountDownTimer() {
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full h-8 p-0 hover:bg-blue-50 transition-colors"
-          title="Focus Timer"
-        >
-          <Clock className="w-4 h-4" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent
-        showCloseButton={false}
-        className="p-0 bg-transparent border-0 shadow-none overflow-hidden w-sm"
-      >
-        <DialogTitle className="sr-only">Focus Timer</DialogTitle>
-        <FocusTimer className="bg-white/95 backdrop-blur-sm border-0" />
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-export default FloatingToolboxProvider;

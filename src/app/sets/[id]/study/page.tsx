@@ -1,5 +1,6 @@
 "use client";
 
+import FocusTimer from "@/components/focus-timer";
 import MainLayout from "@/components/layouts/MainLayout";
 import NavigateBack from "@/components/navigate-back";
 import { Button } from "@/components/ui/button";
@@ -58,8 +59,8 @@ export default function Page() {
           <div className="block">
             <NavigateBack />
           </div>
-          <div className="block md:hidden">
-            <Button variant="outline">Your skipped cards</Button>
+          <div className="block">
+            <FocusTimer />
           </div>
         </div>
 

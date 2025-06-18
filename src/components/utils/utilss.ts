@@ -110,25 +110,7 @@ export const speakUK = (text: string) => {
   speechSynthesis.speak(utterance);
 };
 
-export function timeAgo(dateString: string): string {
-  const now = new Date();
-  const date = new Date(dateString);
-  const diffMs = now.getTime() - date.getTime();
-
-  const seconds = Math.floor(diffMs / 1000);
-  const minutes = Math.floor(diffMs / (1000 * 60));
-  const hours = Math.floor(diffMs / (1000 * 60 * 60));
-  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  const months = Math.floor(days / 30);
-  const years = Math.floor(days / 365);
-
-  if (days === 0) {
-    if (hours >= 1) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-    if (minutes >= 1) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
-    return `Just now`;
-  }
-
-  if (years >= 1) return `${years} year${years > 1 ? "s" : ""} ago`;
-  if (months >= 1) return `${months} month${months > 1 ? "s" : ""} ago`;
-  return `${days} day${days > 1 ? "s" : ""} ago`;
+export function playSound(url: string) {
+  const audio = new Audio(url);
+  audio.play();
 }

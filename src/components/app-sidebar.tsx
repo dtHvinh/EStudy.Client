@@ -3,8 +3,8 @@
 import {
   IconBallpen,
   IconBrandParsinta,
-  IconCalendarEventFilled,
   IconDashboard,
+  IconMessageChatbot,
   IconScript,
 } from "@tabler/icons-react";
 import * as React from "react";
@@ -26,11 +26,6 @@ import Link from "next/link";
 import DataErrorAlert from "./data-error-alert";
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    // avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "My information",
@@ -48,9 +43,9 @@ const data = {
       icon: IconBrandParsinta,
     },
     {
-      title: "Schedule",
-      url: "schedule",
-      icon: IconCalendarEventFilled,
+      title: "AI",
+      url: "ai",
+      icon: IconMessageChatbot,
     },
     {
       title: "Do Test",

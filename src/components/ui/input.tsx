@@ -69,7 +69,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <ButtonIcon
             icon={<IconX />}
             tooltip={"Clear input"}
-            className="absolute border-0 right-2 top-1/2 -translate-y-1/2 h-6 w-6 hover:bg-muted rounded-sm"
+            className="absolute bg-transparent border-0 right-2 top-1/2 -translate-y-1/2 h-6 w-6 hover:bg-muted rounded-sm"
             onClick={handleClear}
             type="button"
             tabIndex={-1}

@@ -3,7 +3,6 @@ import {
   EditFlashCardSetParamType,
   FlashCardSetResponseType,
 } from "@/hooks/useMyFlashCardSet";
-
 import {
   IconPlayerPlay,
   IconSettings,
@@ -11,6 +10,8 @@ import {
   IconStarFilled,
   IconTrash,
 } from "@tabler/icons-react";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import ButtonIcon from "./button-icon";
 import EditFlashCardSetForm from "./edit-flash-card-set-form";
 import RelativeLink from "./relative-link";
@@ -42,6 +43,8 @@ import {
 import { Progress } from "./ui/progress";
 import { Skeleton } from "./ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { calcPercentage } from "./utils/utilss";
+dayjs.extend(relativeTime);
 
 export type FlashCardSetMode = "select" | "default";
 
@@ -143,7 +146,7 @@ function FlashCardSetDisplay({ ...props }: FlashCardSetProps) {
               variant={"outline"}
             />
           )}
-          <RelativeLink href={`study/${props.id}`}>
+          <RelativeLink href={`${props.id}/study`}>
             <ButtonIcon icon={<IconPlayerPlay />} tooltip={"Start learning"} />
           </RelativeLink>
         </CardAction>
@@ -194,12 +197,23 @@ function FlashCardSetFooter({
           </span>
 
           <span className="text-sm text-gray-500 dark:text-gray-400">
-            {lastAccess ? `Last access: ${lastAccess}` : "Never accessed"}
+            {lastAccess
+              ? `Last access: ${dayjs(lastAccess).fromNow()}`
+              : "Never accessed"}
           </span>
         </div>
       </div>
       <div className="w-full">
-        <Progress value={progress} />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Progress value={calcPercentage(progress, cardCount)} />
+          </TooltipTrigger>
+          <TooltipContent>
+            <span className="text-sm">
+              {progress} / {cardCount} cards completed
+            </span>
+          </TooltipContent>
+        </Tooltip>
       </div>
     </CardFooter>
   );

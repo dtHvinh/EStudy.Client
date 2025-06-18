@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BrandGoogle } from "@mynaui/icons-react";
+import { useGoogleLogin } from "@react-oauth/google";
 import { deleteCookie, setCookie } from "cookies-next/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -27,7 +28,7 @@ import {
   FormMessage,
 } from "./ui/form";
 import { Input } from "./ui/input";
-import { setFormErrors } from "./utils/errorUtils";
+import { getErrorMessage, setFormErrors } from "./utils/errorUtils";
 import { ACCESS_TOKEN_COOKIE, post } from "./utils/requestUtils";
 
 const loginFormSchema = z.object({
@@ -40,6 +41,30 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
+  const login = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      let loadingToastId;
+      try {
+        loadingToastId = toast.loading("Logging in...");
+        const res = await post(
+          "/api/account/google-login?access_token=" +
+            tokenResponse.access_token,
+          {}
+        );
+        toast.dismiss(loadingToastId);
+        toast.success("Logged in successfully!");
+        setCookie(ACCESS_TOKEN_COOKIE, res.accessToken, {
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+        });
+        router.push("/dashboard");
+      } catch (error) {
+        toast.error(getErrorMessage(error) || "Login failed!");
+      } finally {
+        toast.dismiss(loadingToastId);
+      }
+    },
+  });
 
   useEffect(() => {
     deleteCookie(ACCESS_TOKEN_COOKIE, {
@@ -124,7 +149,12 @@ export function LoginForm({
                         </Link>
                       </div>
                       <FormControl>
-                        <Input spellCheck={false} type="password" {...field} />
+                        <Input
+                          spellCheck={false}
+                          type="password"
+                          autoComplete="current-password"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -134,7 +164,12 @@ export function LoginForm({
                   <Button type="submit" className="w-full">
                     Login
                   </Button>
-                  <Button variant="outline" className="w-full" type="button">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    type="button"
+                    onClick={() => login()}
+                  >
                     Login with Google <BrandGoogle />
                   </Button>
                 </div>

@@ -6,6 +6,7 @@ type UserInfoResponseType = {
   name: string;
   email?: string;
   phoneNumber?: string;
+  profilePicture?: string;
 };
 
 export function useUserInfo() {

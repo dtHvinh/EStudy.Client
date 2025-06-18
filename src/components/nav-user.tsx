@@ -34,7 +34,7 @@ export function NavUser({
   user: {
     name: string;
     email?: string;
-    avatar?: string;
+    profilePicture?: string;
   };
 }) {
   const { isMobile } = useSidebar();
@@ -48,8 +48,12 @@ export function NavUser({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src={user.avatar} alt={user.name} />
+              <Avatar>
+                <AvatarImage
+                  src={user.profilePicture}
+                  alt={user.name}
+                  referrerPolicy="no-referrer"
+                />
                 <AvatarFallback className="rounded-lg">
                   {getInitials(user.name)}
                 </AvatarFallback>
@@ -72,7 +76,7 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarImage src={user.profilePicture} alt={user.name} />
                   <AvatarFallback className="rounded-lg">
                     {getInitials(user.name)}
                   </AvatarFallback>

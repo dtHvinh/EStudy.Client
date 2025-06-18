@@ -1,9 +1,9 @@
 import { ToasterProvider } from "@/components/contexts/ToasterContext";
 import { ThemeProvider } from "@/components/theme-toggle";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import type { Metadata } from "next";
 import { EB_Garamond, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -33,14 +33,16 @@ export default function RootLayout({
       <body
         className={`${best.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ToasterProvider>{children}</ToasterProvider>
-        </ThemeProvider>
+        <GoogleOAuthProvider clientId={process.env.CLIENT_ID || ""}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <ToasterProvider>{children}</ToasterProvider>
+          </ThemeProvider>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
 import { setFormErrors } from "@/components/utils/errorUtils";
 import api from "@/components/utils/requestUtils";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 import useSWRInfinite from "swr/infinite";
@@ -8,6 +8,8 @@ import useSWRInfinite from "swr/infinite";
 export type UseGetCardProps = {
   id: string;
   pageSize: number;
+  shuffle?: boolean;
+  study?: boolean;
 };
 
 export type FlashCardResponseType = {
@@ -18,6 +20,7 @@ export type FlashCardResponseType = {
   example?: string;
   note?: string;
   imageUrl?: string;
+  isSkipped?: boolean;
 };
 
 export type CreateFlashCardRequestType = {
@@ -40,14 +43,28 @@ export type EditFlashCardRequestType = {
 };
 
 export default function useSetCards({ ...props }: UseGetCardProps) {
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const getKey = (
     pageIndex: number,
     previousPageData: FlashCardResponseType[] | null
   ) => {
     if (previousPageData && !previousPageData.length) return null;
-    return `/api/flash-card-sets/${props.id}/cards?page=${
-      pageIndex + 1
-    }&pageSize=${props.pageSize}`;
+    const params = new URLSearchParams({
+      page: (pageIndex + 1).toString(),
+      pageSize: props.pageSize.toString(),
+    });
+
+    if (searchQuery) {
+      params.set("q", searchQuery);
+    }
+
+    if (props.shuffle) {
+      params.set("shuffle", "true");
+    }
+
+    return `/api/flash-card-sets/${props.id}/${
+      props.study ? "study" : "cards"
+    }?${params.toString()}`;
   };
 
   const {
@@ -55,7 +72,9 @@ export default function useSetCards({ ...props }: UseGetCardProps) {
     isLoading,
     setSize,
     mutate,
-  } = useSWRInfinite<FlashCardResponseType[]>(getKey, api.get);
+  } = useSWRInfinite<FlashCardResponseType[]>(getKey, api.get, {
+    revalidateOnFocus: false,
+  });
 
   const scrollNext = () => {
     setSize((size) => size + 1);
@@ -64,6 +83,43 @@ export default function useSetCards({ ...props }: UseGetCardProps) {
   const scrollPrev = () => {
     setSize((size) => size - 1);
   };
+
+  const search = (query: string) => {
+    setSearchQuery(query);
+    setSize(1);
+  };
+
+  const resetCards = useCallback(async (setId: string | number) => {
+    if (!cards || cards.length == 0) {
+      toast.error("No cards to reset.");
+      return false;
+    }
+
+    try {
+      await api.patch(`/api/flash-card-sets/${setId}/reset`, {});
+      toast.success("Reset successfully!");
+      mutate();
+      return true;
+    } catch (error) {
+      toast.error("Failed reset.");
+      return false;
+    }
+  }, []);
+
+  const skipCard = useCallback(
+    async (cardId: number | string) => {
+      try {
+        await api.patch(`/api/flash-cards/skip?id=${cardId}`);
+        toast.success("Card skipped successfully!");
+        mutate();
+        return true;
+      } catch (error) {
+        toast.error("Failed to skip card.");
+        return false;
+      }
+    },
+    [mutate]
+  );
 
   const createCard = useCallback(
     async (
@@ -124,5 +180,8 @@ export default function useSetCards({ ...props }: UseGetCardProps) {
     createCard,
     deleteCard,
     editCard,
+    skipCard,
+    resetCards,
+    search,
   };
 }

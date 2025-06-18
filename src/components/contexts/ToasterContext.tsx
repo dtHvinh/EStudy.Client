@@ -21,14 +21,14 @@ const ToasterContext = createContext<ToasterContextType | undefined>(undefined);
 
 export function ToasterProvider({ children }: { children: React.ReactNode }) {
   const { theme } = useTheme();
-  const [position, setPosition] = React.useState<Position>("bottom-right");
+  const [position, setPosition] = React.useState<Position>("top-center");
   const [settings, setSettings] = React.useState<
     ToasterProps & React.RefAttributes<HTMLElement>
   >({});
 
   const resetConfig = () => {
     setSettings({
-      position: "bottom-right",
+      position: "top-center",
       richColors: true,
       theme: theme as "light" | "dark" | "system",
     });
@@ -40,7 +40,6 @@ export function ToasterProvider({ children }: { children: React.ReactNode }) {
     >
       <Toaster
         position={position}
-        richColors
         {...settings}
         theme={theme as "light" | "dark" | "system"}
       />

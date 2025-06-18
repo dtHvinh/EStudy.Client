@@ -84,8 +84,7 @@ export default function Page() {
             </div>
           )}
         </div>
-
-        <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-8 px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="flex-1 flex lg:flex-row items-center justify-center gap-4 lg:gap-8 px-4 sm:px-6 lg:px-8 pb-8">
           <div className="w-sm">
             <Carousel className="w-full">
               <CarouselContent>

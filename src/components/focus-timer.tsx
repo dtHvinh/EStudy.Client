@@ -10,10 +10,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { Pause, Play, RotateCcw } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { HTMLAttributes, useEffect, useRef, useState } from "react";
 
-export default function FocusTimer() {
+export default function FocusTimer({
+  ...props
+}: HTMLAttributes<HTMLDivElement>) {
   const [timeLeft, setTimeLeft] = useState(0); // in seconds
   const [isRunning, setIsRunning] = useState(false);
   const [initialTime, setInitialTime] = useState(0);
@@ -103,7 +106,12 @@ export default function FocusTimer() {
   );
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+    <div
+      className={cn(
+        "flex items-center justify-center bg-gray-50",
+        props.className
+      )}
+    >
       <Card className="w-full max-w-sm">
         <CardContent className="p-6 space-y-6">
           {/* Header */}

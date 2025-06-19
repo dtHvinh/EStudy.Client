@@ -107,7 +107,7 @@ export default function FloatingToolbox({
         className="fixed z-50 cursor-grab"
       >
         <Card
-          className={`bg-white/95 backdrop-blur-sm border shadow-lg transition-all duration-200 w-12 py-0 ${
+          className={`bg-card backdrop-blur-sm border shadow-lg transition-all duration-200 w-12 py-0 ${
             isCollapsed ? "" : "hover:shadow-lg"
           }`}
         >

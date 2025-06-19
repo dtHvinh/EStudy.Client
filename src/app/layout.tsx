@@ -4,6 +4,8 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import type { Metadata } from "next";
 import { EB_Garamond, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "./prosemirror.css";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -31,7 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${best.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${best.className} ${geistSans.className} ${geistMono.variable} antialiased`}
       >
         <GoogleOAuthProvider clientId={process.env.CLIENT_ID || ""}>
           <ThemeProvider

@@ -2,8 +2,8 @@
 
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { BrandGoogle } from "@mynaui/icons-react";
 import { useGoogleLogin } from "@react-oauth/google";
+import { IconBrandGoogle } from "@tabler/icons-react";
 import { deleteCookie, setCookie } from "cookies-next/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -170,7 +170,7 @@ export function LoginForm({
                     type="button"
                     onClick={() => login()}
                   >
-                    Login with Google <BrandGoogle />
+                    Login with Google <IconBrandGoogle />
                   </Button>
                 </div>
               </div>

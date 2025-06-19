@@ -33,6 +33,11 @@ const data = {
       icon: IconDashboard,
     },
     {
+      title: "Blog",
+      url: "blog",
+      icon: IconScript,
+    },
+    {
       title: "Flash card sets",
       url: "sets",
       icon: IconScript,

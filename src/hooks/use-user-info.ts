@@ -1,13 +1,14 @@
 import api from "@/components/utils/requestUtils";
 import useSWR from "swr";
 
-type UserInfoResponseType = {
+export type UserInfoResponseType = {
   id: string;
   name: string;
   email?: string;
   phoneNumber?: string;
   profilePicture?: string;
   creationDate: string;
+  isOnBoarded: boolean;
 };
 
 export function useUserInfo() {

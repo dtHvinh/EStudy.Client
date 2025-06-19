@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { deleteCookie } from "cookies-next/client";
+import { deleteCookie, setCookie } from "cookies-next/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -68,14 +68,18 @@ export function RegisterForm({
     let loadingToastId;
     try {
       loadingToastId = toast.loading("Registering your account...");
-      await post("/api/account/register", {
+      const res = await post<{ accessToken: string }>("/api/account/register", {
         userName: values.userName,
         name: values.name,
         password: values.password,
       });
       toast.dismiss(loadingToastId);
       toast.success("Account registered successfully!");
-      router.push("/login");
+      setCookie(ACCESS_TOKEN_COOKIE, res.accessToken, {
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+      router.push("/way");
     } catch (error) {
       setFormErrors(error, form.setError);
     } finally {

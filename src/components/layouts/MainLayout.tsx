@@ -1,11 +1,14 @@
 "use client";
 
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import React from "react";
 import { AppSidebar } from "../app-sidebar";
 import { AuthProvider } from "../contexts/AuthContext";
 import FloatingToolboxProvider from "../contexts/FloatingToolboxContext";
 import { SiteHeader } from "../site-header";
 import { SidebarInset, SidebarProvider } from "../ui/sidebar";
+dayjs.extend(relativeTime);
 
 export default function MainLayout({
   children,

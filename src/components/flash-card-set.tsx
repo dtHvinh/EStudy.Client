@@ -11,7 +11,6 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import ButtonIcon from "./button-icon";
 import EditFlashCardSetForm from "./edit-flash-card-set-form";
 import RelativeLink from "./relative-link";
@@ -44,7 +43,6 @@ import { Progress } from "./ui/progress";
 import { Skeleton } from "./ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { calcPercentage } from "./utils/utilss";
-dayjs.extend(relativeTime);
 
 export type FlashCardSetMode = "select" | "default";
 

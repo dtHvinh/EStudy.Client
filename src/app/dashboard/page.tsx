@@ -1,11 +1,14 @@
 "use client";
 
 import { ProfileSkeleton } from "@/components/dashboard-skeleton";
+import DataErrorAlert from "@/components/data-error-alert";
 import { ErrorCard } from "@/components/error-card";
+import { FlashCardSetSkeleton } from "@/components/flash-card-set";
+import { FlashCardSetV2 } from "@/components/flash-card-set-v2";
 import MainLayout from "@/components/layouts/MainLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,7 +18,10 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useUserInfo } from "@/hooks/use-user-info";
+import { UserInfoResponseType, useUserInfo } from "@/hooks/use-user-info";
+import useMyFlashCardSet from "@/hooks/useMyFlashCardSet";
+import { IconDots, IconStar } from "@tabler/icons-react";
+import dayjs from "dayjs";
 import {
   BookOpen,
   Brain,
@@ -27,14 +33,11 @@ import {
   Target,
   TrendingUp,
 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const mockUserData = {
-  name: "Sarah Johnson",
-  email: "sarah.johnson@email.com",
-  avatar: "/placeholder.svg?height=80&width=80",
-  joinDate: "March 2024",
-  level: "Intermediate",
   totalFlashcards: 1247,
   masteredFlashcards: 892,
   studyStreak: 23,
@@ -66,29 +69,6 @@ const mockUserData = {
       description: "Studied Phrasal Verbs set",
       time: "3 days ago",
       score: 78,
-    },
-  ],
-  flashcardSets: [
-    {
-      id: 1,
-      name: "Business English",
-      cards: 45,
-      mastered: 38,
-      lastStudied: "Today",
-    },
-    {
-      id: 2,
-      name: "Phrasal Verbs",
-      cards: 60,
-      mastered: 42,
-      lastStudied: "Yesterday",
-    },
-    {
-      id: 3,
-      name: "IELTS Vocabulary",
-      cards: 120,
-      mastered: 89,
-      lastStudied: "2 days ago",
     },
   ],
   courses: [
@@ -157,38 +137,7 @@ export default function UserProfilePage() {
   return (
     <MainLayout>
       {/* Header */}
-      <div className="border-b bg-card">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-            <Avatar className="h-20 w-20">
-              <AvatarImage
-                src={userData.avatar || "/placeholder.svg"}
-                alt={userData.name}
-              />
-              <AvatarFallback className="text-lg">
-                {userData.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold">{userData.name}</h1>
-              <p className="text-muted-foreground">{userData.email}</p>
-              <div className="flex flex-wrap items-center gap-2 mt-2">
-                <Badge variant="secondary">{userData.level}</Badge>
-                <Badge variant="outline">
-                  Member since {userData.joinDate}
-                </Badge>
-              </div>
-            </div>
-            <Button className="w-full md:w-auto">
-              <Play className="h-4 w-4 mr-2" />
-              Continue Learning
-            </Button>
-          </div>
-        </div>
-      </div>
+      <UserData user={user} />
 
       <div className="container mx-auto px-4 py-6">
         <Tabs defaultValue="overview" className="space-y-6">
@@ -376,47 +325,7 @@ export default function UserProfilePage() {
           </TabsContent>
 
           <TabsContent value="flashcards" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Your Flashcard Sets</h2>
-              <Button>
-                <Brain className="h-4 w-4 mr-2" />
-                Create New Set
-              </Button>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {userData.flashcardSets.map((set) => (
-                <Card
-                  key={set.id}
-                  className="hover:shadow-md transition-shadow"
-                >
-                  <CardHeader>
-                    <CardTitle className="text-lg">{set.name}</CardTitle>
-                    <CardDescription>
-                      Last studied: {set.lastStudied}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Progress</span>
-                        <span>
-                          {set.mastered}/{set.cards}
-                        </span>
-                      </div>
-                      <Progress
-                        value={(set.mastered / set.cards) * 100}
-                        className="h-2"
-                      />
-                    </div>
-                    <Button className="w-full" variant="outline">
-                      <Play className="h-4 w-4 mr-2" />
-                      Study Now
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <UserFlashCards />
           </TabsContent>
 
           <TabsContent value="courses" className="space-y-6">
@@ -513,5 +422,100 @@ export default function UserProfilePage() {
         </Tabs>
       </div>
     </MainLayout>
+  );
+}
+
+function UserData({ user }: { user: UserInfoResponseType | undefined }) {
+  if (!user) {
+    return <DataErrorAlert title="User data not found" />;
+  }
+
+  return (
+    <div className="border-b bg-card">
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+          <Avatar className="h-20 w-20">
+            <AvatarImage src={user.profilePicture} alt={user.name} />
+            <AvatarFallback className="text-lg">
+              {user.name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold">{user.name}</h1>
+            <p className="text-muted-foreground">{user.email}</p>
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <Badge variant="outline">
+                Member for {dayjs(user.creationDate).fromNow()}
+              </Badge>
+            </div>
+          </div>
+          {!user.isOnBoarded && (
+            <Link
+              href="/onboarding/"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              <IconStar className="text-muted-foreground" />
+              On board
+            </Link>
+          )}
+          <Button className="w-full md:w-auto">
+            <Play className="h-4 w-4 mr-2" />
+            Continue Learning
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function UserFlashCards() {
+  const { sets, isSetLoading, getSetError, refresh } = useMyFlashCardSet({
+    page: 1,
+    pageSize: 4,
+  });
+
+  const router = useRouter();
+
+  const goToFlashCardSetPage = () => {
+    router.push("/sets");
+    return true;
+  };
+
+  if (isSetLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <FlashCardSetSkeleton number={3} />
+      </div>
+    );
+  }
+
+  if (getSetError) {
+    return (
+      <DataErrorAlert
+        onReload={refresh}
+        title="Failed to load flashcard sets"
+      />
+    );
+  }
+
+  return (
+    <>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Your Flashcard Sets</h2>
+        <Button variant={"outline"} onClick={goToFlashCardSetPage}>
+          <IconDots />
+          See more
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {sets.map((set) => (
+          <FlashCardSetV2 {...set} key={set.id} />
+        ))}
+      </div>
+    </>
   );
 }

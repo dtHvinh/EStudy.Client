@@ -1,4 +1,3 @@
-import FloatingToolboxProvider from "@/components/contexts/FloatingToolboxContext";
 import { ToasterProvider } from "@/components/contexts/ToasterContext";
 import { ThemeProvider } from "@/components/theme-toggle";
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -34,18 +33,16 @@ export default function RootLayout({
       <body
         className={`${best.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <FloatingToolboxProvider>
-          <GoogleOAuthProvider clientId={process.env.CLIENT_ID || ""}>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <ToasterProvider>{children}</ToasterProvider>
-            </ThemeProvider>
-          </GoogleOAuthProvider>
-        </FloatingToolboxProvider>
+        <GoogleOAuthProvider clientId={process.env.CLIENT_ID || ""}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <ToasterProvider>{children}</ToasterProvider>
+          </ThemeProvider>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );

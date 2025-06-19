@@ -7,6 +7,7 @@ type UserInfoResponseType = {
   email?: string;
   phoneNumber?: string;
   profilePicture?: string;
+  creationDate: string;
 };
 
 export function useUserInfo() {

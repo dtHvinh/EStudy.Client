@@ -28,7 +28,7 @@ import DataErrorAlert from "./data-error-alert";
 const data = {
   navMain: [
     {
-      title: "My information",
+      title: "Dashboard",
       url: "dashboard",
       icon: IconDashboard,
     },

@@ -14,7 +14,6 @@ import {
   handleCommandNavigation,
   JSONContent,
 } from "novel";
-import { useState } from "react";
 import AutoJoiner from "tiptap-extension-auto-joiner";
 import { useDebouncedCallback } from "use-debounce";
 import { defaultExtensions } from "./default-extensions";
@@ -23,16 +22,21 @@ import { NodeSelector } from "./selectors/node-selector";
 import { TextButtons } from "./selectors/text-buttons";
 import { slashCommand, suggestionItems } from "./slash-commands";
 
-const TailwindEditor = ({ autoFocus }: { autoFocus?: boolean }) => {
-  const [content, setContent] = useState<JSONContent | undefined>(undefined);
-  const [saveStatus, setSaveStatus] = useState("Unsaved");
+const TailwindEditor = ({
+  initialContent,
+  autoFocus,
+  onUpdate,
+}: {
+  initialContent?: JSONContent | string;
+  autoFocus?: boolean;
+  onUpdate?: (JSONContent: JSONContent) => void;
+}) => {
   const { opened: openNode, openChange: setOpenNode } = useGenericToggle(false);
   const { opened: openLink, openChange: setOpenLink } = useGenericToggle(false);
   const debouncedUpdates = useDebouncedCallback(
     async ({ editor }: { editor: EditorInstance; transaction: any }) => {
       const json = editor.getJSON();
-      setContent(json);
-      setSaveStatus("Saved");
+      onUpdate?.(json);
     },
     500
   );
@@ -47,7 +51,7 @@ const TailwindEditor = ({ autoFocus }: { autoFocus?: boolean }) => {
           GlobalDragHandle,
           AutoJoiner,
         ]}
-        initialContent={content}
+        initialContent={initialContent as JSONContent}
         onUpdate={debouncedUpdates}
         editorProps={{
           handleDOMEvents: {

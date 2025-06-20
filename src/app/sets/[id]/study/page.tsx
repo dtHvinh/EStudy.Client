@@ -30,6 +30,13 @@ export default function Page() {
     });
   const { setInfo, setInfoMutate } = useSetInfo(id);
 
+  const playSkipSound = () => {
+    const audio = new Audio("/audio/correct.wav");
+    audio.play().catch((error) => {
+      console.error("Error playing sound:", error);
+    });
+  };
+
   const calcPercentage = () => {
     if (!setInfo) return 0;
     if (setInfo.cardCount === 0) return 0;
@@ -41,6 +48,7 @@ export default function Page() {
   const handleSkipCard = async (cardId: number | string) => {
     const success = await skipCard(cardId);
     if (success) {
+      playSkipSound();
       setInfoMutate();
       scrollNext();
     }
@@ -120,13 +128,13 @@ const CarouselFlashCardItem = ({
   const { scrollNext, scrollPrev } = useCarousel();
 
   return (
-    <CarouselItem key={card.id}>
+    <CarouselItem>
       <div className="p-2 sm:p-4">
         <Card className="w-full">
           <CardContent className="flex aspect-square items-center justify-center p-4 sm:p-6 lg:p-8">
             <div className="text-center space-y-2 sm:space-y-4">
               <span className="text-2xl dsm:text-3xl lg:text-4xl font-semibold leading-tight">
-                {card.term}
+                {card.term} {card.id}
               </span>
               {card.partOfSpeech && (
                 <div className="text-sm sm:text-base text-muted-foreground">

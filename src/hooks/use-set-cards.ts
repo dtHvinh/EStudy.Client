@@ -90,15 +90,10 @@ export default function useSetCards({ ...props }: UseGetCardProps) {
   };
 
   const resetCards = useCallback(async (setId: string | number) => {
-    if (!cards || cards.length == 0) {
-      toast.error("No cards to reset.");
-      return false;
-    }
-
     try {
       await api.patch(`/api/flash-card-sets/${setId}/reset`, {});
       toast.success("Reset successfully!");
-      mutate();
+      setSize(1);
       return true;
     } catch (error) {
       toast.error("Failed reset.");

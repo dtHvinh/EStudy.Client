@@ -26,7 +26,7 @@ export default function Page() {
 
   return (
     <MainLayout>
-      <div spellCheck={false} className="pb-9">
+      <div spellCheck={false} className="pb-9 md:px-20">
         <TailwindEditor autoFocus onUpdate={setContent} />
       </div>
     </MainLayout>

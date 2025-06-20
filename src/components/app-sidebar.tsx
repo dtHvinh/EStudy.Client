@@ -5,6 +5,7 @@ import {
   IconBrandParsinta,
   IconDashboard,
   IconMessageChatbot,
+  IconReportSearch,
   IconScript,
 } from "@tabler/icons-react";
 import * as React from "react";
@@ -35,7 +36,7 @@ const data = {
     {
       title: "Blog",
       url: "blog",
-      icon: IconScript,
+      icon: IconReportSearch,
     },
     {
       title: "Flash card sets",

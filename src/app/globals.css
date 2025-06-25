@@ -146,6 +146,11 @@
   }
 }
 
+*,
+html {
+  scroll-behavior: smooth !important;
+}
+
 /* Custom Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 4px;

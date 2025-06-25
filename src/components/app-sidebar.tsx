@@ -75,7 +75,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <Link href="dashboard">
+              <Link href="/dashboard">
                 <div className="relative size-28 py-2">
                   <Image
                     src="/logo2.png"

@@ -8,6 +8,13 @@ export default interface PagedResponse<T> {
   hasNext: boolean;
 }
 
+export interface AuthorType {
+  id: number;
+  name: string;
+  profilePicture?: string;
+  creationDate: string;
+}
+
 export interface LoadingableComponentProps {
   loading?: boolean;
 }

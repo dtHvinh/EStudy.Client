@@ -25,20 +25,19 @@ import { slashCommand, suggestionItems } from "./slash-commands";
 const TailwindEditor = ({
   initialContent,
   autoFocus,
-  onUpdate,
+  onContentUpdate,
 }: {
   initialContent?: JSONContent | string;
   autoFocus?: boolean;
-  onUpdate?: (JSONContent: JSONContent) => void;
+  onContentUpdate?: (jsonContent: JSONContent, htmlContent: string) => void;
 }) => {
   const { opened: openNode, openChange: setOpenNode } = useGenericToggle(false);
   const { opened: openLink, openChange: setOpenLink } = useGenericToggle(false);
   const debouncedUpdates = useDebouncedCallback(
     async ({ editor }: { editor: EditorInstance; transaction: any }) => {
-      const json = editor.getJSON();
-      onUpdate?.(json);
+      onContentUpdate?.(editor.getJSON(), editor.getHTML());
     },
-    500
+    1000
   );
 
   return (

@@ -6,15 +6,13 @@ import FlashCardSetList from "@/components/flash-card-set-list";
 import MainLayout from "@/components/layouts/MainLayout";
 import { Button } from "@/components/ui/button";
 import H3 from "@/components/ui/h3";
-import { useGenericToggle } from "@/hooks/use-generic-toggle";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useMobile } from "@/hooks/use-mobile";
 import useMyFlashCardSet from "@/hooks/useMyFlashCardSet";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 
 export default function Page() {
-  const isMobile = useIsMobile();
-  const { opened: isSelect, toggle: toggleSelect } = useGenericToggle();
+  const isMobile = useMobile();
   const PAGE_SIZE = isMobile ? 6 : 16;
   const { ref, inView } = useInView();
 
@@ -52,36 +50,38 @@ export default function Page() {
 
   return (
     <MainLayout>
-      <div className="flex items-baseline justify-between px-4">
-        <H3>My sets</H3>
-        <div className="flex">
-          <AddFlashCardSetForm
-            trigger={
-              <Button className="ml-4" variant={"outline"} type="button">
-                Add new set
-              </Button>
-            }
-            onSubmit={addSet}
+      <div className="px-4 lg:px-6 space-y-4">
+        <div className="flex items-baseline justify-between px-4">
+          <H3>My sets</H3>
+          <div className="flex">
+            <AddFlashCardSetForm
+              trigger={
+                <Button className="ml-4" variant={"outline"} type="button">
+                  Add new set
+                </Button>
+              }
+              onSubmit={addSet}
+            />
+          </div>
+        </div>
+        {!isSetLoading && !sets.length && (
+          <div className="px-4">
+            <p className="text-muted-foreground">
+              You have no sets yet. Create a new set to get started.
+            </p>
+          </div>
+        )}
+        {!!sets.length && (
+          <FlashCardSetList
+            sets={sets}
+            onAddToFavorite={addToFavorite}
+            onRemoveFromFavorite={removeFromFavorite}
+            onDelete={deleteSet}
+            onEdit={editSet}
           />
-        </div>
+        )}
+        <div ref={ref} />
       </div>
-      {!isSetLoading && !sets.length && (
-        <div className="px-4">
-          <p className="text-muted-foreground">
-            You have no sets yet. Create a new set to get started.
-          </p>
-        </div>
-      )}
-      {!!sets.length && (
-        <FlashCardSetList
-          sets={sets}
-          onAddToFavorite={addToFavorite}
-          onRemoveFromFavorite={removeFromFavorite}
-          onDelete={deleteSet}
-          onEdit={editSet}
-        />
-      )}
-      <div ref={ref} />
     </MainLayout>
   );
 }

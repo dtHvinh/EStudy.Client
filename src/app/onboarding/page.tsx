@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import api from "@/components/utils/requestUtils";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -207,18 +208,8 @@ export default function Page() {
     setIsCompleting(true);
 
     try {
-      // Simulate API call to save onboarding data
-      const loadingToastId = toast.loading("Completing your setup...");
-
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Here you would typically send the selections to your API
-      console.log("Onboarding completed with selections:", selections);
-
-      toast.dismiss(loadingToastId);
+      await api.patch("/api/user/onboarding", selections);
       toast.success("Welcome! Your account is ready to use.");
-
-      // Redirect to dashboard
       router.push("/dashboard");
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
@@ -244,7 +235,7 @@ export default function Page() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex items-center justify-between text-sm">
             <span>
               Step {currentStep + 1} of {totalSteps}
             </span>
@@ -254,7 +245,7 @@ export default function Page() {
         </motion.div>
 
         {/* Content Container */}
-        <div className="relative overflow-visible min-h-[400px]">
+        <div className="relative min-h-[400px] overflow-visible">
           <AnimatePresence initial={false} custom={direction} mode="wait">
             <motion.div
               key={currentStep}
@@ -271,7 +262,7 @@ export default function Page() {
                 <h1 className="text-3xl font-bold tracking-tight">
                   {currentStepData.title}
                 </h1>
-                <p className="text-lg text-muted-foreground">
+                <p className="text-muted-foreground text-lg">
                   {currentStepData.description}
                 </p>
               </div>
@@ -297,10 +288,10 @@ export default function Page() {
                     >
                       <Card
                         className={cn(
-                          "cursor-pointer transition-all hover:shadow-lg border-2",
+                          "cursor-pointer border-2 transition-all hover:shadow-lg",
                           isSelected
-                            ? "ring-2 ring-primary bg-primary/5 shadow-md border-primary"
-                            : "hover:bg-muted/50 border-border"
+                            ? "ring-primary bg-primary/5 border-primary shadow-md ring-2"
+                            : "hover:bg-muted/50 border-border",
                         )}
                         onClick={() => handleOptionSelect(option.id)}
                       >
@@ -310,7 +301,7 @@ export default function Page() {
                               "rounded-full p-3 transition-colors",
                               isSelected
                                 ? "bg-primary text-primary-foreground"
-                                : "bg-muted"
+                                : "bg-muted",
                             )}
                             animate={{
                               scale: isSelected ? 1.1 : 1,
@@ -323,11 +314,11 @@ export default function Page() {
                           >
                             <Icon className="h-8 w-8" />
                           </motion.div>
-                          <div className="text-center space-y-2">
-                            <h3 className="font-semibold text-lg">
+                          <div className="space-y-2 text-center">
+                            <h3 className="text-lg font-semibold">
                               {option.title}
                             </h3>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-muted-foreground text-sm">
                               {option.description}
                             </p>
                           </div>
@@ -364,8 +355,8 @@ export default function Page() {
             {isCompleting
               ? "Completing..."
               : currentStep === totalSteps - 1
-              ? "Complete Setup"
-              : "Continue"}
+                ? "Complete Setup"
+                : "Continue"}
           </Button>
         </motion.div>
       </div>

@@ -2,11 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useMobile } from "@/hooks/use-mobile";
+import { IconArrowDown, IconArrowUp } from "@tabler/icons-react";
 import { motion } from "framer-motion";
-import { Bell, Clock, GripVertical, Home, Plus } from "lucide-react";
+import { GripVertical } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { ToolProps } from "./contexts/FloatingToolboxContext";
-import { playSound } from "./utils/utilss";
+import { ToolProps } from "../contexts/FloatingToolboxContext";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface Position {
   x: number;
@@ -15,17 +17,15 @@ interface Position {
 
 const defaultTools: ToolProps[] = [
   {
-    icon: <Home className="w-4 h-4" />,
-    label: "Home",
-    onClick: () => console.log("Home clicked"),
+    icon: <IconArrowUp className="w-4 h-4" />,
+    label: "To top",
+    onClick: () => window.scrollTo({ top: 0, behavior: "smooth" }),
   },
   {
-    icon: <Bell className="w-4 h-4" />,
-    label: "Notifications",
+    icon: <IconArrowDown className="w-4 h-4" />,
+    label: "To bottom",
     onClick: () =>
-      playSound(
-        "https://cawaeyecbhhlteogiasw.supabase.co/storage/v1/object/public/estudy/sounds/noti1.wav"
-      ),
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }),
   },
 ];
 
@@ -34,8 +34,10 @@ export default function FloatingToolbox({
 }: {
   additionalTools?: ToolProps[];
 }) {
+  const isMobile = useMobile();
+
   const [position, setPosition] = useState<Position>({ x: 20, y: 300 });
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const [dragConstraints, setDragConstraints] = useState({
     left: 0,
     top: 0,
@@ -45,6 +47,12 @@ export default function FloatingToolbox({
   const toolboxRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
+
     const updateConstraints = () => {
       if (typeof window !== "undefined") {
         const margin = 20;
@@ -60,13 +68,36 @@ export default function FloatingToolbox({
       }
     };
 
+    const updatePosition = () => {
+      if (typeof window !== "undefined" && toolboxRef.current) {
+        const margin = 20;
+        const toolboxWidth = toolboxRef.current.offsetWidth;
+        const toolboxHeight = toolboxRef.current.offsetHeight;
+
+        setPosition({
+          x: window.innerWidth - toolboxWidth - margin,
+          y: window.innerHeight - toolboxHeight - margin,
+        });
+      }
+    };
+
     updateConstraints();
+    updatePosition();
 
     if (typeof window !== "undefined") {
-      window.addEventListener("resize", updateConstraints);
-      return () => window.removeEventListener("resize", updateConstraints);
+      const handleResize = () => {
+        updateConstraints();
+        updatePosition();
+      };
+
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
     }
-  }, [isCollapsed]); // Re-calculate when collapsed state changes
+  }, [isClient]);
+
+  if (isMobile) {
+    return <></>;
+  }
 
   const toolsToRender = defaultTools.concat(additionalTools || []);
 
@@ -107,53 +138,36 @@ export default function FloatingToolbox({
         className="fixed z-50 cursor-grab"
       >
         <Card
-          className={`bg-card backdrop-blur-sm border shadow-lg transition-all duration-200 w-12 py-0 ${
-            isCollapsed ? "" : "hover:shadow-lg"
-          }`}
+          className={`bg-card backdrop-blur-sm border shadow-lg transition-all duration-200 w-12 py-0`}
         >
           <div className="p-2 touch-none">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full h-8 p-0 mb-1"
-              onClick={() => setIsCollapsed(!isCollapsed)}
-            >
-              {isCollapsed ? (
-                <Plus className="w-4 h-4" />
-              ) : (
-                <GripVertical className="w-4 h-4" />
-              )}
-            </Button>
-
-            <motion.div
-              variants={{
-                hidden: { opacity: 0, height: 0 },
-                visible: { opacity: 1, height: "auto" },
-              }}
-              initial="hidden"
-              animate={isCollapsed ? "hidden" : "visible"}
-              className="space-y-1"
-            >
-              {toolsToRender.map((tool, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full h-8 p-0"
-                  onClick={tool.onClick}
-                >
-                  {tool.icon}
-                </Button>
-              ))}
+            <div className="space-y-1">
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full h-8 p-0 hover:bg-blue-50 transition-colors"
+                className="w-full h-8 p-0 hover:bg-blue-50 transition-colors cursor-grab"
                 title="Focus Timer"
               >
-                <Clock className="w-4 h-4" />
+                <GripVertical className="w-4 h-4" />
               </Button>
-            </motion.div>
+              {toolsToRender.map((tool, idx) => (
+                <Tooltip key={idx}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full h-8 p-0"
+                      onClick={tool.onClick}
+                    >
+                      {tool.icon}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="w-max">
+                    {tool.label}
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+            </div>
           </div>
         </Card>
       </motion.div>

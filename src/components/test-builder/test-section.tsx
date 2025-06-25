@@ -26,8 +26,10 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Section } from "@/hooks/use-create-test";
 import {
+  CheckSquare,
   ChevronDown,
   ChevronRight,
+  Circle,
   Copy,
   GripVertical,
   MoreHorizontal,
@@ -36,12 +38,18 @@ import {
 } from "lucide-react";
 import { QuestionCard } from "./question-card";
 
+interface Answer {
+  id: string;
+  text: string;
+  isCorrect: boolean;
+}
+
 interface Question {
   id: string;
-  type: string;
+  type: "single-choice" | "multiple-choice";
   text: string;
   points: number;
-  answers: any[];
+  answers: Answer[];
   explanation?: string;
 }
 
@@ -62,10 +70,7 @@ interface TestSectionProps {
   onDeleteSection: (sectionId: string) => void;
   onDuplicateSection: (sectionId: string) => void;
   onToggleSection: (sectionId: string) => void;
-  onAddQuestion: (
-    sectionId: string,
-    type?: "single-choice" | "true-false" | "short-answer",
-  ) => void;
+  onAddQuestion: (sectionId: string, type?: Question["type"]) => void;
   onUpdateQuestion: (
     sectionId: string,
     questionId: string,
@@ -78,7 +83,7 @@ interface TestSectionProps {
     sectionId: string,
     questionId: string,
     answerId: string,
-    field: keyof { id: string; text: string; isCorrect: boolean },
+    field: keyof Answer,
     value: string,
   ) => void;
   onSetCorrectAnswer: (
@@ -111,8 +116,15 @@ export function TestSection({
   onAddAnswerOption,
   onRemoveAnswerOption,
 }: TestSectionProps) {
+  const singleChoiceCount = section.questions.filter(
+    (q) => q.type === "single-choice",
+  ).length;
+  const multipleChoiceCount = section.questions.filter(
+    (q) => q.type === "multiple-choice",
+  ).length;
+
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden shadow-sm">
       <Collapsible
         open={section.isExpanded}
         onOpenChange={() => onToggleSection(section.id)}
@@ -131,11 +143,34 @@ export function TestSection({
                   <CardTitle className="text-base">
                     {section.title || `Section ${sectionIndex + 1}`}
                   </CardTitle>
-                  <CardDescription>
-                    {sectionStats.questions} question
-                    {sectionStats.questions !== 1 ? "s" : ""} •{" "}
-                    {sectionStats.points} point
-                    {sectionStats.points !== 1 ? "s" : ""}
+                  <CardDescription className="flex items-center gap-2">
+                    <span>
+                      {sectionStats.questions} question
+                      {sectionStats.questions !== 1 ? "s" : ""}
+                    </span>
+                    <span>•</span>
+                    <span>
+                      {sectionStats.points} point
+                      {sectionStats.points !== 1 ? "s" : ""}
+                    </span>
+                    {singleChoiceCount > 0 && (
+                      <>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          <Circle className="h-3 w-3 text-blue-500" />
+                          {singleChoiceCount} Single
+                        </span>
+                      </>
+                    )}
+                    {multipleChoiceCount > 0 && (
+                      <>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          <CheckSquare className="h-3 w-3 text-green-500" />
+                          {multipleChoiceCount} Multiple
+                        </span>
+                      </>
+                    )}
                   </CardDescription>
                 </div>
               </div>
@@ -181,35 +216,20 @@ export function TestSection({
               <div className="space-y-2">
                 <Label>Section Title</Label>
                 <Input
-                  placeholder="e.g., Listening, Reading, Writing"
-                  value={section.title}
                   spellCheck={false}
-                  autoComplete="off"
+                  placeholder="e.g., Reading Comprehension, Math Problems"
+                  value={section.title}
                   onChange={(e) =>
                     onUpdateSection(section.id, "title", e.target.value)
                   }
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Time Limit (optional)</Label>
-                <Input
-                  type="number"
-                  placeholder="Minutes"
-                  value={section.timeLimit || ""}
-                  onChange={(e) =>
-                    onUpdateSection(
-                      section.id,
-                      "timeLimit",
-                      Number.parseInt(e.target.value) || undefined,
-                    )
-                  }
-                />
-              </div>
+
               <div className="space-y-2 md:col-span-2">
                 <Label>Section Description</Label>
                 <Textarea
                   spellCheck={false}
-                  placeholder="Describe this section"
+                  placeholder="Describe this section and any special instructions for students"
                   value={section.description}
                   onChange={(e) =>
                     onUpdateSection(section.id, "description", e.target.value)
@@ -217,16 +237,17 @@ export function TestSection({
                 />
               </div>
             </div>
-
             <Separator />
-
             {/* Questions */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">Questions</h3>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button size="sm">
+                    <Button
+                      size="sm"
+                      className="bg-primary hover:bg-primary/90"
+                    >
                       <Plus className="mr-2 h-4 w-4" />
                       Add Question
                     </Button>
@@ -235,33 +256,63 @@ export function TestSection({
                     <DropdownMenuItem
                       onClick={() => onAddQuestion(section.id, "single-choice")}
                     >
-                      Single Choice
+                      <Circle className="mr-2 h-4 w-4 text-blue-500" />
+                      <div>
+                        <div className="font-medium">Single Choice</div>
+                        <div className="text-muted-foreground text-xs">
+                          One correct answer
+                        </div>
+                      </div>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => onAddQuestion(section.id, "true-false")}
+                      onClick={() =>
+                        onAddQuestion(section.id, "multiple-choice")
+                      }
                     >
-                      True/False
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => onAddQuestion(section.id, "short-answer")}
-                    >
-                      Short Answer
+                      <CheckSquare className="mr-2 h-4 w-4 text-green-500" />
+                      <div>
+                        <div className="font-medium">Multiple Choice</div>
+                        <div className="text-muted-foreground text-xs">
+                          Multiple correct answers
+                        </div>
+                      </div>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-
               {section.questions.length === 0 ? (
-                <div className="text-muted-foreground py-8 text-center">
-                  <p className="mb-4">No questions in this section yet</p>
-                  <Button
-                    variant="outline"
-                    onClick={() => onAddQuestion(section.id)}
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add First Question
-                  </Button>
-                </div>
+                <Card className="border-dashed">
+                  <CardContent className="p-8 text-center">
+                    <div className="text-muted-foreground mb-4">
+                      <p className="text-lg font-medium">
+                        No questions in this section yet
+                      </p>
+                      <p className="text-sm">
+                        Add your first question to get started
+                      </p>
+                    </div>
+                    <div className="flex justify-center gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          onAddQuestion(section.id, "single-choice")
+                        }
+                      >
+                        <Circle className="mr-2 h-4 w-4 text-blue-500" />
+                        Single Choice
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          onAddQuestion(section.id, "multiple-choice")
+                        }
+                      >
+                        <CheckSquare className="mr-2 h-4 w-4 text-green-500" />
+                        Multiple Choice
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               ) : (
                 <div className="space-y-4">
                   {section.questions.map((question, questionIndex) => (
@@ -282,6 +333,7 @@ export function TestSection({
                 </div>
               )}
             </div>
+            <Button className="w-full">Add Question</Button>
           </CardContent>
         </CollapsibleContent>
       </Collapsible>

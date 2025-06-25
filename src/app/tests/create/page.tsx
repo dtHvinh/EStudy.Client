@@ -3,21 +3,22 @@
 import type React from "react";
 
 import MainLayout from "@/components/layouts/MainLayout";
+import TestGuide from "@/components/test-builder/test-guide";
 import { TestHeader } from "@/components/test-builder/test-header";
 import { TestInformation } from "@/components/test-builder/test-information";
-import { TestPreview } from "@/components/test-builder/test-preview";
-import { TestSections } from "@/components/test-builder/test-sections";
-import { TestSettings } from "@/components/test-builder/test-settings";
-import { TestStats } from "@/components/test-builder/test-stats";
+import TestPreview from "@/components/test-builder/test-preview";
+import { TestSection } from "@/components/test-builder/test-section";
+import TestStatistic from "@/components/test-builder/test-stats";
 import { ValidationErrors } from "@/components/test-builder/validation-errors";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { useCreateTest } from "@/hooks/use-create-test";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 
 export default function CreateTestPage() {
   const {
     test,
-    settings,
     updateTest,
     resetTest,
     addSection,
@@ -33,7 +34,6 @@ export default function CreateTestPage() {
     setCorrectAnswer,
     addAnswerOption,
     removeAnswerOption,
-    updateSettings,
     getTotalQuestions,
     getTotalPoints,
     getAverageTimePerQuestion,
@@ -44,96 +44,82 @@ export default function CreateTestPage() {
     importTest,
   } = useCreateTest();
 
-  const [activeTab, setActiveTab] = useState("builder");
   const [showValidationErrors, setShowValidationErrors] = useState(false);
 
-  const handleSaveDraft = () => {
-    const testData = exportTest();
-    // Here you would typically save to your backend
-    console.log("Saving draft:", testData);
-
-    // For demo purposes, save to localStorage
-    localStorage.setItem("test-draft", JSON.stringify(testData));
-    alert("Draft saved successfully!");
-  };
-
-  const handlePublish = () => {
-    const errors = validateTest();
-    if (errors.length > 0) {
-      setShowValidationErrors(true);
-      return;
+  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target?.result as string);
+          importTest(data);
+        } catch (error) {
+          console.error("Failed to import test:", error);
+        }
+      };
+      reader.readAsText(file);
     }
-
-    const testData = exportTest();
-    // Here you would typically publish to your backend
-    console.log("Publishing test:", testData);
-    alert("Test published successfully!");
   };
 
   const handleExport = () => {
-    const testData = exportTest();
-    const blob = new Blob([JSON.stringify(testData, null, 2)], {
+    const data = exportTest();
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = `${test.title || "test"}.json`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
-  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = JSON.parse(e.target?.result as string);
-        const success = importTest(data);
-        if (success) {
-          alert("Test imported successfully!");
-        } else {
-          alert("Failed to import test. Please check the file format.");
-        }
-      } catch (error) {
-        alert("Invalid file format.");
-      }
-    };
-    reader.readAsText(file);
+  const handlePublish = () => {
+    if (isTestValid()) {
+      console.log("Publishing test:", test);
+      // Here you would typically send the test to your backend
+      alert("Test published successfully!");
+    } else {
+      setShowValidationErrors(true);
+    }
   };
 
   const validationErrors = validateTest();
+  const singleChoiceCount = test.sections.reduce(
+    (total, section) =>
+      total +
+      section.questions.filter((q) => q.type === "single-choice").length,
+    0,
+  );
+  const multipleChoiceCount = test.sections.reduce(
+    (total, section) =>
+      total +
+      section.questions.filter((q) => q.type === "multiple-choice").length,
+    0,
+  );
 
   return (
     <MainLayout>
+      {/* Header */}
       <TestHeader
         isTestValid={isTestValid()}
         onImport={handleImport}
         onExport={handleExport}
-        onSaveDraft={handleSaveDraft}
+        onSaveDraft={() => alert("Draft saved!")}
         onPublish={handlePublish}
       />
 
-      <div className="container mx-auto px-4 py-6">
-        <ValidationErrors
-          errors={validationErrors}
-          show={showValidationErrors}
-        />
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+          <div className="space-y-6 lg:col-span-3">
+            <ValidationErrors
+              errors={validationErrors}
+              show={showValidationErrors}
+            />
 
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="space-y-6"
-        >
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="builder">Test Builder</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-            <TabsTrigger value="preview">Preview</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="builder" className="space-y-6">
             <TestInformation
               title={test.title}
               description={test.description}
@@ -143,68 +129,93 @@ export default function CreateTestPage() {
                 updateTest("description", description)
               }
               onUpdateDuration={(duration) => updateTest("duration", duration)}
-            />{" "}
-            <TestStats
-              sectionsCount={test.sections.length}
-              totalQuestions={getTotalQuestions()}
-              totalPoints={getTotalPoints()}
-              duration={test.duration}
-              averageTimePerQuestion={getAverageTimePerQuestion()}
             />
-            <TestSections
-              sections={test.sections}
-              onResetTest={resetTest}
-              onAddSection={addSection}
-              onUpdateSection={updateSection as any}
-              onDeleteSection={deleteSection}
-              onDuplicateSection={duplicateSection}
-              onToggleSection={toggleSection}
-              onAddQuestion={addQuestion as any}
-              onUpdateQuestion={updateQuestion as any}
-              onDeleteQuestion={deleteQuestion}
-              onDuplicateQuestion={duplicateQuestion}
-              onUpdateAnswer={updateAnswer as any}
-              onSetCorrectAnswer={setCorrectAnswer}
-              onAddAnswerOption={addAnswerOption}
-              onRemoveAnswerOption={removeAnswerOption}
-              getSectionStats={getSectionStats}
-            />
-          </TabsContent>
 
-          <TabsContent value="settings" className="space-y-6">
-            <TestSettings
-              passingScore={test.passingScore}
-              maxAttempts={settings.maxAttempts}
-              shuffleQuestions={settings.shuffleQuestions}
-              showResultsImmediately={settings.showResultsImmediately}
-              onUpdatePassingScore={(score) =>
-                updateTest("passingScore", score)
-              }
-              onUpdateMaxAttempts={(attempts) =>
-                updateSettings("maxAttempts", attempts)
-              }
-              onUpdateShuffleQuestions={(shuffle) =>
-                updateSettings("shuffleQuestions", shuffle)
-              }
-              onUpdateShowResultsImmediately={(show) =>
-                updateSettings("showResultsImmediately", show)
-              }
-            />
-          </TabsContent>
+            {/* Test Sections */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Test Sections</h2>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={resetTest}>
+                    Reset All
+                  </Button>
+                  <Button onClick={addSection}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Section
+                  </Button>
+                </div>
+              </div>
 
-          <TabsContent value="preview" className="space-y-6">
-            <TestPreview
-              title={test.title}
-              description={test.description}
-              duration={test.duration}
-              sections={test.sections}
+              {test.sections.length === 0 ? (
+                <Card className="border-dashed">
+                  <CardContent className="p-8 text-center">
+                    <div className="text-muted-foreground mb-4">
+                      <p className="text-lg font-medium">
+                        No sections created yet
+                      </p>
+                      <p className="text-sm">
+                        Create your first section to start building your test
+                      </p>
+                    </div>
+                    <Button onClick={addSection} size="lg">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Your First Section
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  {test.sections.map((section, sectionIndex) => (
+                    <TestSection
+                      key={section.id}
+                      section={section}
+                      sectionIndex={sectionIndex}
+                      sectionStats={getSectionStats(section.id)}
+                      onUpdateSection={updateSection}
+                      onDeleteSection={deleteSection}
+                      onDuplicateSection={duplicateSection}
+                      onToggleSection={toggleSection}
+                      onAddQuestion={addQuestion}
+                      onUpdateQuestion={updateQuestion}
+                      onDeleteQuestion={deleteQuestion}
+                      onDuplicateQuestion={duplicateQuestion}
+                      onUpdateAnswer={updateAnswer}
+                      onSetCorrectAnswer={setCorrectAnswer}
+                      onAddAnswerOption={addAnswerOption}
+                      onRemoveAnswerOption={removeAnswerOption}
+                    />
+                  ))}
+                  <Button className="w-full" onClick={addSection}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Section
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            <TestStatistic
+              test={test}
+              singleChoiceCount={singleChoiceCount}
+              multipleChoiceCount={multipleChoiceCount}
               getTotalQuestions={getTotalQuestions}
               getTotalPoints={getTotalPoints}
               getAverageTimePerQuestion={getAverageTimePerQuestion}
+            />
+
+            {/* Test Preview */}
+            <TestPreview
+              test={test}
+              getTotalQuestions={getTotalQuestions}
+              getTotalPoints={getTotalPoints}
               getSectionStats={getSectionStats}
             />
-          </TabsContent>
-        </Tabs>
+
+            <TestGuide />
+          </div>
+        </div>
       </div>
     </MainLayout>
   );

@@ -2,18 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Section } from "@/hooks/use-create-test";
+import { Question, Section } from "@/hooks/use-create-test";
 import { Plus } from "lucide-react";
 import { TestSection } from "./test-section";
-
-interface Question {
-  id: string;
-  type: string;
-  text: string;
-  points: number;
-  answers: any[];
-  explanation?: string;
-}
 
 interface TestSectionsProps {
   sections: Section[];

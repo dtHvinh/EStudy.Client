@@ -1,83 +1,54 @@
-"use client";
-
+import { Test } from "@/hooks/use-create-test";
+import { Separator } from "@radix-ui/react-dropdown-menu";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+} from "../ui/card";
 
-interface Section {
-  id: string;
-  title: string;
-  description: string;
-  timeLimit?: number;
-}
-
-interface TestPreviewProps {
-  title: string;
-  description: string;
-  duration: number;
-  sections: Section[];
-  getTotalQuestions: () => number;
-  getTotalPoints: () => number;
-  getAverageTimePerQuestion: () => number;
-  getSectionStats: (sectionId: string) => { questions: number; points: number };
-}
-
-export function TestPreview({
-  title,
-  description,
-  duration,
-  sections,
+export default function TestPreview({
+  test,
   getTotalQuestions,
   getTotalPoints,
-  getAverageTimePerQuestion,
   getSectionStats,
-}: TestPreviewProps) {
+}: {
+  test: Test;
+  getTotalQuestions: () => number;
+  getTotalPoints: () => number;
+  getSectionStats: (sectionId: string) => { questions: number; points: number };
+}) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Test Preview</CardTitle>
-        <CardDescription>
-          Preview how your test will appear to students
-        </CardDescription>
+        <CardTitle className="text-base">Test Preview</CardTitle>
+        <CardDescription>How your test will appear to students</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="space-y-2 text-center">
-            <h2 className="text-2xl font-bold">{title || "Untitled Test"}</h2>
-            <p className="text-muted-foreground">{description}</p>
-            <div className="text-muted-foreground flex justify-center gap-4 text-sm">
-              <span>{duration} minutes</span>
+            <h3 className="font-bold">{test.title || "Untitled Test"}</h3>
+            <p className="text-muted-foreground text-sm">{test.description}</p>
+            <div className="text-muted-foreground flex justify-center gap-2 text-xs">
+              <span>{test.duration}m</span>
               <span>•</span>
               <span>{getTotalQuestions()} questions</span>
               <span>•</span>
               <span>{getTotalPoints()} points</span>
-              <span>•</span>
-              <span>{getAverageTimePerQuestion()}m per question</span>
             </div>
           </div>
           <Separator />
-          <div className="space-y-4">
-            {sections.map((section, index) => {
-              const sectionStats = getSectionStats(section.id);
+          <div className="space-y-2">
+            {test.sections.map((section, index) => {
+              const stats = getSectionStats(section.id);
               return (
-                <div key={section.id} className="space-y-2">
-                  <h3 className="font-semibold">
+                <div key={section.id} className="text-sm">
+                  <p className="font-medium">
                     Section {index + 1}: {section.title}
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    {section.description}
                   </p>
                   <p className="text-muted-foreground text-xs">
-                    {sectionStats.questions} question
-                    {sectionStats.questions !== 1 ? "s" : ""} •{" "}
-                    {sectionStats.points} point
-                    {sectionStats.points !== 1 ? "s" : ""}
-                    {section.timeLimit && ` • ${section.timeLimit} minutes`}
+                    {stats.questions} questions • {stats.points} points
                   </p>
                 </div>
               );

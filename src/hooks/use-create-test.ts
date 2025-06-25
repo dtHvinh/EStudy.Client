@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { create } from "zustand";
+import { immer } from "zustand/middleware/immer";
 
 export interface Answer {
   id: string;
@@ -10,7 +11,7 @@ export interface Answer {
 
 export interface Question {
   id: string;
-  type: "single-choice" | "true-false" | "short-answer";
+  type: "single-choice" | "multiple-choice";
   text: string;
   answers: Answer[];
   points: number;
@@ -21,7 +22,6 @@ export interface Section {
   id: string;
   title: string;
   description: string;
-  timeLimit?: number;
   questions: Question[];
   isExpanded: boolean;
 }
@@ -34,10 +34,62 @@ export interface Test {
   sections: Section[];
 }
 
-export interface TestSettings {
-  maxAttempts: number | "unlimited";
-  shuffleQuestions: boolean;
-  showResultsImmediately: boolean;
+interface TestStore {
+  test: Test;
+
+  // Test Management
+  updateTest: (field: keyof Test, value: any) => void;
+  resetTest: () => void;
+
+  // Section Management
+  addSection: () => void;
+  updateSection: (sectionId: string, field: keyof Section, value: any) => void;
+  deleteSection: (sectionId: string) => void;
+  duplicateSection: (sectionId: string) => void;
+  toggleSection: (sectionId: string) => void;
+
+  // Question Management
+  addQuestion: (sectionId: string, questionType?: Question["type"]) => void;
+  updateQuestion: (
+    sectionId: string,
+    questionId: string,
+    field: keyof Question,
+    value: any,
+  ) => void;
+  deleteQuestion: (sectionId: string, questionId: string) => void;
+  duplicateQuestion: (sectionId: string, questionId: string) => void;
+
+  // Answer Management
+  updateAnswer: (
+    sectionId: string,
+    questionId: string,
+    answerId: string,
+    field: keyof Answer,
+    value: any,
+  ) => void;
+  setCorrectAnswer: (
+    sectionId: string,
+    questionId: string,
+    answerId: string,
+  ) => void;
+  addAnswerOption: (sectionId: string, questionId: string) => void;
+  removeAnswerOption: (
+    sectionId: string,
+    questionId: string,
+    answerId: string,
+  ) => void;
+
+  // Utility Functions
+  getTotalQuestions: () => number;
+  getTotalPoints: () => number;
+  getAverageTimePerQuestion: () => number;
+  getSectionStats: (sectionId: string) => { questions: number; points: number };
+  validateTest: () => string[];
+  isTestValid: () => boolean;
+
+  // Export/Import
+  exportTest: () => any;
+  importTest: (importedData: any) => boolean;
 }
 
 const createDefaultTest = (): Test => ({
@@ -56,404 +108,231 @@ const createDefaultSection = (index: number): Section => ({
   isExpanded: true,
 });
 
-const createDefaultQuestion = (): Question => ({
+const createDefaultQuestion = (
+  type: Question["type"] = "single-choice",
+): Question => ({
   id: Date.now().toString(),
-  type: "single-choice",
+  type,
   text: "",
+  points: 1,
   answers: [
     { id: "1", text: "", isCorrect: true },
     { id: "2", text: "", isCorrect: false },
     { id: "3", text: "", isCorrect: false },
     { id: "4", text: "", isCorrect: false },
   ],
-  points: 1,
 });
 
-const createDefaultSettings = (): TestSettings => ({
-  maxAttempts: 3,
-  shuffleQuestions: false,
-  showResultsImmediately: true,
-});
+export const useTestStore = create<TestStore>()(
+  immer((set, get) => ({
+    test: createDefaultTest(),
 
-export function useCreateTest(initialTest?: Partial<Test>) {
-  const [test, setTest] = useState<Test>(() => ({
-    ...createDefaultTest(),
-    ...initialTest,
-  }));
+    // Test Management
+    updateTest: (field, value) =>
+      set((state) => {
+        (state.test as any)[field] = value;
+      }),
 
-  const [settings, setSettings] = useState<TestSettings>(
-    createDefaultSettings(),
-  );
+    resetTest: () =>
+      set((state) => {
+        state.test = createDefaultTest();
+      }),
 
-  // Test Management
-  const updateTest = useCallback((field: keyof Test, value: any) => {
-    setTest((prev) => ({ ...prev, [field]: value }));
-  }, []);
+    // Section Management
+    addSection: () =>
+      set((state) => {
+        const newSection = createDefaultSection(state.test.sections.length);
+        state.test.sections.push(newSection);
+      }),
 
-  const resetTest = useCallback(() => {
-    setTest(createDefaultTest());
-    setSettings(createDefaultSettings());
-  }, []);
+    updateSection: (sectionId, field, value) =>
+      set((state) => {
+        const section = state.test.sections.find((s) => s.id === sectionId);
+        if (section) {
+          (section[field] as any) = value;
+        }
+      }),
 
-  // Section Management
-  const addSection = useCallback(() => {
-    setTest((prev) => {
-      const newSection = createDefaultSection(prev.sections.length);
-      return {
-        ...prev,
-        sections: [...prev.sections, newSection],
-      };
-    });
-  }, []);
+    deleteSection: (sectionId) =>
+      set((state) => {
+        state.test.sections = state.test.sections.filter(
+          (s) => s.id !== sectionId,
+        );
+      }),
 
-  const updateSection = useCallback(
-    (sectionId: string, field: keyof Section, value: any) => {
-      setTest((prev) => ({
-        ...prev,
-        sections: prev.sections.map((section) =>
-          section.id === sectionId ? { ...section, [field]: value } : section,
-        ),
-      }));
-    },
-    [],
-  );
+    duplicateSection: (sectionId) =>
+      set((state) => {
+        const sectionToDuplicate = state.test.sections.find(
+          (s) => s.id === sectionId,
+        );
+        if (sectionToDuplicate) {
+          const duplicatedSection: Section = {
+            ...sectionToDuplicate,
+            id: Date.now().toString(),
+            title: `${sectionToDuplicate.title} (Copy)`,
+            questions: sectionToDuplicate.questions.map((q) => ({
+              ...q,
+              id: `${Date.now()}-${Math.random()}`,
+              answers: q.answers.map((a) => ({
+                ...a,
+                id: `${Date.now()}-${Math.random()}`,
+              })),
+            })),
+          };
+          state.test.sections.push(duplicatedSection);
+        }
+      }),
 
-  const deleteSection = useCallback((sectionId: string) => {
-    setTest((prev) => ({
-      ...prev,
-      sections: prev.sections.filter((section) => section.id !== sectionId),
-    }));
-  }, []);
+    toggleSection: (sectionId) =>
+      set((state) => {
+        const section = state.test.sections.find((s) => s.id === sectionId);
+        if (section) {
+          section.isExpanded = !section.isExpanded;
+        }
+      }),
 
-  const duplicateSection = useCallback((sectionId: string) => {
-    setTest((prev) => {
-      const sectionToDuplicate = prev.sections.find((s) => s.id === sectionId);
-      if (!sectionToDuplicate) return prev;
+    // Question Management
+    addQuestion: (sectionId, questionType) =>
+      set((state) => {
+        const section = state.test.sections.find((s) => s.id === sectionId);
+        if (section) {
+          const newQuestion = createDefaultQuestion(questionType);
+          section.questions.push(newQuestion);
+        }
+      }),
 
-      const duplicatedSection: Section = {
-        ...sectionToDuplicate,
-        id: Date.now().toString(),
-        title: `${sectionToDuplicate.title} (Copy)`,
-        questions: sectionToDuplicate.questions.map((q) => ({
-          ...q,
-          id: `${Date.now()}-${Math.random()}`,
-          answers: q.answers.map((a) => ({
-            ...a,
-            id: `${Date.now()}-${Math.random()}`,
-          })),
-        })),
-      };
+    updateQuestion: (sectionId, questionId, field, value) =>
+      set((state) => {
+        const section = state.test.sections.find((s) => s.id === sectionId);
+        const question = section?.questions.find((q) => q.id === questionId);
+        if (question) {
+          (question[field] as any) = value;
 
-      return {
-        ...prev,
-        sections: [...prev.sections, duplicatedSection],
-      };
-    });
-  }, []);
-
-  const toggleSection = useCallback((sectionId: string) => {
-    setTest((prev) => ({
-      ...prev,
-      sections: prev.sections.map((section) =>
-        section.id === sectionId
-          ? { ...section, isExpanded: !section.isExpanded }
-          : section,
-      ),
-    }));
-  }, []);
-
-  const reorderSections = useCallback(
-    (startIndex: number, endIndex: number) => {
-      setTest((prev) => {
-        const result = Array.from(prev.sections);
-        const [removed] = result.splice(startIndex, 1);
-        result.splice(endIndex, 0, removed);
-        return { ...prev, sections: result };
-      });
-    },
-    [],
-  );
-
-  // Question Management
-  const addQuestion = useCallback(
-    (sectionId: string, questionType?: Question["type"]) => {
-      setTest((prev) => {
-        const newQuestion = createDefaultQuestion();
-        if (questionType) {
-          newQuestion.type = questionType;
-
-          // Adjust answers based on question type
-          if (questionType === "true-false") {
-            newQuestion.answers = [
-              { id: "1", text: "True", isCorrect: true },
-              { id: "2", text: "False", isCorrect: false },
-            ];
-          } else if (questionType === "short-answer") {
-            newQuestion.answers = [];
+          // Handle question type changes
+          if (field === "type" && value === "single-choice") {
+            const firstCorrectIndex = question.answers.findIndex(
+              (a) => a.isCorrect,
+            );
+            question.answers.forEach((answer, index) => {
+              answer.isCorrect =
+                index === (firstCorrectIndex >= 0 ? firstCorrectIndex : 0);
+            });
           }
         }
+      }),
 
-        return {
-          ...prev,
-          sections: prev.sections.map((section) =>
-            section.id === sectionId
-              ? { ...section, questions: [...section.questions, newQuestion] }
-              : section,
-          ),
-        };
-      });
-    },
-    [],
-  );
+    deleteQuestion: (sectionId, questionId) =>
+      set((state) => {
+        const section = state.test.sections.find((s) => s.id === sectionId);
+        if (section) {
+          section.questions = section.questions.filter(
+            (q) => q.id !== questionId,
+          );
+        }
+      }),
 
-  const updateQuestion = useCallback(
-    (
-      sectionId: string,
-      questionId: string,
-      field: keyof Question,
-      value: any,
-    ) => {
-      setTest((prev) => ({
-        ...prev,
-        sections: prev.sections.map((section) =>
-          section.id === sectionId
-            ? {
-                ...section,
-                questions: section.questions.map((question) =>
-                  question.id === questionId
-                    ? { ...question, [field]: value }
-                    : question,
-                ),
-              }
-            : section,
-        ),
-      }));
-    },
-    [],
-  );
-
-  const deleteQuestion = useCallback(
-    (sectionId: string, questionId: string) => {
-      setTest((prev) => ({
-        ...prev,
-        sections: prev.sections.map((section) =>
-          section.id === sectionId
-            ? {
-                ...section,
-                questions: section.questions.filter((q) => q.id !== questionId),
-              }
-            : section,
-        ),
-      }));
-    },
-    [],
-  );
-
-  const duplicateQuestion = useCallback(
-    (sectionId: string, questionId: string) => {
-      setTest((prev) => {
-        const section = prev.sections.find((s) => s.id === sectionId);
+    duplicateQuestion: (sectionId, questionId) =>
+      set((state) => {
+        const section = state.test.sections.find((s) => s.id === sectionId);
         const question = section?.questions.find((q) => q.id === questionId);
+        if (question) {
+          const duplicatedQuestion: Question = {
+            ...question,
+            id: Date.now().toString(),
+            text: `${question.text} (Copy)`,
+            answers: question.answers.map((answer) => ({
+              ...answer,
+              id: `${Date.now()}-${Math.random()}`,
+            })),
+          };
+          section?.questions.push(duplicatedQuestion);
+        }
+      }),
 
-        if (!question) return prev;
+    // Answer Management
+    updateAnswer: (sectionId, questionId, answerId, field, value) =>
+      set((state) => {
+        const section = state.test.sections.find((s) => s.id === sectionId);
+        const question = section?.questions.find((q) => q.id === questionId);
+        const answer = question?.answers.find((a) => a.id === answerId);
+        if (answer) {
+          (answer[field] as any) = value;
+        }
+      }),
 
-        const duplicatedQuestion: Question = {
-          ...question,
-          id: Date.now().toString(),
-          text: `${question.text} (Copy)`,
-          answers: question.answers.map((answer) => ({
-            ...answer,
-            id: `${Date.now()}-${Math.random()}`,
-          })),
-        };
+    setCorrectAnswer: (sectionId, questionId, answerId) =>
+      set((state) => {
+        const section = state.test.sections.find((s) => s.id === sectionId);
+        const question = section?.questions.find((q) => q.id === questionId);
+        if (question) {
+          if (question.type === "multiple-choice") {
+            const answer = question.answers.find((a) => a.id === answerId);
+            if (answer) {
+              answer.isCorrect = !answer.isCorrect;
+            }
+          } else {
+            question.answers.forEach((answer) => {
+              answer.isCorrect = answer.id === answerId;
+            });
+          }
+        }
+      }),
 
-        return {
-          ...prev,
-          sections: prev.sections.map((section) =>
-            section.id === sectionId
-              ? {
-                  ...section,
-                  questions: [...section.questions, duplicatedQuestion],
-                }
-              : section,
+    addAnswerOption: (sectionId, questionId) =>
+      set((state) => {
+        const section = state.test.sections.find((s) => s.id === sectionId);
+        const question = section?.questions.find((q) => q.id === questionId);
+        if (question) {
+          const newAnswer: Answer = {
+            id: Date.now().toString(),
+            text: "",
+            isCorrect: false,
+          };
+          question.answers.push(newAnswer);
+        }
+      }),
+
+    removeAnswerOption: (sectionId, questionId, answerId) =>
+      set((state) => {
+        const section = state.test.sections.find((s) => s.id === sectionId);
+        const question = section?.questions.find((q) => q.id === questionId);
+        if (question) {
+          question.answers = question.answers.filter((a) => a.id !== answerId);
+        }
+      }),
+
+    // Utility Functions
+    getTotalQuestions: () => {
+      const { test } = get();
+      return test.sections.reduce(
+        (total, section) => total + section.questions.length,
+        0,
+      );
+    },
+
+    getTotalPoints: () => {
+      const { test } = get();
+      return test.sections.reduce(
+        (total, section) =>
+          total +
+          section.questions.reduce(
+            (sectionTotal, question) => sectionTotal + question.points,
+            0,
           ),
-        };
-      });
+        0,
+      );
     },
-    [],
-  );
 
-  const reorderQuestions = useCallback(
-    (sectionId: string, startIndex: number, endIndex: number) => {
-      setTest((prev) => ({
-        ...prev,
-        sections: prev.sections.map((section) => {
-          if (section.id !== sectionId) return section;
-
-          const result = Array.from(section.questions);
-          const [removed] = result.splice(startIndex, 1);
-          result.splice(endIndex, 0, removed);
-
-          return { ...section, questions: result };
-        }),
-      }));
+    getAverageTimePerQuestion: () => {
+      const { test, getTotalQuestions } = get();
+      const totalQuestions = getTotalQuestions();
+      return totalQuestions > 0
+        ? Math.round(test.duration / totalQuestions)
+        : 0;
     },
-    [],
-  );
 
-  // Answer Management
-  const updateAnswer = useCallback(
-    (
-      sectionId: string,
-      questionId: string,
-      answerId: string,
-      field: keyof Answer,
-      value: any,
-    ) => {
-      setTest((prev) => ({
-        ...prev,
-        sections: prev.sections.map((section) =>
-          section.id === sectionId
-            ? {
-                ...section,
-                questions: section.questions.map((question) =>
-                  question.id === questionId
-                    ? {
-                        ...question,
-                        answers: question.answers.map((answer) =>
-                          answer.id === answerId
-                            ? { ...answer, [field]: value }
-                            : answer,
-                        ),
-                      }
-                    : question,
-                ),
-              }
-            : section,
-        ),
-      }));
-    },
-    [],
-  );
-
-  const setCorrectAnswer = useCallback(
-    (sectionId: string, questionId: string, answerId: string) => {
-      setTest((prev) => ({
-        ...prev,
-        sections: prev.sections.map((section) =>
-          section.id === sectionId
-            ? {
-                ...section,
-                questions: section.questions.map((question) =>
-                  question.id === questionId
-                    ? {
-                        ...question,
-                        answers: question.answers.map((answer) => ({
-                          ...answer,
-                          isCorrect: answer.id === answerId,
-                        })),
-                      }
-                    : question,
-                ),
-              }
-            : section,
-        ),
-      }));
-    },
-    [],
-  );
-
-  const addAnswerOption = useCallback(
-    (sectionId: string, questionId: string) => {
-      setTest((prev) => ({
-        ...prev,
-        sections: prev.sections.map((section) =>
-          section.id === sectionId
-            ? {
-                ...section,
-                questions: section.questions.map((question) => {
-                  if (question.id !== questionId) return question;
-
-                  const newAnswer: Answer = {
-                    id: Date.now().toString(),
-                    text: "",
-                    isCorrect: false,
-                  };
-
-                  return {
-                    ...question,
-                    answers: [...question.answers, newAnswer],
-                  };
-                }),
-              }
-            : section,
-        ),
-      }));
-    },
-    [],
-  );
-
-  const removeAnswerOption = useCallback(
-    (sectionId: string, questionId: string, answerId: string) => {
-      setTest((prev) => ({
-        ...prev,
-        sections: prev.sections.map((section) =>
-          section.id === sectionId
-            ? {
-                ...section,
-                questions: section.questions.map((question) =>
-                  question.id === questionId
-                    ? {
-                        ...question,
-                        answers: question.answers.filter(
-                          (answer) => answer.id !== answerId,
-                        ),
-                      }
-                    : question,
-                ),
-              }
-            : section,
-        ),
-      }));
-    },
-    [],
-  );
-
-  // Settings Management
-  const updateSettings = useCallback(
-    (field: keyof TestSettings, value: any) => {
-      setSettings((prev) => ({ ...prev, [field]: value }));
-    },
-    [],
-  );
-
-  // Utility Functions
-  const getTotalQuestions = useCallback(() => {
-    return test.sections.reduce(
-      (total, section) => total + section.questions.length,
-      0,
-    );
-  }, [test.sections]);
-
-  const getTotalPoints = useCallback(() => {
-    return test.sections.reduce(
-      (total, section) =>
-        total +
-        section.questions.reduce(
-          (sectionTotal, question) => sectionTotal + question.points,
-          0,
-        ),
-      0,
-    );
-  }, [test.sections]);
-
-  const getAverageTimePerQuestion = useCallback(() => {
-    const totalQuestions = getTotalQuestions();
-    return totalQuestions > 0 ? Math.round(test.duration / totalQuestions) : 0;
-  }, [test.duration, getTotalQuestions]);
-
-  const getSectionStats = useCallback(
-    (sectionId: string) => {
+    getSectionStats: (sectionId) => {
+      const { test } = get();
       const section = test.sections.find((s) => s.id === sectionId);
       if (!section) return { questions: 0, points: 0 };
 
@@ -465,39 +344,37 @@ export function useCreateTest(initialTest?: Partial<Test>) {
         ),
       };
     },
-    [test.sections],
-  );
 
-  const validateTest = useCallback(() => {
-    const errors: string[] = [];
+    validateTest: () => {
+      const { test } = get();
+      const errors: string[] = [];
 
-    if (!test.title.trim()) {
-      errors.push("Test title is required");
-    }
-
-    if (test.sections.length === 0) {
-      errors.push("At least one section is required");
-    }
-
-    test.sections.forEach((section, sectionIndex) => {
-      if (!section.title.trim()) {
-        errors.push(`Section ${sectionIndex + 1} title is required`);
+      if (!test.title.trim()) {
+        errors.push("Test title is required");
       }
 
-      if (section.questions.length === 0) {
-        errors.push(
-          `Section "${section.title}" must have at least one question`,
-        );
+      if (test.sections.length === 0) {
+        errors.push("At least one section is required");
       }
 
-      section.questions.forEach((question, questionIndex) => {
-        if (!question.text.trim()) {
+      test.sections.forEach((section, sectionIndex) => {
+        if (!section.title.trim()) {
+          errors.push(`Section ${sectionIndex + 1} title is required`);
+        }
+
+        if (section.questions.length === 0) {
           errors.push(
-            `Question ${questionIndex + 1} in section "${section.title}" is empty`,
+            `Section "${section.title}" must have at least one question`,
           );
         }
 
-        if (question.type !== "short-answer") {
+        section.questions.forEach((question, questionIndex) => {
+          if (!question.text.trim()) {
+            errors.push(
+              `Question ${questionIndex + 1} in section "${section.title}" is empty`,
+            );
+          }
+
           const hasCorrectAnswer = question.answers.some(
             (answer) => answer.isCorrect,
           );
@@ -515,89 +392,51 @@ export function useCreateTest(initialTest?: Partial<Test>) {
               `Question ${questionIndex + 1} in section "${section.title}" has empty answer options`,
             );
           }
-        }
+
+          if (question.answers.length < 2) {
+            errors.push(
+              `Question ${questionIndex + 1} in section "${section.title}" needs at least 2 answer options`,
+            );
+          }
+        });
       });
-    });
 
-    return errors;
-  }, [test]);
+      return errors;
+    },
 
-  const isTestValid = useCallback(() => {
-    return validateTest().length === 0;
-  }, [validateTest]);
+    isTestValid: () => {
+      const { validateTest } = get();
+      return validateTest().length === 0;
+    },
 
-  // Export/Import Functions
-  const exportTest = useCallback(() => {
-    return {
-      test,
-      settings,
-      metadata: {
-        createdAt: new Date().toISOString(),
-        version: "1.0",
-      },
-    };
-  }, [test, settings]);
+    exportTest: () => {
+      const { test } = get();
+      return {
+        test,
+        metadata: {
+          createdAt: new Date().toISOString(),
+          version: "1.0",
+        },
+      };
+    },
 
-  const importTest = useCallback((importedData: any) => {
-    try {
-      if (importedData.test) {
-        setTest(importedData.test);
+    importTest: (importedData) => {
+      try {
+        if (importedData.test) {
+          set((state) => {
+            state.test = importedData.test;
+          });
+        }
+        return true;
+      } catch (error) {
+        console.error("Failed to import test:", error);
+        return false;
       }
-      if (importedData.settings) {
-        setSettings(importedData.settings);
-      }
-      return true;
-    } catch (error) {
-      console.error("Failed to import test:", error);
-      return false;
-    }
-  }, []);
+    },
+  })),
+);
 
-  return {
-    // State
-    test,
-    settings,
-
-    // Test Management
-    updateTest,
-    resetTest,
-
-    // Section Management
-    addSection,
-    updateSection,
-    deleteSection,
-    duplicateSection,
-    toggleSection,
-    reorderSections,
-
-    // Question Management
-    addQuestion,
-    updateQuestion,
-    deleteQuestion,
-    duplicateQuestion,
-    reorderQuestions,
-
-    // Answer Management
-    updateAnswer,
-    setCorrectAnswer,
-    addAnswerOption,
-    removeAnswerOption,
-
-    // Settings Management
-    updateSettings,
-
-    // Utility Functions
-    getTotalQuestions,
-    getTotalPoints,
-    getAverageTimePerQuestion,
-    getSectionStats,
-
-    // Validation
-    validateTest,
-    isTestValid,
-
-    // Export/Import
-    exportTest,
-    importTest,
-  };
+export function useCreateTest() {
+  const store = useTestStore();
+  return store;
 }

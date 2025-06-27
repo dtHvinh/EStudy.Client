@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Section } from "@/hooks/use-create-test";
+import { cn } from "@/lib/utils";
 import {
   CheckSquare,
   ChevronDown,
@@ -209,7 +210,11 @@ export function TestSection({
           </CardHeader>
         </CollapsibleTrigger>
 
-        <CollapsibleContent>
+        <CollapsibleContent
+          className={cn(
+            "text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 outline-none",
+          )}
+        >
           <CardContent className="space-y-4">
             {/* Section Settings */}
             <div className="bg-muted/30 grid grid-cols-1 gap-4 rounded-lg p-4 md:grid-cols-2">
@@ -333,7 +338,12 @@ export function TestSection({
                 </div>
               )}
             </div>
-            <Button className="w-full">Add Question</Button>
+            <Button
+              className="w-full"
+              onClick={() => onAddQuestion(section.id)}
+            >
+              Add Question
+            </Button>
           </CardContent>
         </CollapsibleContent>
       </Collapsible>

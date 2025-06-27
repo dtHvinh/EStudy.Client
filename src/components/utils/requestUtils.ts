@@ -49,7 +49,7 @@ axiosInstance.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 // Helper function to handle responses and extract data
@@ -87,36 +87,37 @@ const prepareFormData = (data: any): FormData => {
 
   const formData = new FormData();
 
-  const appendToFormData = (obj: any, prefix = "") => {
+  const appendToFormData = (obj: any, formData: FormData, prefix = "") => {
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        const value = obj[key];
-        const formKey = prefix ? `${prefix}[${key}]` : key;
+      if (!obj.hasOwnProperty(key)) continue;
 
-        if (value instanceof File) {
-          formData.append(formKey, value);
-        } else if (value instanceof FileList) {
-          for (let i = 0; i < value.length; i++) {
-            formData.append(`${formKey}[${i}]`, value[i]);
-          }
-        } else if (Array.isArray(value)) {
-          value.forEach((item, index) => {
-            if (typeof item === "object" && item !== null) {
-              appendToFormData(item, `${formKey}[${index}]`);
-            } else {
-              formData.append(`${formKey}[${index}]`, item);
-            }
-          });
-        } else if (typeof value === "object" && value !== null) {
-          appendToFormData(value, formKey);
-        } else if (value !== null && value !== undefined) {
-          formData.append(formKey, value.toString());
+      const value = obj[key];
+      const formKey = prefix ? `${prefix}.${key}` : key;
+
+      if (value instanceof File) {
+        formData.append(formKey, value);
+      } else if (value instanceof FileList) {
+        for (let i = 0; i < value.length; i++) {
+          formData.append(`${formKey}[${i}]`, value[i]);
         }
+      } else if (Array.isArray(value)) {
+        value.forEach((item, index) => {
+          const arrayKey = `${formKey}[${index}]`;
+          if (typeof item === "object" && item !== null) {
+            appendToFormData(item, formData, arrayKey);
+          } else {
+            formData.append(arrayKey, item);
+          }
+        });
+      } else if (typeof value === "object" && value !== null) {
+        appendToFormData(value, formData, formKey);
+      } else if (value !== null && value !== undefined) {
+        formData.append(formKey, value.toString());
       }
     }
   };
 
-  appendToFormData(data);
+  appendToFormData(data, formData);
   return formData;
 };
 
@@ -125,7 +126,7 @@ const prepareFormData = (data: any): FormData => {
  */
 export async function get<T = any>(
   url: string,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<T> {
   const response = await axiosInstance.get(url, options);
   return handleResponse<T>(response);
@@ -137,7 +138,7 @@ export async function get<T = any>(
 export async function post<T = any>(
   url: string,
   data?: any,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<T> {
   const response = await axiosInstance.post(url, data, options);
   return handleResponse<T>(response);
@@ -146,7 +147,7 @@ export async function post<T = any>(
 export async function postWithFormData<T = any>(
   url: string,
   data: any,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<T> {
   const formData = prepareFormData(data);
   const response = await axiosInstance.post(url, formData, {
@@ -161,7 +162,7 @@ export async function postWithFormData<T = any>(
 export async function putWithFormData<T = any>(
   url: string,
   data: any,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<T> {
   const formData = prepareFormData(data);
   const response = await axiosInstance.put(url, formData, {
@@ -179,7 +180,7 @@ export async function putWithFormData<T = any>(
 export async function put<T = any>(
   url: string,
   data?: any,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<T> {
   const response = await axiosInstance.put(url, data, options);
   return handleResponse<T>(response);
@@ -191,7 +192,7 @@ export async function put<T = any>(
 export async function patch<T = any>(
   url: string,
   data?: any,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<T> {
   const response = await axiosInstance.patch(url, data, options);
   return handleResponse<T>(response);
@@ -202,7 +203,7 @@ export async function patch<T = any>(
  */
 export async function del<T = any>(
   url: string,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<T> {
   const response = await axiosInstance.delete(url, options);
   return handleResponse<T>(response);
@@ -214,7 +215,7 @@ export async function del<T = any>(
 export async function uploadFile<T = any>(
   url: string,
   formData: FormData,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<T> {
   const response = await axiosInstance.post(url, formData, {
     headers: {

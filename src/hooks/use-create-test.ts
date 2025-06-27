@@ -438,5 +438,5 @@ export const useTestStore = create<TestStore>()(
 
 export function useCreateTest() {
   const store = useTestStore();
-  return store;
+  return { ...store };
 }

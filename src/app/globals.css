@@ -152,29 +152,6 @@ html {
 }
 
 /* Custom Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 4px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--muted);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
-  border-radius: 10px;
-  border: 2px solid var(--background);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #2563eb, #4f46e5);
-}
-
-::-webkit-scrollbar-corner {
-  background: var(--background);
-}
 
 ::selection {
   background: var(--foreground);
@@ -184,7 +161,7 @@ html {
 /* Firefox scrollbar styling */
 * {
   scrollbar-width: thin;
-  scrollbar-color: gray;
+  scrollbar-color: black transparent;
 }
 
 /* Thin scrollbar variant for smaller areas
@@ -200,7 +177,7 @@ html {
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: rgba(59, 130, 246, 0.8);
-}*/
+} */
 
 /* Hide scrollbar but keep functionality */
 .scrollbar-hide {

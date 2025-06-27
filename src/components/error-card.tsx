@@ -82,12 +82,12 @@ export function ErrorCard({
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center p-4 bg-background ${className}`}
+      className={`bg-background flex items-center justify-center p-4 ${className}`}
     >
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader className="text-center pb-4">
-          <div className="flex justify-center mb-4">{config.icon}</div>
-          <CardTitle className="text-xl font-semibold text-foreground">
+      <Card className="mx-auto w-full max-w-md">
+        <CardHeader className="pb-4 text-center">
+          <div className="mb-4 flex justify-center">{config.icon}</div>
+          <CardTitle className="text-foreground text-xl font-semibold">
             {displayTitle}
           </CardTitle>
           <CardDescription className="text-muted-foreground mt-2">
@@ -116,7 +116,7 @@ export function ErrorCard({
             </Alert>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
             {config.showRetry && onRetry && (
               <Button
                 onClick={onRetry}
@@ -125,12 +125,12 @@ export function ErrorCard({
               >
                 {retryLoading ? (
                   <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                     Retrying...
                   </>
                 ) : (
                   <>
-                    <RefreshCw className="h-4 w-4 mr-2" />
+                    <RefreshCw className="mr-2 h-4 w-4" />
                     Try Again
                   </>
                 )}
@@ -139,7 +139,7 @@ export function ErrorCard({
 
             {onGoHome && (
               <Button variant="outline" onClick={onGoHome} className="flex-1">
-                <Home className="h-4 w-4 mr-2" />
+                <Home className="mr-2 h-4 w-4" />
                 Go Home
               </Button>
             )}
@@ -151,7 +151,7 @@ export function ErrorCard({
               onClick={onContactSupport}
               className="w-full"
             >
-              <Mail className="h-4 w-4 mr-2" />
+              <Mail className="mr-2 h-4 w-4" />
               Contact Support
             </Button>
           )}

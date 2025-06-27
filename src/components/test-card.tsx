@@ -1,11 +1,13 @@
-import { TestResponseType } from "@/app/tests/page";
+import { GetTestResponseType } from "@/hooks/use-tests";
 import { cn } from "@/lib/utils";
 import { Clock, MessageCircle, Users } from "lucide-react";
+import RelativeLink from "./relative-link";
 import { Button } from "./ui/button";
 import {
   Card,
   CardAction,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "./ui/card";
@@ -13,7 +15,7 @@ import {
 export default function TestCard({
   className,
   ...props
-}: { className?: string } & TestResponseType) {
+}: { className?: string } & GetTestResponseType) {
   return (
     <Card
       className={cn("transition-all duration-200 hover:shadow-md", className)}
@@ -21,9 +23,10 @@ export default function TestCard({
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-lg">{props.title}</CardTitle>
-            </div>
+            <CardTitle className="text-lg">{props.title}</CardTitle>
+            <CardDescription className="line-clamp-3">
+              {props.description}
+            </CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -73,9 +76,11 @@ export default function TestCard({
         </Button> */}
       </CardContent>
       <CardAction className="w-full px-5">
-        <Button variant={"outline"} className="w-full">
-          Detail
-        </Button>
+        <RelativeLink href={`${props.id}`}>
+          <Button variant={"outline"} className="w-full">
+            Details
+          </Button>
+        </RelativeLink>
       </CardAction>
     </Card>
   );

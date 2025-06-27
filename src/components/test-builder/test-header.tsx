@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Download, Eye, Save, Settings, Upload } from "lucide-react";
+import { Download, Save, Settings, Upload } from "lucide-react";
 import type React from "react";
 
 interface TestHeaderProps {
@@ -49,10 +49,6 @@ export function TestHeader({
             <Button variant="outline" size="sm" onClick={onExport}>
               <Download className="mr-2 h-4 w-4" />
               Export
-            </Button>
-            <Button variant="outline" size="sm">
-              <Eye className="mr-2 h-4 w-4" />
-              Preview
             </Button>
             <Button variant="outline" size="sm" onClick={onSaveDraft}>
               <Save className="mr-2 h-4 w-4" />

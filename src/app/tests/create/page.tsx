@@ -3,7 +3,6 @@
 import type React from "react";
 
 import MainLayout from "@/components/layouts/MainLayout";
-import TestGuide from "@/components/test-builder/test-guide";
 import { TestHeader } from "@/components/test-builder/test-header";
 import { TestInformation } from "@/components/test-builder/test-information";
 import TestPreview from "@/components/test-builder/test-preview";
@@ -12,9 +11,12 @@ import TestStatistic from "@/components/test-builder/test-stats";
 import { ValidationErrors } from "@/components/test-builder/validation-errors";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import api from "@/components/utils/requestUtils";
 import { useCreateTest } from "@/hooks/use-create-test";
 import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function CreateTestPage() {
   const {
@@ -45,7 +47,7 @@ export default function CreateTestPage() {
   } = useCreateTest();
 
   const [showValidationErrors, setShowValidationErrors] = useState(false);
-
+  const router = useRouter();
   const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -77,14 +79,25 @@ export default function CreateTestPage() {
     URL.revokeObjectURL(url);
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (isTestValid()) {
-      console.log("Publishing test:", test);
-      // Here you would typically send the test to your backend
-      alert("Test published successfully!");
+      try {
+        await api.post("/api/tests", test);
+        toast.success("Test published successfully!");
+        router.push("/tests");
+      } catch (error) {
+        console.error("Failed to publish test:", error);
+        toast.error("Failed to publish test.");
+        setShowValidationErrors(true);
+      }
     } else {
+      toast.error("Please fix validation errors before publishing.");
       setShowValidationErrors(true);
     }
+  };
+
+  const saveLocalStorage = () => {
+    localStorage.setItem("test", JSON.stringify(test));
   };
 
   const validationErrors = validateTest();
@@ -108,7 +121,7 @@ export default function CreateTestPage() {
         isTestValid={isTestValid()}
         onImport={handleImport}
         onExport={handleExport}
-        onSaveDraft={() => alert("Draft saved!")}
+        onSaveDraft={saveLocalStorage}
         onPublish={handlePublish}
       />
 
@@ -194,26 +207,26 @@ export default function CreateTestPage() {
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <TestStatistic
-              test={test}
-              singleChoiceCount={singleChoiceCount}
-              multipleChoiceCount={multipleChoiceCount}
-              getTotalQuestions={getTotalQuestions}
-              getTotalPoints={getTotalPoints}
-              getAverageTimePerQuestion={getAverageTimePerQuestion}
-            />
+          {/* Sticky Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="space-y-6 lg:sticky lg:top-6 lg:max-h-[calc(100vh-1rem)] lg:overflow-y-auto lg:pr-2">
+              <TestStatistic
+                test={test}
+                singleChoiceCount={singleChoiceCount}
+                multipleChoiceCount={multipleChoiceCount}
+                getTotalQuestions={getTotalQuestions}
+                getTotalPoints={getTotalPoints}
+                getAverageTimePerQuestion={getAverageTimePerQuestion}
+              />
 
-            {/* Test Preview */}
-            <TestPreview
-              test={test}
-              getTotalQuestions={getTotalQuestions}
-              getTotalPoints={getTotalPoints}
-              getSectionStats={getSectionStats}
-            />
-
-            <TestGuide />
+              {/* Test Preview */}
+              <TestPreview
+                test={test}
+                getTotalQuestions={getTotalQuestions}
+                getTotalPoints={getTotalPoints}
+                getSectionStats={getSectionStats}
+              />
+            </div>
           </div>
         </div>
       </div>

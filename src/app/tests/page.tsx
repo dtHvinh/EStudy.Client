@@ -1,29 +1,39 @@
+"use client";
+
+import { ErrorCard } from "@/components/error-card";
 import MainLayout from "@/components/layouts/MainLayout";
 import RelativeLink from "@/components/relative-link";
 import RoleBaseComponent from "@/components/role-base-component";
 import TestCard from "@/components/test-card";
 import { Button } from "@/components/ui/button";
 import H3 from "@/components/ui/h3";
-const a = {
-  id: "1",
-  title: "IELTS Simulation Listening test 1",
-  duration: 45,
-  attemptCount: 1247,
-  commentCount: 89,
-  questionCount: 40,
-  sectionCount: 4,
-};
-export type TestResponseType = {
-  id: string;
-  title: string;
-  duration: number;
-  attemptCount: number;
-  commentCount: number;
-  questionCount: number;
-  sectionCount: number;
-};
+import useTests from "@/hooks/use-tests";
+import { useEffect } from "react";
+import { useInView } from "react-intersection-observer";
 
 export default function Page() {
+  const { tests, scrollNext, isTestLoading, getTestError } = useTests({
+    pageSize: 15,
+  });
+  const { inView, ref } = useInView();
+
+  useEffect(() => {
+    if (inView) {
+      scrollNext();
+    }
+  }, [inView]);
+
+  if (!isTestLoading && getTestError) {
+    return (
+      <MainLayout>
+        <ErrorCard
+          title="Failed to load tests"
+          message="We couldn't retrieve your tests. Please try again later."
+        />
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout>
       <div className="space-y-4 px-4 lg:px-6">
@@ -41,9 +51,10 @@ export default function Page() {
           </div>
 
           <div className="grid grid-cols-2 gap-x-5 gap-y-8 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {[...Array(15)].map((item, idx) => (
-              <TestCard key={idx} {...a} />
+            {tests.map((item) => (
+              <TestCard key={item.id} {...item} />
             ))}
+            <div ref={ref} />
           </div>
         </div>
       </div>

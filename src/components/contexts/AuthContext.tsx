@@ -3,6 +3,7 @@
 import { deleteCookie, getCookie } from "cookies-next/client";
 import { useRouter } from "next/navigation";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { mutate } from "swr";
 import { ACCESS_TOKEN_COOKIE } from "../utils/requestUtils";
 
 interface AuthContextType {
@@ -38,6 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     deleteCookie(ACCESS_TOKEN_COOKIE);
+    mutate(() => true, undefined, { revalidate: false });
     router.push("/login");
   };
 

@@ -7,7 +7,6 @@ import NavigateBack from "@/components/navigate-back";
 import TailwindEditor from "@/components/text-editor/text-editor";
 import H3 from "@/components/ui/h3";
 import useBlogDetail from "@/hooks/use-blog-detail";
-import { useGenericToggle } from "@/hooks/use-generic-toggle";
 import { Loader2Icon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { JSONContent } from "novel";
@@ -16,12 +15,7 @@ import { useEffect, useState } from "react";
 export default function Page() {
   const params = useParams();
   const id = params.id as string;
-  console.log("Blog ID:", id);
-
   const { blog, isLoading, error, syncBlog } = useBlogDetail(id);
-  const { opened: isReadonly, openChange: setIsReadonly } =
-    useGenericToggle(false);
-
   const [title, setTitle] = useState<string>("untitled");
 
   useEffect(() => {
@@ -32,7 +26,7 @@ export default function Page() {
 
   const handleHTHMLUpdate = async (
     jsonContent: JSONContent,
-    htmlContent: string
+    htmlContent: string,
   ) => {
     setTitle(getTitle(jsonContent));
     await syncBlog(getTitle(jsonContent), htmlContent);
@@ -41,7 +35,7 @@ export default function Page() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="flex items-center justify-center h-full text-gray-500 space-x-2">
+        <div className="flex h-full items-center justify-center space-x-2 text-gray-500">
           <Loader2Icon className="animate-spin" />
           <div>Loading...</div>
         </div>
@@ -60,22 +54,22 @@ export default function Page() {
   return (
     <MainLayout>
       {blog &&
-        (blog.isReadonly ? (
+        (!blog.isReadOnly ? (
           <>
             <Title title={title} />
-            <div spellCheck={false} className="pb-9 md:px-20">
-              <HTMLContent content={blog.content} />
-            </div>
-          </>
-        ) : (
-          <>
-            <Title title={title} isLock={isReadonly} />
             <div spellCheck={false} className="pb-9 md:px-20">
               <TailwindEditor
                 autoFocus
                 initialContent={blog.content}
                 onContentUpdate={handleHTHMLUpdate}
               />
+            </div>
+          </>
+        ) : (
+          <>
+            <Title title={title} />
+            <div spellCheck={false} className="pb-9 md:px-20">
+              <HTMLContent content={blog.content} />
             </div>
           </>
         ))}
@@ -85,7 +79,7 @@ export default function Page() {
 
 const Title = ({ title }: { title: string; isLock?: boolean }) => {
   return (
-    <div className="flex items-center justify-between px-4 lg:px-6 pb-2 border-b gap-4">
+    <div className="flex items-center justify-between gap-4 border-b px-4 pb-2 lg:px-6">
       <div className="flex items-center gap-2">
         <NavigateBack />
         <H3 className="text-muted-foreground">{title}</H3>

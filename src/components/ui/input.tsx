@@ -7,12 +7,16 @@ import ButtonIcon from "../button-icon";
 interface InputProps extends React.ComponentProps<"input"> {
   clearable?: boolean;
   onClear?: () => void;
+  rightSection?: React.ReactNode;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, clearable = true, onClear, ...props }, ref) => {
+  (
+    { className, type, clearable = true, onClear, rightSection, ...props },
+    ref,
+  ) => {
     const [internalValue, setInternalValue] = React.useState(
-      props.defaultValue || ""
+      props.defaultValue || "",
     );
     const isControlled = props.value !== undefined;
     const inputValue = isControlled ? props.value : internalValue;
@@ -49,7 +53,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       clearable && inputValue && String(inputValue).length > 0;
 
     return (
-      <div className="relative">
+      <div className="relative flex items-center gap-2">
         <input
           ref={ref}
           type={type}
@@ -59,7 +63,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[1px]",
             "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
             shouldShowClearButton && "pr-10", // Add padding for the clear button
-            className
+            className,
           )}
           {...props}
           value={inputValue}
@@ -69,15 +73,16 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <ButtonIcon
             icon={<IconX />}
             tooltip={"Clear input"}
-            className="absolute bg-transparent border-0 right-2 top-1/2 -translate-y-1/2 h-6 w-6 hover:bg-muted rounded-sm"
+            className="hover:bg-muted absolute top-1/2 right-2 h-6 w-6 -translate-y-1/2 rounded-sm border-0 bg-transparent"
             onClick={handleClear}
             type="button"
             tabIndex={-1}
           />
         )}
+        {rightSection}
       </div>
     );
-  }
+  },
 );
 
 Input.displayName = "Input";

@@ -41,7 +41,7 @@ export default function Page() {
     if (!setInfo) return 0;
     if (setInfo.cardCount === 0) return 0;
     return parseFloat(
-      ((setInfo.progress / setInfo.cardCount) * 100).toFixed(0)
+      ((setInfo.progress / setInfo.cardCount) * 100).toFixed(0),
     );
   };
 
@@ -63,7 +63,7 @@ export default function Page() {
   return (
     <MainLayout>
       <div className="flex flex-col overflow-hidden md:h-[calc(100vh-3*var(--header-height))]">
-        <div className="flex justify-between items-center px-4">
+        <div className="flex items-center justify-between px-4">
           <div className="block">
             <NavigateBack />
           </div>
@@ -72,13 +72,13 @@ export default function Page() {
           </div>
         </div>
 
-        <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-center mb-2">
+        <div className="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+          <h1 className="mb-2 text-center text-2xl font-bold sm:text-3xl">
             Study Mode
           </h1>
           {setInfo && (
-            <div className="w-full max-w-md mx-auto space-y-2">
-              <div className="flex justify-between items-center text-sm sm:text-base">
+            <div className="mx-auto w-full max-w-md space-y-2">
+              <div className="flex items-center justify-between text-sm sm:text-base">
                 <Label className="font-semibold">
                   Total cards: {setInfo.cardCount}
                 </Label>
@@ -93,7 +93,7 @@ export default function Page() {
             </div>
           )}
         </div>
-        <div className="flex-1 flex lg:flex-row items-center justify-center gap-4 lg:gap-8 px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="flex flex-1 items-center justify-center gap-4 px-4 pb-8 sm:px-6 lg:flex-row lg:gap-8 lg:px-8">
           <div className="w-sm">
             <Carousel className="w-full">
               <CarouselContent>
@@ -132,35 +132,35 @@ const CarouselFlashCardItem = ({
       <div className="p-2 sm:p-4">
         <Card className="w-full">
           <CardContent className="flex aspect-square items-center justify-center p-4 sm:p-6 lg:p-8">
-            <div className="text-center space-y-2 sm:space-y-4">
-              <span className="text-2xl dsm:text-3xl lg:text-4xl font-semibold leading-tight">
-                {card.term} {card.id}
+            <div className="space-y-2 text-center sm:space-y-4">
+              <span className="dsm:text-3xl text-2xl leading-tight font-semibold lg:text-4xl">
+                {card.term}
               </span>
               {card.partOfSpeech && (
-                <div className="text-sm sm:text-base text-muted-foreground">
+                <div className="text-muted-foreground text-sm sm:text-base">
                   {card.partOfSpeech}
                 </div>
               )}
             </div>
           </CardContent>
-          <CardAction className="flex flex-col sm:flex-row gap-2 sm:gap-0 w-full justify-between p-4">
+          <CardAction className="flex w-full flex-col justify-between gap-2 p-4 sm:flex-row sm:gap-0">
             <Button
               disabled={card.isSkipped}
               variant={"default"}
-              className="w-full sm:w-auto order-2 sm:order-1"
+              className="order-2 w-full sm:order-1 sm:w-auto"
               onClick={onSkip}
             >
               Already know it, skip!
             </Button>
 
-            <div className="flex gap-2 justify-center order-1 sm:order-2">
+            <div className="order-1 flex justify-center gap-2 sm:order-2">
               <Button
                 variant={"outline"}
                 onClick={scrollPrev}
                 size="sm"
                 className="flex-1 sm:flex-initial"
               >
-                <IconChevronLeft className="w-4 h-4" />
+                <IconChevronLeft className="h-4 w-4" />
                 <span className="ml-1 sm:hidden">Previous</span>
               </Button>
               <Button
@@ -169,7 +169,7 @@ const CarouselFlashCardItem = ({
                 size="sm"
                 className="flex-1 sm:flex-initial"
               >
-                <IconChevronRight className="w-4 h-4" />
+                <IconChevronRight className="h-4 w-4" />
                 <span className="ml-1 sm:hidden">Next</span>
               </Button>
             </div>
@@ -186,16 +186,16 @@ const FinishedCard = ({ onReset }: { onReset: () => void }) => {
       <div className="p-2 sm:p-4">
         <Card className="w-full">
           <CardContent className="flex aspect-square items-center justify-center p-4 sm:p-6 lg:p-8">
-            <div className="text-center space-y-2 sm:space-y-4">
-              <span className="text-2xl dsm:text-3xl lg:text-4xl font-semibold leading-tight">
+            <div className="space-y-2 text-center sm:space-y-4">
+              <span className="dsm:text-3xl text-2xl leading-tight font-semibold lg:text-4xl">
                 You did it!!!
               </span>
-              <div className="text-sm sm:text-base text-muted-foreground">
+              <div className="text-muted-foreground text-sm sm:text-base">
                 Do you want to restart ?
               </div>
             </div>
           </CardContent>
-          <CardAction className="flex justify-center sm:flex-row gap-2 sm:gap-0 w-full">
+          <CardAction className="flex w-full justify-center gap-2 sm:flex-row sm:gap-0">
             <Button onClick={onReset} variant={"default"} className="sm:w-auto">
               Restart
             </Button>

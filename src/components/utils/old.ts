@@ -216,3 +216,83 @@ export const mock_categories = [
   "DevOps",
   "Marketing",
 ];
+
+export const mockTestData = {
+  id: 1,
+  title: "Advanced JavaScript Fundamentals",
+  description:
+    "A comprehensive test covering advanced JavaScript concepts including closures, prototypes, async programming, and modern ES6+ features. This test is designed to evaluate your understanding of core JavaScript principles.",
+  duration: 90,
+  sectionCount: 4,
+  attemptCount: 1247,
+  commentCount: 23,
+  questionCount: 45,
+  sections: [
+    {
+      id: 1,
+      title: "Variables and Data Types",
+      description:
+        "Understanding primitive and reference types, variable declarations, and type coercion",
+    },
+    {
+      id: 2,
+      title: "Functions and Closures",
+      description:
+        "Function declarations, expressions, arrow functions, and closure concepts",
+    },
+    {
+      id: 3,
+      title: "Asynchronous Programming",
+      description:
+        "Promises, async/await, callbacks, and event loop understanding",
+    },
+    {
+      id: 4,
+      title: "Modern JavaScript Features",
+      description:
+        "ES6+ features including destructuring, modules, classes, and template literals",
+    },
+  ],
+  comments: [
+    {
+      id: 1,
+      text: "Great test! Really helped me understand closures better. The questions were challenging but fair.",
+      author: {
+        profilePicture: "/placeholder.svg?height=40&width=40",
+        name: "Sarah Johnson",
+      },
+    },
+    {
+      id: 2,
+      text: "The async programming section was particularly well-designed. Loved the practical examples.",
+      author: {
+        profilePicture: "/placeholder.svg?height=40&width=40",
+        name: "Mike Chen",
+      },
+    },
+    {
+      id: 3,
+      text: "Could use more questions on modern ES6+ features, but overall excellent content quality.",
+      author: {
+        profilePicture: "/placeholder.svg?height=40&width=40",
+        name: "Emily Rodriguez",
+      },
+    },
+    {
+      id: 4,
+      text: "Perfect difficulty level for intermediate developers. The explanations after each question are very helpful.",
+      author: {
+        profilePicture: "/placeholder.svg?height=40&width=40",
+        name: "David Kim",
+      },
+    },
+    {
+      id: 5,
+      text: "This test really challenged my understanding of JavaScript fundamentals. Highly recommend!",
+      author: {
+        profilePicture: "/placeholder.svg?height=40&width=40",
+        name: "Lisa Thompson",
+      },
+    },
+  ],
+};

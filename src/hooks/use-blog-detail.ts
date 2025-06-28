@@ -8,16 +8,13 @@ export interface BlogDetailsResponseType {
   content: string;
   creationDate: string;
   modificationDate: string;
-  isReadonly: boolean;
+  isReadOnly: boolean;
 }
 
 export default function useBlogDetail(id: number | string) {
   const { data, isLoading, error, mutate } = useSWR<BlogDetailsResponseType>(
     `/api/blogs/${id}`,
     api.get,
-    {
-      revalidateOnFocus: false,
-    }
   );
 
   const syncBlog = async (title: string, content: string) => {

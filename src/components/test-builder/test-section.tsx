@@ -179,7 +179,7 @@ export function TestSection({
                 <Badge variant="secondary">
                   {sectionStats.questions} questions
                 </Badge>
-                <DropdownMenu>
+                <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
@@ -247,7 +247,7 @@ export function TestSection({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">Questions</h3>
-                <DropdownMenu>
+                <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <Button
                       size="sm"

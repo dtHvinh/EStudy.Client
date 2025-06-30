@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { AlertTriangle, Send } from "lucide-react";
 import { useState } from "react";
 
+import useTestQuestionMark from "@/hooks/use-test-question-mark";
 import {
   TestTakingType,
   UserAnswer,
@@ -33,6 +34,9 @@ interface TestTakingPageProps {
 export function TestTakingPage({ testData, onSubmit }: TestTakingPageProps) {
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [showTimeUpDialog, setShowTimeUpDialog] = useState(false);
+
+  const { isQuestionMarked, markQuestion, unmarkQuestion } =
+    useTestQuestionMark();
 
   const {
     currentSectionIndex,
@@ -144,9 +148,11 @@ export function TestTakingPage({ testData, onSubmit }: TestTakingPageProps) {
               sections={testData.sections}
               sectionProgress={sectionProgress}
               currentSectionIndex={currentSectionIndex}
+              currentQuestionIndex={currentQuestionIndex}
               onSectionSelect={navigateToSection}
               onQuestionSelect={navigateToQuestion}
               isQuestionAnswered={isQuestionAnswered}
+              isQuestionMarked={isQuestionMarked}
             />
           </div>
 
@@ -156,10 +162,13 @@ export function TestTakingPage({ testData, onSubmit }: TestTakingPageProps) {
               {currentQuestion && (
                 <QuestionDisplay
                   question={currentQuestion}
+                  isQuestionMarked={isQuestionMarked}
                   questionNumber={currentQuestionNumber}
                   sectionTitle={currentSection.title}
                   userAnswer={userAnswers.get(currentQuestion.id)}
                   onAnswerChange={updateAnswer}
+                  onMarkQuestion={markQuestion}
+                  onUnmarkQuestion={unmarkQuestion}
                 />
               )}
             </div>

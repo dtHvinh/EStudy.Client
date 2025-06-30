@@ -31,7 +31,7 @@ export default function TestCard({
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="mt-auto space-y-4">
         <div>
           {props.sectionCount} sections | {props.questionCount} questions
         </div>

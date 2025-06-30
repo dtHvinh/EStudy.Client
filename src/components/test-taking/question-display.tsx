@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { TestTakingQuestion, UserAnswer } from "@/hooks/use-test-taking";
 import { cn } from "@/lib/utils";
 import { CheckSquare, Circle } from "lucide-react";
+import { Button } from "../ui/button";
 
 interface QuestionDisplayProps {
   question: TestTakingQuestion;
@@ -15,6 +16,9 @@ interface QuestionDisplayProps {
   sectionTitle: string;
   userAnswer?: UserAnswer;
   onAnswerChange: (questionId: number, selectedAnswerIds: number[]) => void;
+  isQuestionMarked: (questionId: number) => boolean;
+  onMarkQuestion: (questionId: number) => void;
+  onUnmarkQuestion: (questionId: number) => void;
 }
 
 export function QuestionDisplay({
@@ -23,6 +27,9 @@ export function QuestionDisplay({
   sectionTitle,
   userAnswer,
   onAnswerChange,
+  isQuestionMarked,
+  onMarkQuestion,
+  onUnmarkQuestion,
 }: QuestionDisplayProps) {
   const selectedAnswerIds = userAnswer?.selectedAnswerIds || [];
 
@@ -104,6 +111,7 @@ export function QuestionDisplay({
   );
 
   const isAnswered = selectedAnswerIds.length > 0;
+  const isMarked = isQuestionMarked(question.id);
 
   return (
     <Card
@@ -131,6 +139,17 @@ export function QuestionDisplay({
             <Badge variant="secondary" className="text-xs">
               {question.points} {question.points === 1 ? "point" : "points"}
             </Badge>
+            <Button
+              variant={isMarked ? "default" : "outline"}
+              size={"sm"}
+              onClick={
+                isMarked
+                  ? () => onUnmarkQuestion(question.id)
+                  : () => onMarkQuestion(question.id)
+              }
+            >
+              {isMarked ? "Unmark this question" : "Mark this question"}
+            </Button>
           </div>
         </div>
       </CardHeader>

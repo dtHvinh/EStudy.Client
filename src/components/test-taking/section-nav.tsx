@@ -11,18 +11,22 @@ interface SectionNavigationProps {
   sections: TestTakingSection[];
   sectionProgress: SectionProgress[];
   currentSectionIndex: number;
+  currentQuestionIndex: number;
   onSectionSelect: (sectionIndex: number) => void;
-  onQuestionSelect: (questionIndex: number) => void;
+  onQuestionSelect: (sectionIndex: number, questionIndex: number) => void;
   isQuestionAnswered: (questionIndex: number) => boolean;
+  isQuestionMarked: (questionId: number) => boolean;
 }
 
 export function SectionNavigation({
   sections,
   sectionProgress,
   currentSectionIndex,
+  currentQuestionIndex,
   onSectionSelect,
   onQuestionSelect,
   isQuestionAnswered,
+  isQuestionMarked,
 }: SectionNavigationProps) {
   return (
     <Card>
@@ -33,11 +37,11 @@ export function SectionNavigation({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {sections.map((section, index) => {
+        {sections.map((section, sectionIndex) => {
           const progress = sectionProgress.find(
             (p) => p.sectionId === section.id,
           );
-          const isCurrent = index === currentSectionIndex;
+          const isCurrent = sectionIndex === currentSectionIndex;
 
           return (
             <div key={section.id} className="space-y-2">
@@ -49,12 +53,12 @@ export function SectionNavigation({
                     !isCurrent &&
                     "border-green-200 bg-green-50 hover:bg-green-100 dark:border-green-800 dark:bg-green-950",
                 )}
-                onClick={() => onSectionSelect(index)}
+                onClick={() => onSectionSelect(sectionIndex)}
               >
                 <div className="flex w-full items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-full text-sm font-medium">
-                      {index + 1}
+                      {sectionIndex + 1}
                     </div>
                     <div>
                       <div className="text-sm font-medium text-wrap">
@@ -69,18 +73,37 @@ export function SectionNavigation({
                 </div>
               </Button>
 
-              <div className="grid grid-cols-5 gap-5">
+              <div className="grid grid-cols-5 gap-1">
                 {section.questions.length > 0 &&
-                  section.questions.map((_, qIndex) => {
+                  section.questions.map((question, qIndex) => {
+                    const questionNumber =
+                      sections
+                        .slice(0, sectionIndex)
+                        .reduce((sum, s) => sum + s.questions.length, 0) +
+                      qIndex +
+                      1;
+
                     return (
                       <Button
-                        key={qIndex}
-                        onClick={() => onQuestionSelect(qIndex)}
+                        key={question.id}
+                        onClick={() => {
+                          onQuestionSelect(sectionIndex, qIndex);
+                        }}
                         variant={
-                          isQuestionAnswered(qIndex + 1) ? "default" : "outline"
+                          isQuestionAnswered(question.id)
+                            ? "default"
+                            : "outline"
                         }
+                        className={cn(
+                          "h-8 w-8 p-0 text-xs",
+                          isCurrent &&
+                            qIndex === currentQuestionIndex &&
+                            "ring-primary ring-2",
+                          isQuestionMarked(question.id) &&
+                            "bg-yellow-200 text-black hover:bg-amber-100",
+                        )}
                       >
-                        {qIndex + 1}
+                        {questionNumber}
                       </Button>
                     );
                   })}

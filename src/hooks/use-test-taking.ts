@@ -49,6 +49,10 @@ export interface UserAnswer {
   textAnswer?: string;
 }
 
+export interface MarkableType {
+  isMarked?: boolean;
+}
+
 export function useTestTaking(testData: TestTakingType) {
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -126,9 +130,13 @@ export function useTestTaking(testData: TestTakingType) {
     setCurrentQuestionIndex(0);
   }, []);
 
-  const navigateToQuestion = useCallback((questionIndex: number) => {
-    setCurrentQuestionIndex(questionIndex);
-  }, []);
+  const navigateToQuestion = useCallback(
+    (sectionIndex: number, questionIndex: number) => {
+      setCurrentSectionIndex(sectionIndex);
+      setCurrentQuestionIndex(questionIndex);
+    },
+    [],
+  );
 
   const goToNextQuestion = useCallback(() => {
     const currentSection = testData.sections[currentSectionIndex];

@@ -1,14 +1,15 @@
 import { cn } from "@/lib/utils";
 import { IconChevronLeft } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
+import { memo } from "react";
 import { Button } from "./ui/button";
 
-export default function NavigateBack({
+const NavigateBack = ({
   className,
   ...props
 }: {
   className?: string;
-} & React.ComponentProps<"button">) {
+} & React.ComponentProps<"button">) => {
   const router = useRouter();
 
   const handleBack = () => {
@@ -25,4 +26,6 @@ export default function NavigateBack({
       <IconChevronLeft /> Back
     </Button>
   );
-}
+};
+
+export default memo(NavigateBack);

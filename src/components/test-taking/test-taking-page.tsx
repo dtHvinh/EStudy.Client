@@ -45,8 +45,10 @@ export function TestTakingPage({ testData, onSubmit }: TestTakingPageProps) {
     totalProgress,
     updateAnswer,
     navigateToSection,
+    navigateToQuestion,
     goToNextQuestion,
     goToPreviousQuestion,
+    isQuestionAnswered,
   } = useTestTaking(testData);
 
   const currentSection = testData.sections[currentSectionIndex];
@@ -143,6 +145,8 @@ export function TestTakingPage({ testData, onSubmit }: TestTakingPageProps) {
               sectionProgress={sectionProgress}
               currentSectionIndex={currentSectionIndex}
               onSectionSelect={navigateToSection}
+              onQuestionSelect={navigateToQuestion}
+              isQuestionAnswered={isQuestionAnswered}
             />
           </div>
 

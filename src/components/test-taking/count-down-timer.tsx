@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { AlertCircle, AlertTriangle, Clock } from "lucide-react";
@@ -61,15 +60,6 @@ export function CountdownTimer({
             >
               {formatTime}
             </span>
-            {warningLevel !== "normal" && (
-              <Badge
-                variant={
-                  warningLevel === "critical" ? "destructive" : "secondary"
-                }
-              >
-                {warningLevel === "critical" ? "Urgent" : "Warning"}
-              </Badge>
-            )}
           </div>
         </div>
       </CardContent>

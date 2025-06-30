@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { SectionProgress, TestTakingSection } from "@/hooks/use-test-taking";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +12,8 @@ interface SectionNavigationProps {
   sectionProgress: SectionProgress[];
   currentSectionIndex: number;
   onSectionSelect: (sectionIndex: number) => void;
+  onQuestionSelect: (questionIndex: number) => void;
+  isQuestionAnswered: (questionIndex: number) => boolean;
 }
 
 export function SectionNavigation({
@@ -20,6 +21,8 @@ export function SectionNavigation({
   sectionProgress,
   currentSectionIndex,
   onSectionSelect,
+  onQuestionSelect,
+  isQuestionAnswered,
 }: SectionNavigationProps) {
   return (
     <Card>
@@ -35,9 +38,6 @@ export function SectionNavigation({
             (p) => p.sectionId === section.id,
           );
           const isCurrent = index === currentSectionIndex;
-          const progressPercentage = progress
-            ? (progress.answeredQuestions / progress.totalQuestions) * 100
-            : 0;
 
           return (
             <div key={section.id} className="space-y-2">
@@ -69,11 +69,22 @@ export function SectionNavigation({
                 </div>
               </Button>
 
-              {progress && (
-                <div className="px-3">
-                  <Progress value={progressPercentage} className="h-1" />
-                </div>
-              )}
+              <div className="grid grid-cols-5 gap-5">
+                {section.questions.length > 0 &&
+                  section.questions.map((_, qIndex) => {
+                    return (
+                      <Button
+                        key={qIndex}
+                        onClick={() => onQuestionSelect(qIndex)}
+                        variant={
+                          isQuestionAnswered(qIndex + 1) ? "default" : "outline"
+                        }
+                      >
+                        {qIndex + 1}
+                      </Button>
+                    );
+                  })}
+              </div>
             </div>
           );
         })}

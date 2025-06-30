@@ -162,6 +162,13 @@ export function useTestTaking(testData: TestTakingType) {
     };
   }, [testData.questionCount, userAnswers.size]);
 
+  const isQuestionAnswered = useCallback(
+    (questionId: number) => {
+      return userAnswers.has(questionId);
+    },
+    [userAnswers],
+  );
+
   return {
     currentSectionIndex,
     currentQuestionIndex,
@@ -177,6 +184,7 @@ export function useTestTaking(testData: TestTakingType) {
     navigateToQuestion,
     goToNextQuestion,
     goToPreviousQuestion,
+    isQuestionAnswered,
     pauseTimer: () => setIsActive(false),
     resumeTimer: () => setIsActive(true),
   };

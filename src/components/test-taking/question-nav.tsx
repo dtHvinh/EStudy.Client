@@ -1,8 +1,9 @@
 import { TestTakingSection } from "@/hooks/use-test-taking";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { memo } from "react";
 import { Button } from "../ui/button";
 
-export default function QuestionNavigation({
+const QuestionNavigation = ({
   canGoPrevious,
   canGoNext,
   goToPreviousQuestion,
@@ -16,7 +17,7 @@ export default function QuestionNavigation({
   goToNextQuestion: () => void;
   currentSection: TestTakingSection;
   currentQuestionIndex: number;
-}) {
+}) => {
   return (
     <div className="flex items-center justify-between py-8 pt-4">
       <Button
@@ -47,4 +48,6 @@ export default function QuestionNavigation({
       </Button>
     </div>
   );
-}
+};
+
+export default memo(QuestionNavigation);

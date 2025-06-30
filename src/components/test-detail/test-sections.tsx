@@ -7,7 +7,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { IconPlayerPlay } from "@tabler/icons-react";
 import { BookOpen } from "lucide-react";
+import Link from "next/link";
+import { Button } from "../ui/button";
 
 interface Section {
   id: string | number;
@@ -38,19 +41,26 @@ export function TestSections({ sections, sectionCount }: TestSectionsProps) {
           {sections.map((section, index) => (
             <div
               key={section.id}
-              className="hover:bg-muted/50 flex gap-4 rounded-lg border p-4 transition-colors"
+              className="hover:bg-muted/50 flex items-center gap-4 rounded-lg border p-4 transition-colors"
             >
-              <div className="bg-primary text-primary-foreground flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm font-medium">
-                {index + 1}
+              <div className="flex flex-1 items-center gap-4">
+                <div className="bg-primary text-primary-foreground flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm font-medium">
+                  {index + 1}
+                </div>
+                <div className="flex-1">
+                  <h3 className="mb-1 font-semibold">{section.title}</h3>
+                  {section.description && (
+                    <p className="text-muted-foreground text-sm">
+                      {section.description}
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="flex-1">
-                <h3 className="mb-1 font-semibold">{section.title}</h3>
-                {section.description && (
-                  <p className="text-muted-foreground text-sm">
-                    {section.description}
-                  </p>
-                )}
-              </div>
+              <Button size="sm" className="rounded-full" asChild>
+                <Link href={"/"}>
+                  <IconPlayerPlay /> Practice
+                </Link>
+              </Button>
             </div>
           ))}
         </div>

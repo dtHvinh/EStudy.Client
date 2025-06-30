@@ -1,6 +1,7 @@
 "use client";
 
 import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React from "react";
 import { AppSidebar } from "../app-sidebar";
@@ -9,6 +10,7 @@ import FloatingToolboxProvider from "../contexts/FloatingToolboxContext";
 import { SiteHeader } from "../site-header";
 import { SidebarInset, SidebarProvider } from "../ui/sidebar";
 dayjs.extend(relativeTime);
+dayjs.extend(duration);
 
 export default function MainLayout({
   children,

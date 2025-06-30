@@ -151,6 +151,10 @@ html {
   scroll-behavior: smooth !important;
 }
 
+html {
+  overflow-y: scroll;
+}
+
 /* Custom Scrollbar Styling */
 
 ::selection {

@@ -132,9 +132,9 @@ const Comment = ({
         </div>
         {!comment.isReadOnly && (
           <div className="text-muted-foreground flex-shrink-0 text-xs">
-            <Button variant="link" size="sm" className="text-xs">
+            {/* <Button variant="link" size="sm" className="text-xs">
               Reply
-            </Button>
+            </Button> */}
             <DeleteButton onDeleteComment={onDeleteComment} />
           </div>
         )}
@@ -174,7 +174,9 @@ const CommentInput = ({
           name="text"
           render={({ field }) => (
             <Input
+              clearable={false}
               type="text"
+              autoComplete="off"
               spellCheck="false"
               placeholder="Add a comment..."
               {...field}

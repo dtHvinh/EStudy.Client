@@ -2,7 +2,8 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Play, Star } from "lucide-react";
+import { Play, Star } from "lucide-react";
+import RelativeLink from "../relative-link";
 
 interface TestHeaderProps {
   testId: string | number;
@@ -42,18 +43,12 @@ export function TestHeader({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col gap-3 sm:flex-row lg:min-w-[200px] lg:flex-col">
-          <Button size="lg" className="flex items-center gap-2">
-            <Play className="h-4 w-4" />
-            Start Test
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="flex items-center gap-2 bg-transparent"
-          >
-            <BookOpen className="h-4 w-4" />
-            Preview
+        <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+          <Button className="flex items-center gap-2" size="lg">
+            <RelativeLink className="flex items-center gap-2" href="practice">
+              <Play className="h-4 w-4" />
+              Start practice
+            </RelativeLink>
           </Button>
         </div>
       </div>

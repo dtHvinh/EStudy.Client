@@ -42,7 +42,7 @@ export function NavUser({
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
@@ -125,7 +125,7 @@ export function NavUserSkeleton() {
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
           <Skeleton className="h-8 w-8 rounded-lg" />
-          <div className="grid flex-1 text-left text-sm leading-tight gap-1">
+          <div className="grid flex-1 gap-1 text-left text-sm leading-tight">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-3 w-32" />
           </div>

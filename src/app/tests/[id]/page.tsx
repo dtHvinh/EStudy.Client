@@ -4,6 +4,7 @@ import { ErrorCard } from "@/components/error-card";
 import MainLayout from "@/components/layouts/MainLayout";
 import NavigateBack from "@/components/navigate-back";
 import {
+  RelatedTests,
   TestComments,
   TestHeader,
   TestSections,
@@ -48,7 +49,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   return (
     details && (
       <MainLayout>
-        <div className="container mx-auto max-w-6xl px-4">
+        <div className="container mx-auto max-w-6xl space-y-5 px-4">
           {/* Header Section */}
           <NavigateBack />
           <TestHeader
@@ -86,6 +87,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               {/* <TestSidebar /> */}
             </div>
           </div>
+
+          <RelatedTests testId={details.id} />
         </div>
       </MainLayout>
     )

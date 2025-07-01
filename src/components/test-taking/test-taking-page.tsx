@@ -19,9 +19,10 @@ import {
   UserAnswer,
   useTestTaking,
 } from "@/hooks/use-test-taking";
+import { useTestTimer } from "@/hooks/use-test-timer";
 import { cn } from "@/lib/utils";
 import NavigateBack from "../navigate-back";
-import { CountdownTimer } from "./count-down-timer";
+import CountdownTimer from "./count-down-timer";
 import { QuestionDisplay } from "./question-display";
 import QuestionNavigation from "./question-nav";
 import { SectionNavigation } from "./section-nav";
@@ -38,13 +39,15 @@ export function TestTakingPage({ testData, onSubmit }: TestTakingPageProps) {
   const { isQuestionMarked, markQuestion, unmarkQuestion } =
     useTestQuestionMark();
 
+  // Use the timer hook
+  const { timeRemaining, isTimeUp, formatTime, warningLevel } = useTestTimer({
+    duration: testData.duration,
+  });
+
   const {
     currentSectionIndex,
     currentQuestionIndex,
     userAnswers,
-    isTimeUp,
-    formatTime,
-    warningLevel,
     sectionProgress,
     totalProgress,
     updateAnswer,
@@ -139,7 +142,7 @@ export function TestTakingPage({ testData, onSubmit }: TestTakingPageProps) {
           <div className="space-y-6 lg:col-span-1">
             <CountdownTimer
               formatTime={formatTime}
-              timeLeft={testData.duration * 60}
+              timeLeft={timeRemaining}
               warningLevel={warningLevel}
               isTimeUp={isTimeUp}
             />

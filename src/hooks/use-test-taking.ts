@@ -1,7 +1,5 @@
 "use client";
-import { WarningLevel } from "@/components/test-taking/count-down-timer";
-import dayjs from "dayjs";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 export interface TestTakingType {
   id: number;
@@ -27,6 +25,7 @@ export interface TestTakingQuestion {
   type: "multiple-choice" | "single-choice";
   text: string;
   points: number;
+  explaination?: string;
   answers: TestTakingAnswer[];
 }
 
@@ -59,45 +58,6 @@ export function useTestTaking(testData: TestTakingType) {
   const [userAnswers, setUserAnswers] = useState<Map<number, UserAnswer>>(
     new Map(),
   );
-  const [timeRemaining, setTimeRemaining] = useState(testData.duration * 60); // Convert to seconds
-  const [isActive, setIsActive] = useState(true);
-  const [isTimeUp, setIsTimeUp] = useState(false);
-
-  // Timer effect
-  useEffect(() => {
-    if (!isActive || timeRemaining <= 0) {
-      if (timeRemaining <= 0) {
-        setIsTimeUp(true);
-      }
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setTimeRemaining((prev) => {
-        if (prev <= 1) {
-          setIsTimeUp(true);
-          setIsActive(false);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isActive, timeRemaining]);
-
-  const formatTime = useCallback((seconds: number) => {
-    return dayjs.duration(seconds, "seconds").format("HH:mm:ss");
-  }, []);
-
-  const getTimeWarningLevel = useCallback(() => {
-    const totalTime = testData.duration * 60;
-    const percentage = (timeRemaining / totalTime) * 100;
-
-    if (percentage <= 5) return "critical";
-    if (percentage <= 15) return "warning";
-    return "normal" as WarningLevel;
-  }, [timeRemaining, testData.duration]);
 
   const getSectionProgress = useCallback((): SectionProgress[] => {
     return testData.sections.map((section) => {
@@ -181,10 +141,6 @@ export function useTestTaking(testData: TestTakingType) {
     currentSectionIndex,
     currentQuestionIndex,
     userAnswers,
-    timeRemaining,
-    isTimeUp,
-    formatTime: formatTime(timeRemaining),
-    warningLevel: getTimeWarningLevel(),
     sectionProgress: getSectionProgress(),
     totalProgress: getTotalProgress(),
     updateAnswer,
@@ -193,7 +149,5 @@ export function useTestTaking(testData: TestTakingType) {
     goToNextQuestion,
     goToPreviousQuestion,
     isQuestionAnswered,
-    pauseTimer: () => setIsActive(false),
-    resumeTimer: () => setIsActive(true),
   };
 }

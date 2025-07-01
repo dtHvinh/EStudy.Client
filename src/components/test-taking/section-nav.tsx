@@ -89,11 +89,7 @@ export function SectionNavigation({
                         onClick={() => {
                           onQuestionSelect(sectionIndex, qIndex);
                         }}
-                        variant={
-                          isQuestionAnswered(question.id)
-                            ? "default"
-                            : "outline"
-                        }
+                        variant={"outline"}
                         className={cn(
                           "h-8 w-8 p-0 text-xs",
                           isCurrent &&
@@ -101,6 +97,8 @@ export function SectionNavigation({
                             "ring-primary ring-2",
                           isQuestionMarked(question.id) &&
                             "bg-yellow-200 text-black hover:bg-amber-100",
+                          isQuestionAnswered(question.id) &&
+                            "border-0 bg-green-200 text-black hover:bg-green-100",
                         )}
                       >
                         {questionNumber}

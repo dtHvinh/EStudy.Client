@@ -11,7 +11,7 @@ interface CountdownTimerProps {
   isTimeUp: boolean;
 }
 
-export function CountdownTimer({
+export default function CountdownTimer({
   timeLeft,
   formatTime,
   warningLevel,

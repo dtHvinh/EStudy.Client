@@ -7,10 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { IconPlayerPlay } from "@tabler/icons-react";
 import { BookOpen } from "lucide-react";
-import Link from "next/link";
-import { Button } from "../ui/button";
 
 interface Section {
   id: string | number;
@@ -56,11 +53,11 @@ export function TestSections({ sections, sectionCount }: TestSectionsProps) {
                   )}
                 </div>
               </div>
-              <Button size="sm" className="rounded-full" asChild>
+              {/* <Button size="sm" className="rounded-full" asChild>
                 <Link href={"/"}>
                   <IconPlayerPlay /> Practice
                 </Link>
-              </Button>
+              </Button> */}
             </div>
           ))}
         </div>

@@ -25,7 +25,7 @@ export function RelatedTests({ testId }: { testId?: string | number }) {
       <CardHeader>
         <CardTitle className="text-lg">Related Tests</CardTitle>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <CardContent className="grid grid-cols-1 gap-4">
         {relatedTestsData?.map((test) => (
           <div
             key={test.id}

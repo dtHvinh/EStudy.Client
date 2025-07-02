@@ -29,7 +29,7 @@ import { SectionNavigation } from "./section-nav";
 
 interface TestTakingPageProps {
   testData: TestTakingType;
-  onSubmit: (answers: UserAnswer[]) => void;
+  onSubmit: (answers: UserAnswer[], timeSpent: number) => void;
 }
 
 export function TestTakingPage({ testData, onSubmit }: TestTakingPageProps) {
@@ -39,7 +39,6 @@ export function TestTakingPage({ testData, onSubmit }: TestTakingPageProps) {
   const { isQuestionMarked, markQuestion, unmarkQuestion } =
     useTestQuestionMark();
 
-  // Use the timer hook
   const { timeRemaining, isTimeUp, formatTime, warningLevel } = useTestTimer({
     duration: testData.duration,
   });
@@ -69,13 +68,13 @@ export function TestTakingPage({ testData, onSubmit }: TestTakingPageProps) {
 
   const handleSubmit = () => {
     const answers = Array.from(userAnswers.values());
-    onSubmit(answers);
+    onSubmit(answers, testData.duration * 60 - timeRemaining);
     setShowSubmitDialog(false);
   };
 
   const handleTimeUpSubmit = () => {
     const answers = Array.from(userAnswers.values());
-    onSubmit(answers);
+    onSubmit(answers, testData.duration * 60 - timeRemaining);
     setShowTimeUpDialog(false);
   };
 

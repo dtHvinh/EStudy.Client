@@ -10,6 +10,7 @@ import {
   TestSections,
   TestStatsGrid,
 } from "@/components/test-detail";
+import TestAttempts from "@/components/test-detail/test-attempts";
 import useTestDetail from "@/hooks/use-test-details";
 import { use, useEffect } from "react";
 import { toast } from "sonner";
@@ -49,46 +50,47 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   return (
     details && (
       <MainLayout>
-        <div className="container mx-auto max-w-6xl space-y-5 px-4">
-          {/* Header Section */}
-          <NavigateBack />
-          <TestHeader
-            testId={details.id}
-            title={details.title}
-            description={details.description}
-          />
-
-          {/* Stats Grid */}
-          <TestStatsGrid
-            duration={details.duration}
-            questionCount={details.questionCount}
-            attemptCount={details.attemptCount}
-            commentCount={details.commentCount}
-          />
-
-          <div className="space-y-8">
-            {/* Main Content */}
-            <div className="space-y-8">
-              {/* Test Sections */}
-              <TestSections
-                sections={details.sections}
-                sectionCount={details.sectionCount}
+        <div className="container mx-auto max-w-6xl space-y-5">
+          <div className="grid grid-cols-8 gap-5">
+            <div className="col-span-8">
+              <NavigateBack fallbackUrl="/" />
+              <TestHeader
+                testId={details.id}
+                title={details.title}
+                description={details.description}
               />
 
-              {/* Comments Section */}
-              <TestComments
-                onScrollToBottom={loadMoreComments}
-                onSendComment={sendComment}
-                onDeleteComment={deleteComment}
-                comments={details.comments}
+              {/* Stats Grid */}
+              <TestStatsGrid
+                duration={details.duration}
+                questionCount={details.questionCount}
+                attemptCount={details.attemptCount}
                 commentCount={details.commentCount}
               />
+            </div>
+            <div className="col-span-8 lg:col-span-6">
+              <div className="space-y-8">
+                <div className="space-y-8">
+                  <TestSections
+                    sections={details.sections}
+                    sectionCount={details.sectionCount}
+                  />
 
-              {/* <TestSidebar /> */}
+                  <TestComments
+                    onScrollToBottom={loadMoreComments}
+                    onSendComment={sendComment}
+                    onDeleteComment={deleteComment}
+                    comments={details.comments}
+                    commentCount={details.commentCount}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="col-span-2 hidden flex-col gap-5 lg:flex">
+              <TestAttempts testId={details.id} />
+              <RelatedTests testId={details.id} />
             </div>
           </div>
-
-          <RelatedTests testId={details.id} />
         </div>
       </MainLayout>
     )

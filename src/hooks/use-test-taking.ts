@@ -25,7 +25,7 @@ export interface TestTakingQuestion {
   type: "multiple-choice" | "single-choice";
   text: string;
   points: number;
-  explaination?: string;
+  explanation?: string;
   answers: TestTakingAnswer[];
 }
 
@@ -45,7 +45,6 @@ export interface SectionProgress {
 export interface UserAnswer {
   questionId: number;
   selectedAnswerIds?: number[];
-  textAnswer?: string;
 }
 
 export interface MarkableType {

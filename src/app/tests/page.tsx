@@ -41,7 +41,6 @@ export default function Page() {
           <div className="flex items-center justify-between">
             <div className="flex flex-col space-y-3">
               <H3>Library</H3>
-              <p>You can find everything here</p>
             </div>
             <RoleBaseComponent requireRoles={["Instructor", "Admin"]}>
               <Button variant={"outline"}>
@@ -54,6 +53,11 @@ export default function Page() {
             {tests.map((item) => (
               <TestCard key={item.id} {...item} />
             ))}
+            {tests.length === 0 && (
+              <div className="col-span-full">
+                There are no tests available in the library.
+              </div>
+            )}
             <div ref={ref} />
           </div>
         </div>

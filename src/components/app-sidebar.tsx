@@ -34,12 +34,12 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Blog",
+      title: "Blogs",
       url: "blog",
       icon: IconReportSearch,
     },
     {
-      title: "Flash card sets",
+      title: "Flash cards",
       url: "sets",
       icon: IconScript,
     },
@@ -54,7 +54,7 @@ const data = {
       icon: IconMessageChatbot,
     },
     {
-      title: "Do Test",
+      title: "Tests",
       url: "tests",
       icon: IconBallpen,
     },

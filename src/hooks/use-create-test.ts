@@ -116,7 +116,7 @@ const createDefaultQuestion = (
   text: "",
   points: 1,
   answers: [
-    { id: "1", text: "", isCorrect: true },
+    { id: "1", text: "", isCorrect: false },
     { id: "2", text: "", isCorrect: false },
     { id: "3", text: "", isCorrect: false },
     { id: "4", text: "", isCorrect: false },

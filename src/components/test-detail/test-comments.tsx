@@ -113,7 +113,7 @@ const Comment = ({
 }) => {
   return (
     <motion.div exit={{ opacity: 0, x: 20 }}>
-      <div className="flex items-center gap-3">
+      <div className="flex items-start gap-3">
         <Avatar className="h-10 w-10">
           <AvatarImage
             src={comment.author.profilePicture || "/placeholder.svg"}

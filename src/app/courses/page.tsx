@@ -1,6 +1,8 @@
 "use client";
 
 import MainLayout from "@/components/layouts/MainLayout";
+import RelativeLink from "@/components/relative-link";
+import RoleBaseComponent from "@/components/role-base-component";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,7 +26,7 @@ export default function Page() {
     <MainLayout>
       <div className="space-y-4 px-4 lg:px-6">
         <div className="flex-1 space-y-6 p-6">
-          <div className="rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white">
+          <div className="rounded-lg p-8">
             <div className="max-w-2xl">
               <h1 className="mb-4 text-4xl font-bold">Learn Without Limits</h1>
               <p className="mb-6 text-xl opacity-90">
@@ -32,12 +34,14 @@ export default function Page() {
                 Professional Certificates, and degrees from world-class
                 instructors.
               </p>
-              <Button
-                size="lg"
-                className="bg-white text-blue-600 hover:bg-gray-100"
-              >
-                Explore Courses
-              </Button>
+              <div className="flex items-center gap-4">
+                <Button size="lg">Explore Courses</Button>
+                <RoleBaseComponent requireRoles={["Instructor", "Admin"]}>
+                  <Button size="lg" variant={"outline"}>
+                    <RelativeLink href={"create"}>Create a course</RelativeLink>
+                  </Button>
+                </RoleBaseComponent>
+              </div>
             </div>
           </div>
         </div>

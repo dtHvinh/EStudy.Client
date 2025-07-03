@@ -44,7 +44,7 @@ export default function Page() {
             </div>
             <RoleBaseComponent requireRoles={["Instructor", "Admin"]}>
               <Button variant={"outline"}>
-                <RelativeLink href={"create"}>Create Test</RelativeLink>
+                <RelativeLink href={"builder"}>Create Test</RelativeLink>
               </Button>
             </RoleBaseComponent>
           </div>

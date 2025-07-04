@@ -95,7 +95,7 @@ export default function MyResourcesPage() {
 
   return (
     <MainLayout>
-      <div className="container px-4 lg:px-6">
+      <div className="container mx-auto max-w-6xl px-4 lg:px-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold tracking-tight">My Resources</h1>
         </div>

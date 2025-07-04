@@ -12,15 +12,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CourseLesson, useCreateCourse } from "@/hooks/use-create-course";
+import {
+  CourseLesson,
+  useCreateCourseStructure,
+} from "@/hooks/use-create-course-structure";
 import { useStorage } from "@/hooks/use-storage";
 import {
   ChevronDown,
   ChevronRight,
   GripVertical,
+  Paperclip,
   Play,
   Trash2,
   Upload,
+  X,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -38,25 +43,40 @@ export function LessonCard({
   lessonIndex,
   dragHandleProps,
 }: LessonCardProps) {
-  const { updateLesson, deleteLesson } = useCreateCourse();
   const [uploading, setUploading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const { uploadFile } = useStorage({ prefix: "course-items" });
+  const { updateLesson, deleteLesson } = useCreateCourseStructure();
 
-  const handleVideoUpload = async (
+  const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
     setUploading(true);
     try {
-      const fileName = `lesson-videos/${Date.now()}-${file.name}`;
-      const videoUrl = await uploadFile(file, fileName);
-      updateLesson(chapterIndex, lessonIndex, { videoUrl });
-      toast.success("Video uploaded successfully");
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const fileName = `lesson-files/${Date.now()}-${file.name}`;
+        const fileUrl = await uploadFile(file, fileName);
+        return fileUrl;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      // Combine with existing attached files
+      const existingUrls = lesson.attachedFileUrls
+        ? lesson.attachedFileUrls.split(",").filter((url) => url.trim())
+        : [];
+      const allUrls = [...existingUrls, ...uploadedUrls];
+
+      updateLesson(chapterIndex, lessonIndex, {
+        attachedFileUrls: allUrls.join(","),
+      });
+
+      toast.success(`${uploadedUrls.length} file(s) uploaded successfully`);
     } catch (error) {
-      toast.error("Failed to upload video");
+      toast.error("Failed to upload files");
       console.error("Upload error:", error);
     } finally {
       setUploading(false);
@@ -82,6 +102,20 @@ export function LessonCard({
       setUploading(false);
     }
   };
+
+  const removeAttachedFile = (urlToRemove: string) => {
+    const currentUrls = lesson.attachedFileUrls
+      ? lesson.attachedFileUrls.split(",").filter((url) => url.trim())
+      : [];
+    const updatedUrls = currentUrls.filter((url) => url !== urlToRemove);
+    updateLesson(chapterIndex, lessonIndex, {
+      attachedFileUrls: updatedUrls.join(","),
+    });
+  };
+
+  const attachedFiles = lesson.attachedFileUrls
+    ? lesson.attachedFileUrls.split(",").filter((url) => url.trim())
+    : [];
 
   return (
     <Card className="border-l-primary/20 border-l-4">
@@ -112,6 +146,12 @@ export function LessonCard({
               {lesson.durationMinutes > 0 && (
                 <span className="text-muted-foreground text-sm">
                   {lesson.durationMinutes}min
+                </span>
+              )}
+              {attachedFiles.length > 0 && (
+                <span className="text-muted-foreground flex items-center gap-1 text-sm">
+                  <Paperclip className="h-3 w-3" />
+                  {attachedFiles.length}
                 </span>
               )}
             </CollapsibleTrigger>
@@ -196,38 +236,56 @@ export function LessonCard({
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <Label>Video File</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={lesson.videoUrl}
-                      onChange={(e) =>
-                        updateLesson(chapterIndex, lessonIndex, {
-                          videoUrl: e.target.value,
-                        })
-                      }
-                      placeholder="Video URL or upload file"
-                      className="flex-1"
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        document
-                          .getElementById(
-                            `video-upload-${chapterIndex}-${lessonIndex}`,
-                          )
-                          ?.click()
-                      }
-                      disabled={uploading}
-                    >
-                      <Upload className="h-4 w-4" />
-                    </Button>
+                  <Label>Attached Files</Label>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          document
+                            .getElementById(
+                              `file-upload-${chapterIndex}-${lessonIndex}`,
+                            )
+                            ?.click()
+                        }
+                        disabled={uploading}
+                        className="flex-1"
+                      >
+                        <Upload className="mr-2 h-4 w-4" />
+                        {uploading ? "Uploading..." : "Upload Files"}
+                      </Button>
+                    </div>
+
+                    {attachedFiles.length > 0 && (
+                      <div className="space-y-1">
+                        {attachedFiles.map((fileUrl, index) => (
+                          <div
+                            key={index}
+                            className="bg-muted flex items-center gap-2 rounded-md p-2"
+                          >
+                            <Paperclip className="h-3 w-3" />
+                            <span className="flex-1 truncate text-sm">
+                              {fileUrl.split("/").pop() || `File ${index + 1}`}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeAttachedFile(fileUrl)}
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <input
-                    id={`video-upload-${chapterIndex}-${lessonIndex}`}
+                    id={`file-upload-${chapterIndex}-${lessonIndex}`}
                     type="file"
-                    accept="video/*"
-                    onChange={handleVideoUpload}
+                    multiple
+                    onChange={handleFileUpload}
                     className="hidden"
                   />
                 </div>

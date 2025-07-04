@@ -50,7 +50,7 @@ export default function Page() {
 
   return (
     <MainLayout>
-      <div className="px-4 lg:px-6 space-y-4">
+      <div className="space-y-4 px-4 lg:px-6">
         <div className="flex items-baseline justify-between px-4">
           <H3>My sets</H3>
           <div className="flex">

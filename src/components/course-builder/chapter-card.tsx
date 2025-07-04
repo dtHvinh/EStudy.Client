@@ -11,7 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { CourseChapter, useCreateCourse } from "@/hooks/use-create-course";
+import {
+  CourseChapter,
+  useCreateCourseStructure,
+} from "@/hooks/use-create-course-structure";
 import {
   BookOpen,
   ChevronDown,
@@ -46,7 +49,8 @@ export function ChapterCard({
   chapterIndex,
   dragHandleProps,
 }: ChapterCardProps) {
-  const { updateChapter, deleteChapter, addLesson } = useCreateCourse();
+  const { updateChapter, addLesson, deleteChapter } =
+    useCreateCourseStructure();
   const [isOpen, setIsOpen] = useState(true);
 
   return (

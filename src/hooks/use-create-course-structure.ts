@@ -1,23 +1,6 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
-export interface Course {
-  id?: number;
-  title: string;
-  description: string;
-  imageUrl?: string;
-  difficultyLevel: "Beginner" | "Intermediate" | "Advanced";
-  price: number;
-  isFree: boolean;
-  isPublished: boolean;
-  previewVideoUrl?: string;
-  prerequisites?: string;
-  learningObjectives?: string;
-  language: string;
-  estimatedDurationHours: number;
-  chapters: CourseChapter[];
-}
-
 export interface CourseChapter {
   id?: number;
   title: string;
@@ -30,7 +13,7 @@ export interface CourseChapter {
 export interface CourseLesson {
   id?: number;
   title: string;
-  videoUrl: string;
+  attachedFileUrls?: string; // Comma-separated string of file URLs
   content: string;
   description?: string;
   durationMinutes: number;
@@ -39,13 +22,15 @@ export interface CourseLesson {
   thumbnailUrl?: string;
 }
 
-interface CourseStore {
-  course: Course;
+interface CourseStructureStore {
+  courseId?: number;
+  chapters: CourseChapter[];
   isLoading: boolean;
   isDirty: boolean;
 
-  // Course actions
-  updateCourse: (updates: Partial<Course>) => void;
+  // Course structure actions
+  setCourseId: (id: number) => void;
+  setChapters: (chapters: CourseChapter[]) => void;
 
   // Chapter actions
   addChapter: () => void;
@@ -70,46 +55,48 @@ interface CourseStore {
   // Utility actions
   setLoading: (loading: boolean) => void;
   markClean: () => void;
+  markDirty: () => void;
+  resetStructure: () => void;
+
+  // Computed values
+  getTotalLessons: () => number;
+  getTotalDuration: () => number;
 }
 
-export const useCreateCourse = create<CourseStore>()(
-  immer((set) => ({
-    course: {
-      title: "",
-      description: "",
-      difficultyLevel: "Beginner",
-      price: 0,
-      isFree: true,
-      isPublished: false,
-      language: "English",
-      estimatedDurationHours: 0,
-      chapters: [],
-    },
+export const useCreateCourseStructure = create<CourseStructureStore>()(
+  immer((set, get) => ({
+    courseId: undefined,
+    chapters: [],
     isLoading: false,
     isDirty: false,
 
-    updateCourse: (updates) =>
+    setCourseId: (id) =>
       set((state) => {
-        Object.assign(state.course, updates);
-        state.isDirty = true;
+        state.courseId = id;
+      }),
+
+    setChapters: (chapters) =>
+      set((state) => {
+        state.chapters = chapters;
+        state.isDirty = false;
       }),
 
     addChapter: () =>
       set((state) => {
         const newChapter: CourseChapter = {
-          title: `Chapter ${state.course.chapters.length + 1}`,
+          title: `Chapter ${state.chapters.length + 1}`,
           description: "",
-          orderIndex: state.course.chapters.length,
+          orderIndex: state.chapters.length,
           isPublished: false,
           lessons: [],
         };
-        state.course.chapters.push(newChapter);
+        state.chapters.push(newChapter);
         state.isDirty = true;
       }),
 
     updateChapter: (chapterId, updates) =>
       set((state) => {
-        const chapter = state.course.chapters.find((c, i) => i === chapterId);
+        const chapter = state.chapters.find((c, i) => i === chapterId);
         if (chapter) {
           Object.assign(chapter, updates);
           state.isDirty = true;
@@ -118,9 +105,9 @@ export const useCreateCourse = create<CourseStore>()(
 
     deleteChapter: (chapterId) =>
       set((state) => {
-        state.course.chapters.splice(chapterId, 1);
+        state.chapters.splice(chapterId, 1);
         // Reorder remaining chapters
-        state.course.chapters.forEach((chapter, index) => {
+        state.chapters.forEach((chapter, index) => {
           chapter.orderIndex = index;
         });
         state.isDirty = true;
@@ -128,10 +115,10 @@ export const useCreateCourse = create<CourseStore>()(
 
     reorderChapters: (startIndex, endIndex) =>
       set((state) => {
-        const [removed] = state.course.chapters.splice(startIndex, 1);
-        state.course.chapters.splice(endIndex, 0, removed);
+        const [removed] = state.chapters.splice(startIndex, 1);
+        state.chapters.splice(endIndex, 0, removed);
         // Update order indices
-        state.course.chapters.forEach((chapter, index) => {
+        state.chapters.forEach((chapter, index) => {
           chapter.orderIndex = index;
         });
         state.isDirty = true;
@@ -139,11 +126,11 @@ export const useCreateCourse = create<CourseStore>()(
 
     addLesson: (chapterId) =>
       set((state) => {
-        const chapter = state.course.chapters[chapterId];
+        const chapter = state.chapters[chapterId];
         if (chapter) {
           const newLesson: CourseLesson = {
             title: `Lesson ${chapter.lessons.length + 1}`,
-            videoUrl: "",
+            attachedFileUrls: "",
             content: "",
             description: "",
             durationMinutes: 0,
@@ -156,7 +143,7 @@ export const useCreateCourse = create<CourseStore>()(
 
     updateLesson: (chapterId, lessonId, updates) =>
       set((state) => {
-        const lesson = state.course.chapters[chapterId]?.lessons[lessonId];
+        const lesson = state.chapters[chapterId]?.lessons[lessonId];
         if (lesson) {
           Object.assign(lesson, updates);
           state.isDirty = true;
@@ -165,7 +152,7 @@ export const useCreateCourse = create<CourseStore>()(
 
     deleteLesson: (chapterId, lessonId) =>
       set((state) => {
-        const chapter = state.course.chapters[chapterId];
+        const chapter = state.chapters[chapterId];
         if (chapter) {
           chapter.lessons.splice(lessonId, 1);
           // Reorder remaining lessons
@@ -178,7 +165,7 @@ export const useCreateCourse = create<CourseStore>()(
 
     reorderLessons: (chapterId, startIndex, endIndex) =>
       set((state) => {
-        const chapter = state.course.chapters[chapterId];
+        const chapter = state.chapters[chapterId];
         if (chapter) {
           const [removed] = chapter.lessons.splice(startIndex, 1);
           chapter.lessons.splice(endIndex, 0, removed);
@@ -199,5 +186,38 @@ export const useCreateCourse = create<CourseStore>()(
       set((state) => {
         state.isDirty = false;
       }),
+
+    markDirty: () =>
+      set((state) => {
+        state.isDirty = true;
+      }),
+
+    resetStructure: () =>
+      set((state) => {
+        state.chapters = [];
+        state.courseId = undefined;
+        state.isDirty = false;
+      }),
+
+    getTotalLessons: () => {
+      const state = get();
+      return state.chapters.reduce(
+        (total, chapter) => total + chapter.lessons.length,
+        0,
+      );
+    },
+
+    getTotalDuration: () => {
+      const state = get();
+      return state.chapters.reduce(
+        (total, chapter) =>
+          total +
+          chapter.lessons.reduce(
+            (chapterTotal, lesson) => chapterTotal + lesson.durationMinutes,
+            0,
+          ),
+        0,
+      );
+    },
   })),
 );

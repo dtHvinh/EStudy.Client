@@ -3,6 +3,7 @@
 import type React from "react";
 
 import MainLayout from "@/components/layouts/MainLayout";
+import RoleBaseComponent from "@/components/role-base-component";
 import { TestHeader } from "@/components/test-builder/test-header";
 import { TestInformation } from "@/components/test-builder/test-information";
 import TestPreview from "@/components/test-builder/test-preview";
@@ -115,121 +116,125 @@ export default function CreateTestPage() {
   );
 
   return (
-    <MainLayout>
-      {/* Header */}
-      <TestHeader
-        isTestValid={isTestValid()}
-        onImport={handleImport}
-        onExport={handleExport}
-        onSaveDraft={saveLocalStorage}
-        onPublish={handlePublish}
-      />
+    <RoleBaseComponent requireRoles={["Admin", "Instructor"]}>
+      <MainLayout>
+        {/* Header */}
+        <TestHeader
+          isTestValid={isTestValid()}
+          onImport={handleImport}
+          onExport={handleExport}
+          onSaveDraft={saveLocalStorage}
+          onPublish={handlePublish}
+        />
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
-          <div className="space-y-6 lg:col-span-3">
-            <ValidationErrors
-              errors={validationErrors}
-              show={showValidationErrors}
-            />
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+            <div className="space-y-6 lg:col-span-3">
+              <ValidationErrors
+                errors={validationErrors}
+                show={showValidationErrors}
+              />
 
-            <TestInformation
-              title={test.title}
-              description={test.description}
-              duration={test.duration}
-              onUpdateTitle={(title) => updateTest("title", title)}
-              onUpdateDescription={(description) =>
-                updateTest("description", description)
-              }
-              onUpdateDuration={(duration) => updateTest("duration", duration)}
-            />
+              <TestInformation
+                title={test.title}
+                description={test.description}
+                duration={test.duration}
+                onUpdateTitle={(title) => updateTest("title", title)}
+                onUpdateDescription={(description) =>
+                  updateTest("description", description)
+                }
+                onUpdateDuration={(duration) =>
+                  updateTest("duration", duration)
+                }
+              />
 
-            {/* Test Sections */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Test Sections</h2>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={resetTest}>
-                    Reset All
-                  </Button>
-                  <Button onClick={addSection}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Section
-                  </Button>
-                </div>
-              </div>
-
-              {test.sections.length === 0 ? (
-                <Card className="border-dashed">
-                  <CardContent className="p-8 text-center">
-                    <div className="text-muted-foreground mb-4">
-                      <p className="text-lg font-medium">
-                        No sections created yet
-                      </p>
-                      <p className="text-sm">
-                        Create your first section to start building your test
-                      </p>
-                    </div>
-                    <Button onClick={addSection} size="lg">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Create Your First Section
+              {/* Test Sections */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">Test Sections</h2>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={resetTest}>
+                      Reset All
                     </Button>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  {test.sections.map((section, sectionIndex) => (
-                    <TestSection
-                      key={section.id}
-                      section={section}
-                      sectionIndex={sectionIndex}
-                      sectionStats={getSectionStats(section.id)}
-                      onUpdateSection={updateSection}
-                      onDeleteSection={deleteSection}
-                      onDuplicateSection={duplicateSection}
-                      onToggleSection={toggleSection}
-                      onAddQuestion={addQuestion}
-                      onUpdateQuestion={updateQuestion}
-                      onDeleteQuestion={deleteQuestion}
-                      onDuplicateQuestion={duplicateQuestion}
-                      onUpdateAnswer={updateAnswer}
-                      onSetCorrectAnswer={setCorrectAnswer}
-                      onAddAnswerOption={addAnswerOption}
-                      onRemoveAnswerOption={removeAnswerOption}
-                    />
-                  ))}
-                  <Button className="w-full" onClick={addSection}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Section
-                  </Button>
+                    <Button onClick={addSection}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Section
+                    </Button>
+                  </div>
                 </div>
-              )}
+
+                {test.sections.length === 0 ? (
+                  <Card className="border-dashed">
+                    <CardContent className="p-8 text-center">
+                      <div className="text-muted-foreground mb-4">
+                        <p className="text-lg font-medium">
+                          No sections created yet
+                        </p>
+                        <p className="text-sm">
+                          Create your first section to start building your test
+                        </p>
+                      </div>
+                      <Button onClick={addSection} size="lg">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create Your First Section
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-4">
+                    {test.sections.map((section, sectionIndex) => (
+                      <TestSection
+                        key={section.id}
+                        section={section}
+                        sectionIndex={sectionIndex}
+                        sectionStats={getSectionStats(section.id)}
+                        onUpdateSection={updateSection}
+                        onDeleteSection={deleteSection}
+                        onDuplicateSection={duplicateSection}
+                        onToggleSection={toggleSection}
+                        onAddQuestion={addQuestion}
+                        onUpdateQuestion={updateQuestion}
+                        onDeleteQuestion={deleteQuestion}
+                        onDuplicateQuestion={duplicateQuestion}
+                        onUpdateAnswer={updateAnswer}
+                        onSetCorrectAnswer={setCorrectAnswer}
+                        onAddAnswerOption={addAnswerOption}
+                        onRemoveAnswerOption={removeAnswerOption}
+                      />
+                    ))}
+                    <Button className="w-full" onClick={addSection}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Section
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Sticky Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="space-y-6 lg:sticky lg:top-6 lg:max-h-[calc(100vh-1rem)] lg:overflow-y-auto lg:pr-2">
-              <TestStatistic
-                test={test}
-                singleChoiceCount={singleChoiceCount}
-                multipleChoiceCount={multipleChoiceCount}
-                getTotalQuestions={getTotalQuestions}
-                getTotalPoints={getTotalPoints}
-                getAverageTimePerQuestion={getAverageTimePerQuestion}
-              />
+            {/* Sticky Sidebar */}
+            <div className="lg:col-span-1">
+              <div className="space-y-6 lg:sticky lg:top-6 lg:max-h-[calc(100vh-1rem)] lg:overflow-y-auto lg:pr-2">
+                <TestStatistic
+                  test={test}
+                  singleChoiceCount={singleChoiceCount}
+                  multipleChoiceCount={multipleChoiceCount}
+                  getTotalQuestions={getTotalQuestions}
+                  getTotalPoints={getTotalPoints}
+                  getAverageTimePerQuestion={getAverageTimePerQuestion}
+                />
 
-              {/* Test Preview */}
-              <TestPreview
-                test={test}
-                getTotalQuestions={getTotalQuestions}
-                getTotalPoints={getTotalPoints}
-                getSectionStats={getSectionStats}
-              />
+                {/* Test Preview */}
+                <TestPreview
+                  test={test}
+                  getTotalQuestions={getTotalQuestions}
+                  getTotalPoints={getTotalPoints}
+                  getSectionStats={getSectionStats}
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </MainLayout>
+      </MainLayout>
+    </RoleBaseComponent>
   );
 }

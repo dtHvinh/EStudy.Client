@@ -50,7 +50,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     };
 
     const shouldShowClearButton =
-      clearable && inputValue && String(inputValue).length > 0;
+      false && // TODO: How :)
+      clearable &&
+      inputValue !== undefined &&
+      inputValue !== null &&
+      String(inputValue).length > 0;
 
     return (
       <div className="relative flex items-center gap-2">

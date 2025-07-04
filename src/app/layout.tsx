@@ -1,3 +1,4 @@
+import { AuthProvider } from "@/components/contexts/AuthContext";
 import { ToasterProvider } from "@/components/contexts/ToasterContext";
 import { ThemeProvider } from "@/components/theme-toggle";
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -48,7 +49,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <ToasterProvider>{children}</ToasterProvider>
+            <AuthProvider>
+              <ToasterProvider>{children}</ToasterProvider>
+            </AuthProvider>
           </ThemeProvider>
         </GoogleOAuthProvider>
       </body>

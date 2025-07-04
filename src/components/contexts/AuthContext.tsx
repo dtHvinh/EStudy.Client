@@ -1,6 +1,7 @@
 "use client";
 
 import { deleteCookie, getCookie } from "cookies-next/client";
+import { jwtDecode, JwtPayload } from "jwt-decode";
 import { useRouter } from "next/navigation";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { mutate } from "swr";
@@ -9,6 +10,7 @@ import { ACCESS_TOKEN_COOKIE } from "../utils/requestUtils";
 interface AuthContextType {
   isLoading: boolean;
   logout: () => void;
+  getId: () => string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,8 +45,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push("/login");
   };
 
+  const getId = () => {
+    const accessToken = `${getCookie(ACCESS_TOKEN_COOKIE)}`;
+    const decoded = jwtDecode<JwtPayload & { nameid: string }>(accessToken);
+    return decoded["nameid"] as string;
+  };
+
   return (
-    <AuthContext.Provider value={{ isLoading, logout }}>
+    <AuthContext.Provider value={{ isLoading, logout, getId }}>
       {children}
     </AuthContext.Provider>
   );

@@ -2,6 +2,7 @@ import { FlashCardResponseType } from "@/hooks/use-set-cards";
 import { useSpeechSynthesis } from "@/hooks/use-speech-synthesis";
 import { IconLoaderQuarter, IconVolume } from "@tabler/icons-react";
 import ButtonIcon from "./button-icon";
+import MediaRenderer from "./resources/media-renderer";
 import { AspectRatio } from "./ui/aspect-ratio";
 import { Badge } from "./ui/badge";
 
@@ -9,7 +10,7 @@ export default function FlashCardDetail({ ...props }: FlashCardResponseType) {
   return (
     <>
       <div className="flex items-start justify-between gap-3">
-        <h3 className="text-xl font-bold text-foreground leading-tight">
+        <h3 className="text-foreground text-xl leading-tight font-bold">
           {props.term}
         </h3>
         {props.partOfSpeech && (
@@ -25,9 +26,9 @@ export default function FlashCardDetail({ ...props }: FlashCardResponseType) {
 
       {props.example && (
         <div className="space-y-2">
-          <h4 className="text-sm font-semibold text-foreground">Examples:</h4>
-          <div className="bg-muted/50 p-3 border-l-4 border-primary/20">
-            <ul className="space-y-1 text-sm text-muted-foreground">
+          <h4 className="text-foreground text-sm font-semibold">Examples:</h4>
+          <div className="bg-muted/50 border-primary/20 border-l-4 p-3">
+            <ul className="text-muted-foreground space-y-1 text-sm">
               {props.example
                 .split("\n")
                 .filter((line) => line.trim())
@@ -40,13 +41,13 @@ export default function FlashCardDetail({ ...props }: FlashCardResponseType) {
       )}
 
       {props.note && (
-        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 rounded-md p-3">
+        <div className="rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-800/30 dark:bg-amber-950/20">
           <div className="flex items-start gap-2">
-            <span className="text-amber-600 dark:text-amber-400 text-sm font-medium">
+            <span className="text-sm font-medium text-amber-600 dark:text-amber-400">
               💡
             </span>
             <div>
-              <p className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-1">
+              <p className="mb-1 text-sm font-medium text-amber-800 dark:text-amber-200">
                 Note
               </p>
               <p className="text-sm text-amber-700 dark:text-amber-300">
@@ -62,10 +63,9 @@ export default function FlashCardDetail({ ...props }: FlashCardResponseType) {
           ratio={16 / 9}
           className="overflow-hidden rounded-lg border"
         >
-          <img
-            src={props.imageUrl || "/placeholder.svg"}
-            alt={props.term}
-            className="object-cover w-full h-full transition-transform duration-200"
+          <MediaRenderer
+            url={props.imageUrl}
+            className="h-full w-full object-cover"
           />
         </AspectRatio>
       )}

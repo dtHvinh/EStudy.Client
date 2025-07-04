@@ -38,7 +38,9 @@ export default function Page() {
                 <Button size="lg">Explore Courses</Button>
                 <RoleBaseComponent requireRoles={["Instructor", "Admin"]}>
                   <Button size="lg" variant={"outline"}>
-                    <RelativeLink href={"create"}>Create a course</RelativeLink>
+                    <RelativeLink href={"builder"}>
+                      Create a course
+                    </RelativeLink>
                   </Button>
                 </RoleBaseComponent>
               </div>
@@ -141,7 +143,7 @@ export default function Page() {
                       <div className="flex items-center gap-2">
                         <Avatar className="h-6 w-6">
                           <AvatarImage
-                            src={course.authorAvatar || "/placeholder.svg"}
+                            src={course.authorAvatar || "https://placehold.co/"}
                           />
                           <AvatarFallback>{course.author[0]}</AvatarFallback>
                         </Avatar>

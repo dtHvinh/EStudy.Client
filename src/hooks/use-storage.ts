@@ -58,12 +58,17 @@ export function useStorage({
     return publicUrl;
   }
 
+  function getFilePath(name: string) {
+    return [prefix, getId(), name].filter(Boolean).join("/");
+  }
+
   async function getResources(limit = 20, offset = 0): Promise<ResourceType[]> {
     const { data, error } = await bucketAPI.list(
       [prefix, getId()].filter(Boolean).join("/"),
       {
         limit,
         offset,
+        sortBy: { column: "created_at", order: "desc" },
       },
     );
 
@@ -89,5 +94,6 @@ export function useStorage({
     removeFile,
     getResources,
     deleteResource,
+    getFilePath,
   };
 }

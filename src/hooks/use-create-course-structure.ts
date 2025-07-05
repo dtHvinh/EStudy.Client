@@ -13,13 +13,19 @@ export interface CourseChapter {
 export interface CourseLesson {
   id?: number;
   title: string;
-  attachedFileUrls?: string; // Comma-separated string of file URLs
+  attachedFileUrls: string[]; // Comma-separated string of file URLs
   content: string;
   description?: string;
   durationMinutes: number;
   orderIndex: number;
   transcriptUrl?: string;
-  thumbnailUrl?: string;
+  videoUrl?: string;
+}
+
+export interface PendingUploadFiles {
+  [path: string]: {
+    file: File;
+  };
 }
 
 interface CourseStructureStore {
@@ -27,6 +33,12 @@ interface CourseStructureStore {
   chapters: CourseChapter[];
   isLoading: boolean;
   isDirty: boolean;
+  pendingUploadFiles: PendingUploadFiles;
+
+  // File upload actions
+  addFile: (path: string, file: File) => void;
+  addFiles: (files: { [path: string]: File }) => void;
+  deleteFile: (path: string) => void;
 
   // Course structure actions
   setCourseId: (id: number) => void;
@@ -69,10 +81,31 @@ export const useCreateCourseStructure = create<CourseStructureStore>()(
     chapters: [],
     isLoading: false,
     isDirty: false,
+    pendingUploadFiles: {},
 
     setCourseId: (id) =>
       set((state) => {
         state.courseId = id;
+      }),
+
+    addFile: (name: string, file: File) =>
+      set((state) => {
+        state.pendingUploadFiles[name] = { file };
+      }),
+
+    addFiles: (files) =>
+      set((state) => {
+        state.pendingUploadFiles = {
+          ...state.pendingUploadFiles,
+          ...Object.fromEntries(
+            Object.entries(files).map(([name, file]) => [name, { file }]),
+          ),
+        };
+      }),
+
+    deleteFile: (name: string) =>
+      set((state) => {
+        delete state.pendingUploadFiles[name];
       }),
 
     setChapters: (chapters) =>
@@ -93,7 +126,6 @@ export const useCreateCourseStructure = create<CourseStructureStore>()(
         state.chapters.push(newChapter);
         state.isDirty = true;
       }),
-
     updateChapter: (chapterId, updates) =>
       set((state) => {
         const chapter = state.chapters.find((c, i) => i === chapterId);
@@ -130,7 +162,7 @@ export const useCreateCourseStructure = create<CourseStructureStore>()(
         if (chapter) {
           const newLesson: CourseLesson = {
             title: `Lesson ${chapter.lessons.length + 1}`,
-            attachedFileUrls: "",
+            attachedFileUrls: [],
             content: "",
             description: "",
             durationMinutes: 0,

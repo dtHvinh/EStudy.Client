@@ -331,7 +331,7 @@ export default function MediaRenderer({
     <div
       ref={containerRef}
       className={cn(
-        "group relative w-full cursor-pointer overflow-hidden rounded-lg",
+        "group relative w-full cursor-pointer overflow-hidden rounded-lg border-[1px]",
         getAspectRatioClass(),
         className,
       )}
@@ -353,7 +353,7 @@ export default function MediaRenderer({
     <div
       ref={containerRef}
       className={cn(
-        "group relative w-full cursor-pointer overflow-hidden rounded-lg",
+        "group relative w-full cursor-pointer overflow-hidden rounded-lg border-[1px]",
         getAspectRatioClass(),
         className,
       )}

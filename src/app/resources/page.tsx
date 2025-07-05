@@ -116,7 +116,7 @@ export default function MyResourcesPage() {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4 lg:grid-cols-4">
+                  <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
                     {dateResources.map((resource, index) => (
                       <div
                         className="break-inside-avoid"

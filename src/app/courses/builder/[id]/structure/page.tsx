@@ -2,8 +2,11 @@
 
 import CourseStructure from "@/components/course-builder/course-structure";
 import MainLayout from "@/components/layouts/MainLayout";
+import { Button } from "@/components/ui/button";
 import useCourseDetails from "@/hooks/use-course-details";
-import { use } from "react";
+import { useCreateCourseStructure } from "@/hooks/use-create-course-structure";
+import { SaveIcon } from "lucide-react";
+import { use, useEffect } from "react";
 
 export default function Page({
   params,
@@ -12,6 +15,14 @@ export default function Page({
 }) {
   const { id } = use(params);
   const { course } = useCourseDetails(id);
+  const { chapters, resetStructure, pendingUploadFiles } =
+    useCreateCourseStructure();
+
+  useEffect(() => {
+    return () => {
+      resetStructure();
+    };
+  }, []);
 
   return (
     <MainLayout>
@@ -24,6 +35,17 @@ export default function Page({
                 Create and manage your course stiructure, including modules,
                 lessons, and resources.
               </p>
+            </div>
+            <div>
+              <Button
+                onClick={() => {
+                  console.log("Chapters", chapters);
+                  console.log("Files", pendingUploadFiles);
+                }}
+                variant="ghost"
+              >
+                <SaveIcon />
+              </Button>
             </div>
           </div>
         )}

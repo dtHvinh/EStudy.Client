@@ -211,7 +211,7 @@ export function CourseCard({
                   </Button>
                 </>
               ) : (
-                <Button className="w-full">
+                <Button className="w-full" asChild>
                   <RelativeLink href={`/builder/${course.id}/structure`}>
                     Edit Course
                   </RelativeLink>

@@ -1,60 +1,63 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { useCreateCourseStructure } from "@/hooks/use-create-course-structure";
 import { BookOpen, Plus } from "lucide-react";
-import { Button } from "../ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { ChapterCard } from "./chapter-card";
+import { ChapterTreeItem } from "./chapter-tree-item";
 
 export default function CourseStructure() {
   const { addChapter, chapters } = useCreateCourseStructure();
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
-            Course Structure
-          </CardTitle>
+    <div className="w-full">
+      <div className="mb-6 flex items-center justify-between border-b pb-4">
+        <div className="flex items-center gap-3">
+          <BookOpen className="text-primary h-6 w-6" />
+          <h2 className="text-2xl font-semibold">Course Structure</h2>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {chapters.length === 0 ? (
-            <div className="text-muted-foreground py-12 text-center">
-              <BookOpen className="mx-auto mb-4 h-12 w-12 opacity-50" />
-              <p className="mb-2 text-lg">No chapters yet</p>
-              <p className="mb-4 text-sm">
-                Start building your course by adding your first chapter
-              </p>
-              <Button onClick={addChapter}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add First Chapter
-              </Button>
+      </div>
+
+      <div className="space-y-1">
+        {chapters.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="bg-muted mb-4 rounded-full p-4">
+              <BookOpen className="text-muted-foreground h-8 w-8" />
             </div>
-          ) : (
-            <>
+            <h3 className="mb-2 text-lg font-medium">No chapters yet</h3>
+            <p className="text-muted-foreground mb-6 max-w-md">
+              Start building your course by adding your first chapter. Each
+              chapter can contain multiple lessons.
+            </p>
+            <Button onClick={addChapter} size="lg">
+              <Plus className="mr-2 h-4 w-4" />
+              Add First Chapter
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-0">
               {chapters.map((chapter, index) => (
-                <ChapterCard
+                <ChapterTreeItem
                   key={index}
                   chapter={chapter}
                   chapterIndex={index}
                 />
               ))}
+            </div>
 
+            <div className="mt-6 border-t pt-4">
               <Button
                 variant="outline"
                 onClick={addChapter}
-                className="w-full bg-transparent"
+                className="w-full bg-transparent sm:w-auto"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Chapter
               </Button>
-            </>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 }

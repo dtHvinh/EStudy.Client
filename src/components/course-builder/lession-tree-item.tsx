@@ -1,7 +1,5 @@
 "use client";
 
-import type React from "react";
-
 import TailwindEditor from "@/components/text-editor/text-editor";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +14,6 @@ import {
   type CourseLesson,
   useCreateCourseStructure,
 } from "@/hooks/use-create-course-structure";
-import { useStorage } from "@/hooks/use-storage";
 import {
   ChevronDown,
   ChevronRight,
@@ -24,11 +21,9 @@ import {
   Paperclip,
   Play,
   Trash2,
-  Upload,
-  X,
 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import FileDropzone from "../file-dropzone";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,88 +49,31 @@ export function LessonTreeItem({
   lessonIndex,
   dragHandleProps,
 }: LessonTreeItemProps) {
-  const [uploading, setUploading] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const { getFilePath } = useStorage();
-  const { updateLesson, deleteLesson, addFile, addFiles, deleteFile } =
-    useCreateCourseStructure();
+  const {
+    updateLesson,
+    deleteLesson,
+    setAttachments,
+    deleteAttachment,
+    setVideo,
+    deleteVideo,
+  } = useCreateCourseStructure();
 
-  const handleDeleteVideo = async () => {
-    if (!lesson.videoUrl) return;
-    deleteFile(lesson.videoUrl);
-    updateLesson(chapterIndex, lessonIndex, {
-      videoUrl: "",
-    });
+  const handleSetAttachments = (files: File[]) => {
+    setAttachments(chapterIndex, lessonIndex, files);
   };
 
-  const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-
-    setUploading(true);
-    try {
-      const uploadedUrls = Array.from(files).map((file) => {
-        const fileName = `${Date.now()}-${file.name}`;
-        addFile(getFilePath(fileName), file);
-        return getFilePath(fileName);
-      });
-
-      const existingUrls = lesson.attachedFileUrls
-        ? lesson.attachedFileUrls.filter((url) => url.trim())
-        : [];
-      const allUrls = [...existingUrls, ...uploadedUrls];
-
-      updateLesson(chapterIndex, lessonIndex, {
-        attachedFileUrls: allUrls,
-      });
-
-      toast.success(`${uploadedUrls.length} file(s) uploaded successfully`);
-    } catch (error) {
-      toast.error("Failed to upload files");
-      console.error("Upload error:", error);
-    } finally {
-      setUploading(false);
-    }
+  const handleSetVideo = (file: File[]) => {
+    setVideo(chapterIndex, lessonIndex, file[0]);
   };
 
-  const handleVideoUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      console.warn("No file selected for video upload");
-      return;
-    }
-
-    if (!file.type.startsWith("video/")) {
-      toast.error("Please upload a valid video file");
-      return;
-    }
-
-    try {
-      const fileName = `${Date.now()}-${file.name}`;
-      addFile(getFilePath(fileName), file);
-      updateLesson(chapterIndex, lessonIndex, {
-        videoUrl: getFilePath(fileName),
-      });
-      toast.success("Video uploaded successfully");
-    } catch (error) {
-      toast.error("Failed to upload Video");
-      console.error("Upload error:", error);
-    } finally {
-    }
+  const handleDeleteAttachment = (file: File) => {
+    deleteAttachment(chapterIndex, lessonIndex, file);
   };
 
-  const removeAttachedFile = async (urlToRemove: string) => {
-    deleteFile(urlToRemove);
-    updateLesson(chapterIndex, lessonIndex, {
-      attachedFileUrls: lesson.attachedFileUrls?.filter(
-        (url) => url !== urlToRemove,
-      ),
-    });
+  const handleDeleteVideo = () => {
+    deleteVideo(chapterIndex, lessonIndex);
   };
 
   return (
@@ -185,7 +123,7 @@ export function LessonTreeItem({
                   ) : (
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="hover:text-primary w-full truncate text-left text-xs transition-colors"
+                      className="hover:text-primary w-full truncate rounded-md bg-gray-200 p-2 text-left text-xs transition-colors"
                     >
                       {lesson.title || `Lesson ${lessonIndex + 1}`}
                     </button>
@@ -252,103 +190,23 @@ export function LessonTreeItem({
                   <div>
                     <Label className="text-xs">Attached Files</Label>
                     <div className="space-y-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          document
-                            .getElementById(
-                              `file-upload-${chapterIndex}-${lessonIndex}`,
-                            )
-                            ?.click()
-                        }
-                        disabled={uploading}
-                        className="h-7 w-full text-xs"
-                      >
-                        <Upload className="mr-1 h-3 w-3" />
-                        {uploading ? "Uploading..." : "Upload Files"}
-                      </Button>
-
-                      {lesson.attachedFileUrls.length > 0 && (
-                        <div className="space-y-1">
-                          {lesson.attachedFileUrls.map((fileUrl, index) => (
-                            <div
-                              key={index}
-                              className="bg-muted flex items-center gap-2 rounded-md p-1.5 text-xs"
-                            >
-                              <Paperclip className="h-2.5 w-2.5" />
-                              <span className="flex-1 truncate">
-                                {fileUrl.split("/").pop() ||
-                                  `File ${index + 1}`}
-                              </span>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => removeAttachedFile(fileUrl)}
-                                className="h-4 w-4 p-0"
-                              >
-                                <X className="h-2.5 w-2.5" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      <FileDropzone
+                        onFilesSelected={handleSetAttachments}
+                        onFileRemoved={handleDeleteAttachment}
+                      />
                     </div>
-                    <input
-                      id={`file-upload-${chapterIndex}-${lessonIndex}`}
-                      type="file"
-                      multiple
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
                   </div>
 
                   <div>
                     <Label className="text-xs">Video</Label>
-                    <div className="flex items-center gap-1">
-                      <Input
-                        value={lesson.videoUrl || ""}
-                        onChange={(e) =>
-                          updateLesson(chapterIndex, lessonIndex, {
-                            videoUrl: e.target.value,
-                          })
-                        }
-                        placeholder="Video URL"
-                        className="h-7 flex-1 text-xs"
+                    <div className="space-y-2">
+                      <FileDropzone
+                        onFilesSelected={handleSetVideo}
+                        onFileRemoved={handleDeleteVideo}
+                        maxFiles={1}
+                        accept={{ "video/*": [] }}
                       />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          document
-                            .getElementById(
-                              `video-upload-${chapterIndex}-${lessonIndex}`,
-                            )
-                            ?.click()
-                        }
-                        disabled={uploading}
-                        className="h-7 w-7 p-0"
-                      >
-                        <Upload className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={!lesson.videoUrl}
-                        onClick={handleDeleteVideo}
-                        className="h-7 w-7 p-0"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
                     </div>
-
-                    <input
-                      id={`video-upload-${chapterIndex}-${lessonIndex}`}
-                      type="file"
-                      accept="video/*"
-                      onChange={handleVideoUpload}
-                      className="hidden"
-                    />
                   </div>
                 </div>
               </div>

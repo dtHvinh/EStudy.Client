@@ -11,7 +11,6 @@ import {
 } from "@tabler/icons-react";
 import * as React from "react";
 
-import { NavMain } from "@/components/nav-main";
 import { NavUser, NavUserSkeleton } from "@/components/nav-user";
 import {
   Sidebar,
@@ -26,6 +25,7 @@ import { useUserInfo } from "@/hooks/use-user-info";
 import Image from "next/image";
 import Link from "next/link";
 import DataErrorAlert from "./data-error-alert";
+import NavMain from "./nav-main";
 
 const data = {
   navMain: [

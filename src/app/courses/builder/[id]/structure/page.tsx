@@ -15,8 +15,7 @@ export default function Page({
 }) {
   const { id } = use(params);
   const { course } = useCourseDetails(id);
-  const { chapters, resetStructure, pendingUploadFiles } =
-    useCreateCourseStructure();
+  const { chapters, resetStructure } = useCreateCourseStructure();
 
   useEffect(() => {
     return () => {
@@ -40,7 +39,6 @@ export default function Page({
               <Button
                 onClick={() => {
                   console.log("Chapters", chapters);
-                  console.log("Files", pendingUploadFiles);
                 }}
                 variant="ghost"
               >

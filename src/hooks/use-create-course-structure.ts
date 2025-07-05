@@ -10,7 +10,7 @@ export interface CourseChapter {
   lessons: CourseLesson[];
 }
 
-export interface CourseLesson {
+export interface CourseLesson extends LessionAttachment {
   id?: number;
   title: string;
   attachedFileUrls: string[]; // Comma-separated string of file URLs
@@ -22,10 +22,9 @@ export interface CourseLesson {
   videoUrl?: string;
 }
 
-export interface PendingUploadFiles {
-  [path: string]: {
-    file: File;
-  };
+export interface LessionAttachment {
+  attachments: File[];
+  video?: File;
 }
 
 interface CourseStructureStore {
@@ -33,12 +32,12 @@ interface CourseStructureStore {
   chapters: CourseChapter[];
   isLoading: boolean;
   isDirty: boolean;
-  pendingUploadFiles: PendingUploadFiles;
 
   // File upload actions
-  addFile: (path: string, file: File) => void;
-  addFiles: (files: { [path: string]: File }) => void;
-  deleteFile: (path: string) => void;
+  setAttachments: (chapterId: number, lessonId: number, files: File[]) => void;
+  deleteAttachment: (chapterId: number, lessonId: number, file: File) => void;
+  setVideo: (chapterId: number, lessonId: number, video: File) => void;
+  deleteVideo: (chapterId: number, lessonId: number) => void;
 
   // Course structure actions
   setCourseId: (id: number) => void;
@@ -88,24 +87,53 @@ export const useCreateCourseStructure = create<CourseStructureStore>()(
         state.courseId = id;
       }),
 
-    addFile: (name: string, file: File) =>
+    setAttachments: (chapterId, lessonId, files) =>
       set((state) => {
-        state.pendingUploadFiles[name] = { file };
+        const chapter = state.chapters.find((_, i) => i === chapterId);
+        console.log("Chapter", chapter);
+        if (chapter) {
+          const lesson = chapter.lessons.find((_, i) => i === lessonId);
+          if (lesson) {
+            lesson.attachments = files;
+            state.isDirty = true;
+          }
+        }
       }),
 
-    addFiles: (files) =>
+    deleteAttachment: (chapterId, lessonId, file) =>
       set((state) => {
-        state.pendingUploadFiles = {
-          ...state.pendingUploadFiles,
-          ...Object.fromEntries(
-            Object.entries(files).map(([name, file]) => [name, { file }]),
-          ),
-        };
+        const chapter = state.chapters.find((_, i) => i === chapterId);
+        if (chapter) {
+          const lesson = chapter.lessons.find((_, i) => i === lessonId);
+          if (lesson) {
+            lesson.attachments = lesson.attachments.filter((f) => f !== file);
+            state.isDirty = true;
+          }
+        }
       }),
 
-    deleteFile: (name: string) =>
+    setVideo: (chapterId, lessonId, video) =>
       set((state) => {
-        delete state.pendingUploadFiles[name];
+        const chapter = state.chapters.find((_, i) => i === chapterId);
+        if (chapter) {
+          const lesson = chapter.lessons.find((_, i) => i === lessonId);
+          if (lesson) {
+            lesson.video = video;
+            state.isDirty = true;
+          }
+        }
+      }),
+
+    deleteVideo: (chapterId, lessonId) =>
+      set((state) => {
+        const chapter = state.chapters.find((_, i) => i === chapterId);
+        if (chapter) {
+          const lesson = chapter.lessons.find((_, i) => i === lessonId);
+          if (lesson) {
+            lesson.video = undefined;
+            state.isDirty = true;
+          }
+        }
       }),
 
     setChapters: (chapters) =>
@@ -167,6 +195,8 @@ export const useCreateCourseStructure = create<CourseStructureStore>()(
             description: "",
             durationMinutes: 0,
             orderIndex: chapter.lessons.length,
+            attachments: [],
+            video: undefined,
           };
           chapter.lessons.push(newLesson);
           state.isDirty = true;

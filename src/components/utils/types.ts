@@ -19,6 +19,10 @@ export interface LoadingableComponentProps {
   loading?: boolean;
 }
 
+export interface FileMetadata {
+  displayName?: string;
+}
+
 export type ButtonVariant =
   | "link"
   | "default"

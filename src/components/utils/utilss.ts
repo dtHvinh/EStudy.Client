@@ -30,7 +30,7 @@ export function isSelected(path: string, link: string): boolean {
 export function updateElement<T extends { id: number }>(
   array: T[][] | undefined,
   id: number,
-  newData: Partial<T>
+  newData: Partial<T>,
 ): T[][] | undefined {
   if (!array) return array;
 
@@ -52,7 +52,7 @@ export function updateElement<T extends { id: number }>(
 
 export function insertElement<T extends { id: number }>(
   array: T[][] | undefined,
-  newData: T
+  newData: T,
 ): T[][] | undefined {
   if (!array) return array;
 
@@ -113,4 +113,20 @@ export const speakUK = (text: string) => {
 export function playSound(url: string) {
   const audio = new Audio(url);
   audio.play();
+}
+
+function makeid(length: number): string {
+  var result = "";
+  var characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  var charactersLength = characters.length;
+  for (var i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
+
+export function generateFileName(fileName: string): string {
+  var randomstring = require("randomstring");
+  return randomstring.generate(7) + fileName;
 }

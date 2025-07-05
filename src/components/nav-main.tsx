@@ -12,9 +12,10 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { memo } from "react";
 import { isSelectedNav } from "./utils/utilss";
 
-export function NavMain({
+const NavMain = ({
   items,
 }: {
   items: {
@@ -22,7 +23,7 @@ export function NavMain({
     url: string;
     icon?: Icon;
   }[];
-}) {
+}) => {
   const path = usePathname();
 
   return (
@@ -65,4 +66,6 @@ export function NavMain({
       </SidebarGroupContent>
     </SidebarGroup>
   );
-}
+};
+
+export default memo(NavMain);

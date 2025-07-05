@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import TailwindEditor from "../text-editor/text-editor";
 
 interface LessonCardProps {
   lesson: CourseLesson;
@@ -143,11 +144,6 @@ export function LessonCard({
               <span className="flex-1 text-left font-medium">
                 {lesson.title || `Lesson ${lessonIndex + 1}`}
               </span>
-              {lesson.durationMinutes > 0 && (
-                <span className="text-muted-foreground text-sm">
-                  {lesson.durationMinutes}min
-                </span>
-              )}
               {attachedFiles.length > 0 && (
                 <span className="text-muted-foreground flex items-center gap-1 text-sm">
                   <Paperclip className="h-3 w-3" />
@@ -173,25 +169,6 @@ export function LessonCard({
                       })
                     }
                     placeholder="Enter lesson title"
-                  />
-                </div>
-
-                <div>
-                  <Label
-                    htmlFor={`lesson-duration-${chapterIndex}-${lessonIndex}`}
-                  >
-                    Duration (minutes)
-                  </Label>
-                  <Input
-                    id={`lesson-duration-${chapterIndex}-${lessonIndex}`}
-                    type="number"
-                    value={lesson.durationMinutes}
-                    onChange={(e) =>
-                      updateLesson(chapterIndex, lessonIndex, {
-                        durationMinutes: Number.parseInt(e.target.value) || 0,
-                      })
-                    }
-                    min="0"
                   />
                 </div>
               </div>
@@ -221,16 +198,13 @@ export function LessonCard({
                 >
                   Lesson Content
                 </Label>
-                <Textarea
-                  id={`lesson-content-${chapterIndex}-${lessonIndex}`}
-                  value={lesson.content}
-                  onChange={(e) =>
+                <TailwindEditor
+                  className="rounded-md border-[1px]"
+                  onContentUpdate={(_, e) =>
                     updateLesson(chapterIndex, lessonIndex, {
-                      content: e.target.value,
+                      content: e,
                     })
                   }
-                  placeholder="Detailed lesson content, notes, or transcript"
-                  rows={4}
                 />
               </div>
 

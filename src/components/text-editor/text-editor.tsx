@@ -1,6 +1,7 @@
 "use client";
 
 import { useGenericToggle } from "@/hooks/use-generic-toggle";
+import { cn } from "@/lib/utils";
 import {
   EditorBubble,
   EditorCommand,
@@ -26,10 +27,12 @@ const TailwindEditor = ({
   initialContent,
   autoFocus,
   onContentUpdate,
+  className,
 }: {
   initialContent?: JSONContent | string;
   autoFocus?: boolean;
   onContentUpdate?: (jsonContent: JSONContent, htmlContent: string) => void;
+  className?: string;
 }) => {
   const { opened: openNode, openChange: setOpenNode } = useGenericToggle(false);
   const { opened: openLink, openChange: setOpenLink } = useGenericToggle(false);
@@ -37,7 +40,7 @@ const TailwindEditor = ({
     async ({ editor }: { editor: EditorInstance; transaction: any }) => {
       onContentUpdate?.(editor.getJSON(), editor.getHTML());
     },
-    1000
+    1000,
   );
 
   return (
@@ -57,17 +60,18 @@ const TailwindEditor = ({
             keydown: (_view, event) => handleCommandNavigation(event),
           },
           attributes: {
-            class: `prose prose-lg dark:prose-invert prose-headings:font-title font-default focus:outline-none max-w-full`,
+            class: `${cn("prose prose-lg dark:prose-invert prose-headings:font-title font-default focus:outline-none max-w-full", className)}`,
+            spellcheck: "false",
           },
         }}
       >
-        <EditorBubble className="flex w-fit max-w-[90vw] overflow-hidden rounded-md border border-gray-200 bg-background shadow-xl">
+        <EditorBubble className="bg-background flex w-fit max-w-[90vw] overflow-hidden rounded-md border border-gray-200 shadow-xl">
           <NodeSelector open={openNode} onOpenChange={setOpenNode} />
           <LinkSelector open={openLink} onOpenChange={setOpenLink} />
           <TextButtons />
         </EditorBubble>
-        <EditorCommand className="z-50 h-auto max-h-[330px]  w-72 overflow-y-auto rounded-md border border-muted bg-background px-1 py-2 shadow-md transition-all">
-          <EditorCommandEmpty className="px-2 text-muted-foreground">
+        <EditorCommand className="border-muted bg-background z-50 h-auto max-h-[330px] w-72 overflow-y-auto rounded-md border px-1 py-2 shadow-md transition-all">
+          <EditorCommandEmpty className="text-muted-foreground px-2">
             No results
           </EditorCommandEmpty>
           <EditorCommandList>
@@ -75,15 +79,15 @@ const TailwindEditor = ({
               <EditorCommandItem
                 value={item.title}
                 onCommand={(val) => item.command?.(val)}
-                className={`flex w-full items-center space-x-2 rounded-md px-2 py-1 text-left text-sm hover:bg-accent aria-selected:bg-accent `}
+                className={`hover:bg-accent aria-selected:bg-accent flex w-full items-center space-x-2 rounded-md px-2 py-1 text-left text-sm`}
                 key={item.title}
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-md border border-muted bg-background">
+                <div className="border-muted bg-background flex h-10 w-10 items-center justify-center rounded-md border">
                   {item.icon}
                 </div>
                 <div>
                   <p className="font-medium">{item.title}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {item.description}
                   </p>
                 </div>

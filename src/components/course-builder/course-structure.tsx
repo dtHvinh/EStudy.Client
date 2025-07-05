@@ -7,8 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ChapterCard } from "./chapter-card";
 
 export default function CourseStructure() {
-  const { addChapter, getTotalDuration, getTotalLessons, chapters } =
-    useCreateCourseStructure();
+  const { addChapter, chapters } = useCreateCourseStructure();
 
   return (
     <Card>
@@ -18,12 +17,6 @@ export default function CourseStructure() {
             <BookOpen className="h-5 w-5" />
             Course Structure
           </CardTitle>
-          <div className="text-muted-foreground text-sm">
-            {chapters.length} chapter
-            {chapters.length !== 1 ? "s" : ""} • {getTotalLessons()} lesson
-            {getTotalLessons() !== 1 ? "s" : ""} •{" "}
-            {Math.round(getTotalDuration() / 60)}h {getTotalDuration() % 60}m
-          </div>
         </div>
       </CardHeader>
       <CardContent>

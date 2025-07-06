@@ -40,16 +40,19 @@ interface ChapterTreeItemProps {
   chapter: CourseChapter;
   chapterIndex: number;
   dragHandleProps?: any;
+  isExpanded?: boolean;
+  onToggle?: () => void;
 }
 
 export function ChapterTreeItem({
   chapter,
   chapterIndex,
   dragHandleProps,
+  isExpanded = false,
+  onToggle,
 }: ChapterTreeItemProps) {
   const { updateChapter, addLesson, deleteChapter } =
     useCreateCourseStructure();
-  const [isOpen, setIsOpen] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
 
   return (
@@ -65,13 +68,13 @@ export function ChapterTreeItem({
           </div>
 
           <Collapsible
-            open={isOpen}
-            onOpenChange={setIsOpen}
+            open={isExpanded}
+            onOpenChange={onToggle}
             className="flex-1"
           >
             <div className="flex flex-1 items-center gap-2">
               <CollapsibleTrigger className="hover:bg-muted/50 -ml-1 flex items-center gap-2 rounded-md p-1">
-                {isOpen ? (
+                {isExpanded ? (
                   <ChevronDown className="text-muted-foreground h-4 w-4" />
                 ) : (
                   <ChevronRight className="text-muted-foreground h-4 w-4" />

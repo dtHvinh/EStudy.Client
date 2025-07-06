@@ -22,7 +22,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import api from "../utils/requestUtils";
 
-export function CourseHeader({ onSuccess }: { onSuccess?: () => void }) {
+export function CourseHeader() {
   const { courseDetails, updateCourseDetails } = useCreateCourseDetails();
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);

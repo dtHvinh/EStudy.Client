@@ -3,10 +3,20 @@
 import { Button } from "@/components/ui/button";
 import { useCreateCourseStructure } from "@/hooks/use-create-course-structure";
 import { BookOpen, Plus } from "lucide-react";
+import { useState } from "react";
 import { ChapterTreeItem } from "./chapter-tree-item";
 
 export default function CourseStructure() {
   const { addChapter, chapters } = useCreateCourseStructure();
+  const [expandedChapterIndex, setExpandedChapterIndex] = useState<
+    number | null
+  >(null);
+
+  const handleChapterToggle = (chapterIndex: number) => {
+    setExpandedChapterIndex(
+      expandedChapterIndex === chapterIndex ? null : chapterIndex,
+    );
+  };
 
   return (
     <div className="w-full">
@@ -41,6 +51,8 @@ export default function CourseStructure() {
                   key={index}
                   chapter={chapter}
                   chapterIndex={index}
+                  isExpanded={expandedChapterIndex === index}
+                  onToggle={() => handleChapterToggle(index)}
                 />
               ))}
             </div>

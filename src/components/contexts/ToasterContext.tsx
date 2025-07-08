@@ -42,6 +42,7 @@ export function ToasterProvider({ children }: { children: React.ReactNode }) {
         position={position}
         {...settings}
         theme={theme as "light" | "dark" | "system"}
+        richColors
       />
       {children}
     </ToasterContext.Provider>

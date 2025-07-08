@@ -10,10 +10,10 @@ export interface CourseChapter {
   lessons: CourseLesson[];
 }
 
-export interface CourseLesson extends LessionAttachment {
+export interface CourseLesson {
   id?: number;
   title: string;
-  attachedFileUrls: string[]; // Comma-separated string of file URLs
+  attachedFileUrls: string[];
   content: string;
   description?: string;
   durationMinutes: number;
@@ -22,32 +22,38 @@ export interface CourseLesson extends LessionAttachment {
   videoUrl?: string;
 }
 
-export interface LessionAttachment {
-  attachments: File[];
-  video?: File;
-}
-
-interface CourseStructureStore {
+export interface CourseStructureStore {
   courseId?: number;
   chapters: CourseChapter[];
   isLoading: boolean;
   isDirty: boolean;
 
   // File upload actions
-  setAttachments: (chapterId: number, lessonId: number, files: File[]) => void;
-  deleteAttachment: (chapterId: number, lessonId: number, file: File) => void;
-  setVideo: (chapterId: number, lessonId: number, video: File) => void;
+  setAttachmentUrls: (
+    chapterId: number,
+    lessonId: number,
+    paths: string[],
+  ) => void;
+  deleteAttachment: (chapterId: number, lessonId: number, path: string) => void;
+  setVideoUrl: (chapterId: number, lessonId: number, path: string) => void;
   deleteVideo: (chapterId: number, lessonId: number) => void;
+  clearAttachments: (chapterId: number, lessonId: number) => void;
 
   // Course structure actions
   setCourseId: (id: number) => void;
   setChapters: (chapters: CourseChapter[]) => void;
 
   // Chapter actions
+  getChapters: () => CourseChapter[];
   addChapter: () => void;
   updateChapter: (chapterId: number, updates: Partial<CourseChapter>) => void;
   deleteChapter: (chapterId: number) => void;
   reorderChapters: (startIndex: number, endIndex: number) => void;
+  getChapterLessonLength: (chapterIndex: number) => number;
+  getChapterDescription: (chapterIndex: number) => string;
+  getChapterIsPublished: (chapterIndex: number) => boolean;
+  getChapterLessons: (chapterIndex: number) => CourseLesson[];
+  getChapterTitle: (chapterIndex: number) => string;
 
   // Lesson actions
   addLesson: (chapterId: number) => void;
@@ -87,54 +93,103 @@ export const useCreateCourseStructure = create<CourseStructureStore>()(
         state.courseId = id;
       }),
 
-    setAttachments: (chapterId, lessonId, files) =>
+    setAttachmentUrls(chapterId, lessonId, paths) {
       set((state) => {
         const chapter = state.chapters.find((_, i) => i === chapterId);
-        console.log("Chapter", chapter);
         if (chapter) {
           const lesson = chapter.lessons.find((_, i) => i === lessonId);
           if (lesson) {
-            lesson.attachments = files;
+            lesson.attachedFileUrls = paths;
             state.isDirty = true;
           }
         }
-      }),
+      });
+    },
+    deleteAttachment(chapterId, lessonId, path) {
+      set((state) => {
+        const chapter = state.chapters.find((_, i) => i === chapterId);
+        if (chapter) {
+          const lesson = chapter.lessons.find((_, i) => i === lessonId);
+          if (lesson) {
+            lesson.attachedFileUrls = lesson.attachedFileUrls.filter(
+              (url) => url !== path,
+            );
+            state.isDirty = true;
+          }
+        }
+      });
+    },
 
-    deleteAttachment: (chapterId, lessonId, file) =>
+    clearAttachments(chapterId, lessonId) {
       set((state) => {
         const chapter = state.chapters.find((_, i) => i === chapterId);
         if (chapter) {
           const lesson = chapter.lessons.find((_, i) => i === lessonId);
           if (lesson) {
-            lesson.attachments = lesson.attachments.filter((f) => f !== file);
+            lesson.attachedFileUrls = [];
             state.isDirty = true;
           }
         }
-      }),
+      });
+    },
 
-    setVideo: (chapterId, lessonId, video) =>
+    setVideoUrl(chapterId, lessonId, path) {
       set((state) => {
         const chapter = state.chapters.find((_, i) => i === chapterId);
         if (chapter) {
           const lesson = chapter.lessons.find((_, i) => i === lessonId);
           if (lesson) {
-            lesson.video = video;
+            lesson.videoUrl = path;
             state.isDirty = true;
           }
         }
-      }),
+      });
+    },
 
-    deleteVideo: (chapterId, lessonId) =>
+    deleteVideo(chapterId, lessonId) {
       set((state) => {
         const chapter = state.chapters.find((_, i) => i === chapterId);
         if (chapter) {
           const lesson = chapter.lessons.find((_, i) => i === lessonId);
           if (lesson) {
-            lesson.video = undefined;
+            lesson.videoUrl = undefined;
             state.isDirty = true;
           }
         }
-      }),
+      });
+    },
+
+    getChapters() {
+      const state = get();
+      return state.chapters;
+    },
+
+    getChapterLessonLength: (chapterIndex) => {
+      const state = get();
+      return state.chapters[chapterIndex]?.lessons.length || 0;
+    },
+
+    getChapterDescription: (chapterIndex) => {
+      const state = get();
+      return state.chapters[chapterIndex].description || "";
+    },
+
+    getChapterIsPublished: (chapterIndex) => {
+      const state = get();
+      return state.chapters[chapterIndex].isPublished || false;
+    },
+
+    getChapterTitle: (chapterIndex) => {
+      const state = get();
+      return (
+        state.chapters[chapterIndex].title || `Chapter ${chapterIndex + 1}`
+      );
+    },
+
+    getChapterLessons: (chapterIndex) => {
+      const state = get();
+      return state.chapters[chapterIndex].lessons || [];
+    },
 
     setChapters: (chapters) =>
       set((state) => {
@@ -195,8 +250,6 @@ export const useCreateCourseStructure = create<CourseStructureStore>()(
             description: "",
             durationMinutes: 0,
             orderIndex: chapter.lessons.length,
-            attachments: [],
-            video: undefined,
           };
           chapter.lessons.push(newLesson);
           state.isDirty = true;

@@ -17,14 +17,10 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  type CourseChapter,
-  useCreateCourseStructure,
-} from "@/hooks/use-create-course-structure";
+import { useCreateCourseStructure } from "@/hooks/use-create-course-structure";
 import {
   BookOpen,
   ChevronDown,
@@ -33,11 +29,12 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
+import { useShallow } from "zustand/react/shallow";
+import ChapterTitle from "./chapter-tree-item-title";
 import { LessonTreeItem } from "./lession-tree-item";
 
 interface ChapterTreeItemProps {
-  chapter: CourseChapter;
   chapterIndex: number;
   dragHandleProps?: any;
   isExpanded?: boolean;
@@ -45,15 +42,35 @@ interface ChapterTreeItemProps {
 }
 
 export function ChapterTreeItem({
-  chapter,
   chapterIndex,
   dragHandleProps,
   isExpanded = false,
   onToggle,
 }: ChapterTreeItemProps) {
-  const { updateChapter, addLesson, deleteChapter } =
-    useCreateCourseStructure();
-  const [isEditing, setIsEditing] = useState(false);
+  const {
+    updateChapter,
+    addLesson,
+    deleteChapter,
+    getChapterLessonLength,
+    getChapterDescription,
+    getChapterIsPublished,
+    getChapterLessons,
+  } = useCreateCourseStructure(
+    useShallow((state) => ({
+      updateChapter: state.updateChapter,
+      addLesson: state.addLesson,
+      deleteChapter: state.deleteChapter,
+      getChapterLessonLength: state.getChapterLessonLength,
+      getChapterDescription: state.getChapterDescription,
+      getChapterIsPublished: state.getChapterIsPublished,
+      getChapterLessons: state.getChapterLessons,
+    })),
+  );
+  const d = useDebouncedCallback((e) => {
+    updateChapter(chapterIndex, {
+      description: e.target.value,
+    });
+  }, 500);
 
   return (
     <div className="group">
@@ -84,35 +101,14 @@ export function ChapterTreeItem({
               <div className="flex min-w-0 flex-1 items-center gap-2">
                 <BookOpen className="text-primary h-4 w-4 flex-shrink-0" />
                 <div className="min-w-0 flex-1">
-                  {isEditing ? (
-                    <Input
-                      spellCheck="false"
-                      value={chapter.title}
-                      onChange={(e) =>
-                        updateChapter(chapterIndex, { title: e.target.value })
-                      }
-                      onBlur={() => setIsEditing(false)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") setIsEditing(false);
-                      }}
-                      className="h-8 text-sm font-medium"
-                      autoFocus
-                    />
-                  ) : (
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="hover:text-primary w-full truncate text-left text-sm font-medium transition-colors"
-                    >
-                      {chapter.title || `Chapter ${chapterIndex + 1}`}
-                    </button>
-                  )}
+                  <ChapterTitle chapterIndex={chapterIndex} />
                 </div>
               </div>
 
               <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                 <span className="text-muted-foreground bg-muted rounded-full px-2 py-1 text-xs">
-                  {chapter.lessons.length} lesson
-                  {chapter.lessons.length !== 1 ? "s" : ""}
+                  {getChapterLessonLength(chapterIndex)} lesson
+                  {getChapterLessonLength(chapterIndex) !== 1 ? "s" : ""}
                 </span>
 
                 <AlertDialog>
@@ -160,12 +156,8 @@ export function ChapterTreeItem({
                     <Textarea
                       spellCheck="false"
                       id={`chapter-description-${chapterIndex}`}
-                      value={chapter.description || ""}
-                      onChange={(e) =>
-                        updateChapter(chapterIndex, {
-                          description: e.target.value,
-                        })
-                      }
+                      defaultValue={getChapterDescription(chapterIndex)}
+                      onChange={d}
                       placeholder="Describe what students will learn in this chapter"
                       rows={2}
                       className="text-sm"
@@ -175,7 +167,7 @@ export function ChapterTreeItem({
                   <div className="flex items-center space-x-2">
                     <Switch
                       id={`chapter-published-${chapterIndex}`}
-                      checked={chapter.isPublished}
+                      checked={getChapterIsPublished(chapterIndex)}
                       onCheckedChange={(checked) =>
                         updateChapter(chapterIndex, { isPublished: checked })
                       }
@@ -191,14 +183,16 @@ export function ChapterTreeItem({
 
                 {/* Lessons */}
                 <div className="space-y-1">
-                  {chapter.lessons.map((lesson, lessonIndex) => (
-                    <LessonTreeItem
-                      key={lessonIndex}
-                      lesson={lesson}
-                      chapterIndex={chapterIndex}
-                      lessonIndex={lessonIndex}
-                    />
-                  ))}
+                  {getChapterLessons(chapterIndex).map(
+                    (lesson, lessonIndex) => (
+                      <LessonTreeItem
+                        key={lessonIndex}
+                        lesson={lesson}
+                        chapterIndex={chapterIndex}
+                        lessonIndex={lessonIndex}
+                      />
+                    ),
+                  )}
 
                   <Button
                     variant="ghost"

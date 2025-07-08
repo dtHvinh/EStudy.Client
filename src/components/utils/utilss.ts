@@ -126,7 +126,24 @@ function makeid(length: number): string {
   return result;
 }
 
-export function generateFileName(fileName: string): string {
-  var randomstring = require("randomstring");
-  return randomstring.generate(7) + fileName;
+export function generateFileName(originalName: string): string {
+  const extension = originalName.includes(".")
+    ? "." + originalName.split(".").pop()
+    : "";
+
+  const baseName = originalName.replace(/\.[^/.]+$/, "");
+
+  const safeBase = baseName
+    .toLowerCase()
+    .normalize("NFD") // remove accents
+    .replace(/[\u0300-\u036f]/g, "") // remove diacritics
+    .replace(/[^a-z0-9\-]+/g, "-") // replace unsafe chars with "-"
+    .replace(/-+/g, "-") // remove repeated dashes
+    .replace(/^-|-$/g, ""); // trim dashes
+
+  const randomstring = require("randomstring");
+
+  const random = randomstring.generate(7);
+
+  return `${random}-${safeBase}${extension}`;
 }

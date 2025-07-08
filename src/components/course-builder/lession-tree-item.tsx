@@ -14,6 +14,7 @@ import {
   type CourseLesson,
   useCreateCourseStructure,
 } from "@/hooks/use-create-course-structure";
+import { useStorage } from "@/hooks/use-storage";
 import {
   ChevronDown,
   ChevronRight,
@@ -35,6 +36,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
+import { generateFileName } from "../utils/utilss";
 
 interface LessonTreeItemProps {
   lesson: CourseLesson;
@@ -50,29 +52,55 @@ export function LessonTreeItem({
   dragHandleProps,
 }: LessonTreeItemProps) {
   const [isOpen, setIsOpen] = useState(true);
+  const { deleteResource, uploadFile, removeFiles, getFilesUrl } = useStorage();
+  const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const {
     updateLesson,
     deleteLesson,
-    setAttachments,
-    deleteAttachment,
-    setVideo,
+    setAttachmentUrls,
+    clearAttachments,
+    setVideoUrl,
     deleteVideo,
   } = useCreateCourseStructure();
 
-  const handleSetAttachments = (files: File[]) => {
-    setAttachments(chapterIndex, lessonIndex, files);
+  const handleSetAttachments = async (files: File[]) => {
+    if (files.length === 0) return;
+    setIsLoading(true);
+    try {
+      if (lesson.attachedFileUrls.length > 0) {
+        await removeFiles(lesson.attachedFileUrls);
+      }
+
+      const tasks = Array.from(files).map((file) => {
+        return uploadFile(file, generateFileName(file.name));
+      });
+
+      const urls = await Promise.all(tasks);
+      setAttachmentUrls(chapterIndex, lessonIndex, urls);
+    } catch (error) {
+      console.error("Failed to handle attachments:", error);
+    }
+    setIsLoading(false);
   };
 
-  const handleSetVideo = (file: File[]) => {
-    setVideo(chapterIndex, lessonIndex, file[0]);
+  const handleSetVideo = async (file: File[]) => {
+    if (file.length === 0) return;
+    setIsLoading(true);
+    const path = await uploadFile(file[0], generateFileName(file[0].name));
+    setIsLoading(false);
+    setVideoUrl(chapterIndex, lessonIndex, path);
   };
 
-  const handleDeleteAttachment = (file: File) => {
-    deleteAttachment(chapterIndex, lessonIndex, file);
+  const handleDeleteAttachments = async () => {
+    clearAttachments(chapterIndex, lessonIndex);
+    setIsLoading(true);
+    await removeFiles(lesson.attachedFileUrls);
+    setIsLoading(false);
   };
 
-  const handleDeleteVideo = () => {
+  const handleDeleteVideo = async () => {
+    deleteResource(lesson.videoUrl!);
     deleteVideo(chapterIndex, lessonIndex);
   };
 
@@ -92,7 +120,7 @@ export function LessonTreeItem({
             onOpenChange={setIsOpen}
             className="flex-1"
           >
-            <div className="flex flex-1 items-center gap-2">
+            <div className="flex flex-1 items-end gap-2">
               <CollapsibleTrigger className="hover:bg-muted/50 -ml-1 flex items-center gap-2 rounded-md p-1">
                 {isOpen ? (
                   <ChevronDown className="text-muted-foreground h-3 w-3" />
@@ -130,7 +158,26 @@ export function LessonTreeItem({
                   )}
                 </div>
               </div>
-
+              <div>
+                <Label
+                  htmlFor={`lesson-em-${chapterIndex}-${lessonIndex}`}
+                  className="text-xs"
+                >
+                  Duration minutes
+                </Label>
+                <Input
+                  type="number"
+                  spellCheck="false"
+                  id={`lesson-em-${chapterIndex}-${lessonIndex}`}
+                  value={lesson.durationMinutes || ""}
+                  onChange={(e) =>
+                    updateLesson(chapterIndex, lessonIndex, {
+                      durationMinutes: parseInt(e.target.value),
+                    })
+                  }
+                  className="h-7 w-28 text-xs"
+                />
+              </div>
               <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                 {lesson.attachedFileUrls.length > 0 && (
                   <span className="text-muted-foreground bg-muted flex items-center gap-1 rounded px-1.5 py-0.5 text-xs">
@@ -178,6 +225,7 @@ export function LessonTreeItem({
                   </Label>
                   <TailwindEditor
                     className="rounded-md border text-sm"
+                    initialContent={lesson.content || ""}
                     onContentUpdate={(_, e) =>
                       updateLesson(chapterIndex, lessonIndex, {
                         content: e,
@@ -192,7 +240,9 @@ export function LessonTreeItem({
                     <div className="space-y-2">
                       <FileDropzone
                         onFilesSelected={handleSetAttachments}
-                        onFileRemoved={handleDeleteAttachment}
+                        onFilesRemoved={handleDeleteAttachments}
+                        accept={{ "application/*": [] }}
+                        previews={getFilesUrl(lesson.attachedFileUrls)}
                       />
                     </div>
                   </div>
@@ -202,9 +252,12 @@ export function LessonTreeItem({
                     <div className="space-y-2">
                       <FileDropzone
                         onFilesSelected={handleSetVideo}
-                        onFileRemoved={handleDeleteVideo}
+                        onFilesRemoved={handleDeleteVideo}
                         maxFiles={1}
                         accept={{ "video/*": [] }}
+                        previews={
+                          lesson.videoUrl ? getFilesUrl([lesson.videoUrl]) : []
+                        }
                       />
                     </div>
                   </div>

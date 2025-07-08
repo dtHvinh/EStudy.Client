@@ -5,30 +5,36 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Eye, File, X } from "lucide-react";
+import { useStorage } from "@/hooks/use-storage";
+import { Eye, File, Trash2 } from "lucide-react";
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { FileWithPath, useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 
 type FileDropzoneProps = {
   onFilesSelected?: (files: File[]) => void;
-  onFileRemoved?: (file: File) => void;
+  onFilesRemoved?: (file: File[], url: string[]) => void;
   accept?: Record<string, string[]>;
   maxFiles?: number;
+  previews?: string[];
 };
 
 const FileDropzone: React.FC<FileDropzoneProps> = ({
   onFilesSelected,
-  onFileRemoved,
+  onFilesRemoved,
   accept = {
     "image/*": [],
     "video/*": [],
     "application/pdf": [],
+    "application/*": [],
+    "text/*": [],
+    "audio/*": [],
   },
   maxFiles = 5,
+  previews = [],
 }) => {
   const [files, setFiles] = useState<FileWithPath[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
+  const { getFileRelativeUrl } = useStorage();
   const [viewingFile, setViewingFile] = useState<{
     file: FileWithPath;
     url: string;
@@ -38,10 +44,10 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
   const onDrop = useCallback(
     (acceptedFiles: FileWithPath[]) => {
       setFiles(acceptedFiles);
-      const previewUrls = acceptedFiles.map((file) =>
-        URL.createObjectURL(file),
-      );
-      setPreviews(previewUrls);
+      // const previewUrls = acceptedFiles.map((file) =>
+      //   URL.createObjectURL(file),
+      // );
+      // setPreviews(previewUrls);
       onFilesSelected?.(acceptedFiles);
     },
     [onFilesSelected],
@@ -60,24 +66,18 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
     setViewingFile({ file, url, index });
   };
 
-  const handleRemoveFile = (indexToRemove: number) => {
-    // Revoke the URL to free up memory
-    URL.revokeObjectURL(previews[indexToRemove]);
+  const handleRemoveAllFiles = () => {
+    previews.forEach((url) => URL.revokeObjectURL(url));
 
-    const fileToRemove = files[indexToRemove];
-    onFileRemoved?.(fileToRemove);
+    if (onFilesRemoved) {
+      const filesToRemove = files.slice(); // Create a copy of files array
+      const urlsToRemove = previews.map((url) => getFileRelativeUrl(url));
+      onFilesRemoved?.(filesToRemove, urlsToRemove);
+    }
 
-    // Remove the file and preview at the specified index
-    const newFiles = files.filter((_, index) => index !== indexToRemove);
-    const newPreviews = previews.filter((_, index) => index !== indexToRemove);
-
-    setFiles(newFiles);
-    setPreviews(newPreviews);
-
-    // Notify parent component of the updated file list
-    onFilesSelected?.(newFiles);
-
-    toast.success("File removed successfully");
+    setFiles([]);
+    onFilesSelected?.([]);
+    toast.success(`${files.length} file(s) removed successfully`);
   };
 
   const handleCloseViewer = () => {
@@ -125,9 +125,20 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
 
       {previews.length > 0 && (
         <div className="mt-4 space-y-3">
-          <h3 className="text-foreground text-sm font-medium">
-            Uploaded Files ({previews.length})
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-foreground text-sm font-medium">
+              Uploaded Files ({previews.length})
+            </h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRemoveAllFiles}
+              className="text-destructive hover:text-destructive/80 hover:bg-destructive/10 gap-2 transition-colors"
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete All
+            </Button>
+          </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {previews.map((url, i) => {
               const file = files[i];
@@ -142,16 +153,6 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
                   key={url}
                   className="group bg-card relative overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-md"
                 >
-                  {/* Remove Button */}
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleRemoveFile(i)}
-                    className="absolute top-2 right-2 z-10 h-6 w-6 p-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-
                   {/* Preview Area */}
                   <div className="bg-muted/50 relative flex aspect-square items-center justify-center overflow-hidden">
                     {isImage && (

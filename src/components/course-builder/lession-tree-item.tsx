@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import { useShallow } from "zustand/react/shallow";
 import FileDropzone from "../file-dropzone";
 import {
   AlertDialog,
@@ -70,7 +71,19 @@ export function LessonTreeItem({
     clearAttachments,
     setVideoUrl,
     deleteVideo,
-  } = useCreateCourseStructure();
+    chapter,
+  } = useCreateCourseStructure(
+    useShallow((state) => ({
+      courseId: state.courseId,
+      updateLesson: state.updateLesson,
+      deleteLesson: state.deleteLesson,
+      setAttachmentUrls: state.setAttachmentUrls,
+      clearAttachments: state.clearAttachments,
+      setVideoUrl: state.setVideoUrl,
+      deleteVideo: state.deleteVideo,
+      chapter: state.chapters[chapterIndex],
+    })),
+  );
 
   const handleSetAttachments = async (files: File[]) => {
     if (files.length === 0) return;
@@ -82,7 +95,9 @@ export function LessonTreeItem({
       const tasks = Array.from(files).map((file) => {
         return uploadFile(
           file,
-          [`course_id_${courseId}`, file.name].filter(Boolean).join("/"),
+          [`course_id_${courseId}`, `order_idx_${lesson.orderIndex}`, file.name]
+            .filter(Boolean)
+            .join("/"),
         );
       });
 
@@ -97,7 +112,9 @@ export function LessonTreeItem({
     if (files.length === 0) return;
     const path = await uploadFile(
       files[0],
-      [`course_id_${courseId}`, files[0].name].filter(Boolean).join("/"),
+      [`course_id_${courseId}`, `order_idx_${lesson.orderIndex}`, files[0].name]
+        .filter(Boolean)
+        .join("/"),
     );
     setVideoUrl(chapterIndex, lessonIndex, path);
   };
@@ -138,6 +155,10 @@ export function LessonTreeItem({
               </CollapsibleTrigger>
 
               <div className="flex min-w-0 flex-1 items-center gap-2">
+                <span>
+                  Chapter:{" "}
+                  <span className="font-semibold">{chapter.title}</span>
+                </span>
                 <Play className="text-primary/70 h-3 w-3 flex-shrink-0" />
                 <div className="min-w-0 flex-1">
                   {isEditing ? (

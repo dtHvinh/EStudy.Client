@@ -27,6 +27,11 @@ export interface ResourceType {
   url: string;
 }
 
+export interface ResourceMetadata {
+  originalName?: string;
+  [key: string]: any;
+}
+
 export function useStorage({
   bucket = "estudy",
   prefix = "resources",
@@ -59,17 +64,17 @@ export function useStorage({
       [prefix, getId(), path].filter(Boolean).join("/"),
       file,
       {
-        cacheControl: "3600",
+        cacheControl: "1800",
         upsert: false,
       },
     );
-
     if (error) throw error;
     return data.path;
   }
 
   async function removeFiles(paths: string[]) {
     const { error } = await bucketAPI.remove(paths);
+    console.log("Removing files:", paths);
     if (error) throw error;
   }
 
@@ -93,6 +98,23 @@ export function useStorage({
 
   function getFilePath(name: string) {
     return [prefix, getId(), name].filter(Boolean).join("/");
+  }
+
+  async function getFileMetadata(
+    fileName: string,
+  ): Promise<ResourceMetadata | null> {
+    const { data } = await bucketAPI.list(
+      [prefix, getId()].filter(Boolean).join("/"),
+      {
+        search: fileName,
+        limit: 1,
+      },
+    );
+    return data?.[0].metadata || null;
+  }
+
+  function getFileNameFromPath(path: string): string {
+    return path.split("/").pop() || "Unknown File";
   }
 
   async function getResources(limit = 20, offset = 0): Promise<ResourceType[]> {
@@ -134,9 +156,11 @@ export function useStorage({
     getFileUrl,
     getResources,
     deleteResource,
+    getFileMetadata,
     getFilePath,
     removeFiles,
     getFilesUrl,
     getFileRelativeUrl,
+    getFileNameFromPath,
   };
 }

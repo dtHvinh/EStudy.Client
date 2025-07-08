@@ -70,7 +70,7 @@ export default function MediaRenderer({
 
   const ext = url.split(".").pop()?.toLowerCase() || "";
   const filename = url.split("/").pop()?.split("?")[0] || "media";
-  const displayTitle = title || filename;
+  const [displayTitle, setDisplayTitle] = useState(title || filename);
 
   const isImage = [
     "jpg",
@@ -320,7 +320,7 @@ export default function MediaRenderer({
                 <Download className="h-4 w-4" />
               )}
             </Button>
-            <DeleteButton onClick={onDelete} />
+            {onDelete && <DeleteButton onClick={onDelete} />}
           </div>
         </div>
       </div>

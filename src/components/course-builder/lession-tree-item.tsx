@@ -24,6 +24,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
 import FileDropzone from "../file-dropzone";
 import {
   AlertDialog,
@@ -36,7 +37,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
-import { generateFileName } from "../utils/utilss";
 
 interface LessonTreeItemProps {
   lesson: CourseLesson;
@@ -53,9 +53,17 @@ export function LessonTreeItem({
 }: LessonTreeItemProps) {
   const [isOpen, setIsOpen] = useState(true);
   const { deleteResource, uploadFile, removeFiles, getFilesUrl } = useStorage();
-  const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const debounceUpdateLesson = useDebouncedCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      updateLesson(chapterIndex, lessonIndex, {
+        description: e.target.value,
+      });
+    },
+    500,
+  );
   const {
+    courseId,
     updateLesson,
     deleteLesson,
     setAttachmentUrls,
@@ -66,14 +74,16 @@ export function LessonTreeItem({
 
   const handleSetAttachments = async (files: File[]) => {
     if (files.length === 0) return;
-    setIsLoading(true);
     try {
       if (lesson.attachedFileUrls.length > 0) {
         await removeFiles(lesson.attachedFileUrls);
       }
 
       const tasks = Array.from(files).map((file) => {
-        return uploadFile(file, generateFileName(file.name));
+        return uploadFile(
+          file,
+          [`course_id_${courseId}`, file.name].filter(Boolean).join("/"),
+        );
       });
 
       const urls = await Promise.all(tasks);
@@ -81,22 +91,20 @@ export function LessonTreeItem({
     } catch (error) {
       console.error("Failed to handle attachments:", error);
     }
-    setIsLoading(false);
   };
 
-  const handleSetVideo = async (file: File[]) => {
-    if (file.length === 0) return;
-    setIsLoading(true);
-    const path = await uploadFile(file[0], generateFileName(file[0].name));
-    setIsLoading(false);
+  const handleSetVideo = async (files: File[]) => {
+    if (files.length === 0) return;
+    const path = await uploadFile(
+      files[0],
+      [`course_id_${courseId}`, files[0].name].filter(Boolean).join("/"),
+    );
     setVideoUrl(chapterIndex, lessonIndex, path);
   };
 
   const handleDeleteAttachments = async () => {
     clearAttachments(chapterIndex, lessonIndex);
-    setIsLoading(true);
     await removeFiles(lesson.attachedFileUrls);
-    setIsLoading(false);
   };
 
   const handleDeleteVideo = async () => {
@@ -204,12 +212,8 @@ export function LessonTreeItem({
                   <Textarea
                     spellCheck="false"
                     id={`lesson-description-${chapterIndex}-${lessonIndex}`}
-                    value={lesson.description || ""}
-                    onChange={(e) =>
-                      updateLesson(chapterIndex, lessonIndex, {
-                        description: e.target.value,
-                      })
-                    }
+                    defaultValue={lesson.description || ""}
+                    onChange={debounceUpdateLesson}
                     placeholder="Brief description of the lesson"
                     rows={2}
                     className="text-xs"
@@ -241,7 +245,10 @@ export function LessonTreeItem({
                       <FileDropzone
                         onFilesSelected={handleSetAttachments}
                         onFilesRemoved={handleDeleteAttachments}
-                        accept={{ "application/*": [] }}
+                        accept={{
+                          "application/*": [],
+                          "text/*": [],
+                        }}
                         previews={getFilesUrl(lesson.attachedFileUrls)}
                       />
                     </div>

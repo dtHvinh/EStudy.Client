@@ -40,7 +40,7 @@ const TailwindEditor = ({
     async ({ editor }: { editor: EditorInstance; transaction: any }) => {
       onContentUpdate?.(editor.getJSON(), editor.getHTML());
     },
-    1000,
+    500,
   );
 
   return (

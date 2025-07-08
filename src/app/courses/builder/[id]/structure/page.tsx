@@ -35,10 +35,14 @@ export default function Page({
   const isDirty = useCreateCourseStructure(
     useShallow((state) => state.isDirty),
   );
+  const setCourseId = useCreateCourseStructure(
+    useShallow((state) => state.setCourseId),
+  );
 
   useEffect(() => {
     if (courseStructure) {
       setChapters(courseStructure.chapters);
+      setCourseId(courseStructure.courseId);
     }
   }, [courseStructure]);
 

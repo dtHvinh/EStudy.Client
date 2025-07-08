@@ -190,17 +190,17 @@ export function CourseCard({
           <Separator />
           <CardFooter className="px-5 pt-0">
             <div className="flex w-full gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onViewDetails?.(course.id!)}
+                className="flex-1"
+              >
+                <BookOpen className="mr-2 h-4 w-4" />
+                View Details
+              </Button>
               {course.isPublished ? (
                 <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onViewDetails?.(course.id!)}
-                    className="flex-1"
-                  >
-                    <BookOpen className="mr-2 h-4 w-4" />
-                    View Details
-                  </Button>
                   <Button
                     size="sm"
                     onClick={() => onEnroll?.(course.id!)}
@@ -211,7 +211,7 @@ export function CourseCard({
                   </Button>
                 </>
               ) : (
-                <Button className="w-full" asChild>
+                <Button size={"sm"} asChild>
                   <RelativeLink href={`/builder/${course.id}/structure`}>
                     Edit Course
                   </RelativeLink>

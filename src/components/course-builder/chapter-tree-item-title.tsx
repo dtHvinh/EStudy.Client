@@ -1,4 +1,4 @@
-import { useCreateCourseStructure } from "@/hooks/use-create-course-structure";
+import { useEditCourseStructure } from "@/hooks/use-edit-course-structure";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { useShallow } from "zustand/react/shallow";
@@ -12,7 +12,7 @@ const ChapterTitle = ({ chapterIndex }: { chapterIndex: number }) => {
     });
   }, 500);
 
-  const { updateChapter, getChapterTitle } = useCreateCourseStructure(
+  const { updateChapter, getChapterTitle } = useEditCourseStructure(
     useShallow((state) => ({
       updateChapter: state.updateChapter,
       getChapterTitle: state.getChapterTitle,

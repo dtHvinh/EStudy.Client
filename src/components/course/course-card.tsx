@@ -14,7 +14,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
-import { GetCourseType } from "@/hooks/use-get-course";
+import { GetMyCourseType } from "@/hooks/use-get-my-course";
 import {
   BookOpen,
   ChevronDown,
@@ -29,11 +29,12 @@ import { useState } from "react";
 import RelativeLink from "../relative-link";
 
 interface CourseCardProps {
-  course: GetCourseType;
+  course: GetMyCourseType;
   onEnroll?: (courseId: number) => void;
   onViewDetails?: (courseId: number) => void;
   showActions?: boolean;
   compact?: boolean;
+  isReadonly?: boolean;
 }
 
 export function CourseCard({
@@ -42,6 +43,7 @@ export function CourseCard({
   onViewDetails,
   showActions = true,
   compact = false,
+  isReadonly = false,
 }: CourseCardProps) {
   const [showDetails, setShowDetails] = useState(false);
 
@@ -190,16 +192,28 @@ export function CourseCard({
           <Separator />
           <CardFooter className="px-5 pt-0">
             <div className="flex w-full gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onViewDetails?.(course.id!)}
-                className="flex-1"
-              >
-                <BookOpen className="mr-2 h-4 w-4" />
-                View Details
-              </Button>
-              {course.isPublished ? (
+              {onViewDetails ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onViewDetails?.(course.id!)}
+                  className="flex-1"
+                >
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  View Details
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" className="flex-1">
+                  <RelativeLink
+                    href={`${course.id}`}
+                    className="items-centercourse.id flex"
+                  >
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    View Details
+                  </RelativeLink>
+                </Button>
+              )}
+              {isReadonly && course.isPublished ? (
                 <>
                   <Button
                     size="sm"

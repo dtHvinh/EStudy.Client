@@ -1,7 +1,7 @@
 import api from "@/components/utils/requestUtils";
 import useSWRInfinite from "swr/infinite";
 
-export type GetCourseType = {
+export type GetMyCourseType = {
   id?: number;
   title: string;
   description: string;
@@ -15,9 +15,10 @@ export type GetCourseType = {
   language: string;
   estimatedDurationHours: number;
   studentsCount: number;
+  isReadOnly?: boolean;
 };
 
-export default function useGetCourse() {
+export default function useGetMyCourse() {
   const getKey = (pageIndex: number, previousPageData: any) => {
     if (previousPageData && !previousPageData.length) return null; // No more
     return `/api/courses/mine?page=${pageIndex + 1}&pageSize=10`;
@@ -28,7 +29,7 @@ export default function useGetCourse() {
     error,
     isLoading,
     setSize,
-  } = useSWRInfinite<GetCourseType[]>(getKey, api.get, {
+  } = useSWRInfinite<GetMyCourseType[]>(getKey, api.get, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
   });

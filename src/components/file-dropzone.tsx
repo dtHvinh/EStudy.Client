@@ -31,7 +31,6 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
   isLoading = false,
 }) => {
   const { getFileRelativeUrl } = useStorage();
-
   const onDrop = useCallback(
     (acceptedFiles: FileWithPath[]) => {
       onFilesSelected?.(acceptedFiles);

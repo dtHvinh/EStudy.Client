@@ -1,10 +1,10 @@
 "use client";
 
-import { GetCourseType } from "@/hooks/use-get-course";
+import { GetMyCourseType } from "@/hooks/use-get-my-course";
 import { CourseCard } from "./course-card";
 
 interface CourseGridProps {
-  courses: GetCourseType[];
+  courses: GetMyCourseType[];
   onEnroll?: (courseId: number) => void;
   onViewDetails?: (courseId: number) => void;
   loading?: boolean;
@@ -47,6 +47,7 @@ export function CourseGrid({
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {courses.map((course) => (
         <CourseCard
+          isReadonly={false}
           key={course.id}
           course={course}
           onEnroll={onEnroll}

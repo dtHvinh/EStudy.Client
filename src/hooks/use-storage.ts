@@ -72,6 +72,14 @@ export function useStorage({
     return data.path;
   }
 
+  async function downloadFile(fullPath: string): Promise<Blob> {
+    const { data, error } = await bucketAPI.download(
+      getFileRelativeUrl(fullPath),
+    );
+    if (error) throw error;
+    return data;
+  }
+
   async function removeFiles(paths: string[]) {
     const { error } = await bucketAPI.remove(paths);
     console.log("Removing files:", paths);
@@ -160,6 +168,7 @@ export function useStorage({
     getFilePath,
     removeFiles,
     getFilesUrl,
+    downloadFile,
     getFileRelativeUrl,
     getFileNameFromPath,
   };

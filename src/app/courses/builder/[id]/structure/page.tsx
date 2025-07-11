@@ -1,13 +1,15 @@
 "use client";
 
+import CourseHeader from "@/components/course-builder/course-header";
 import CourseStructure from "@/components/course-builder/course-structure";
 import MainLayout from "@/components/layouts/MainLayout";
 import NavigateBack from "@/components/navigate-back";
 import { Button } from "@/components/ui/button";
 import api from "@/components/utils/requestUtils";
 import useCourseDetails from "@/hooks/use-course-details";
-import { useCreateCourseStructure } from "@/hooks/use-create-course-structure";
+import { useEditCourseStructure } from "@/hooks/use-edit-course-structure";
 import useGetCourseStructure from "@/hooks/use-get-course-structure";
+import { IconGlobe, IconWorld } from "@tabler/icons-react";
 import { SaveIcon } from "lucide-react";
 import { use, useEffect } from "react";
 import { toast } from "sonner";
@@ -22,34 +24,52 @@ export default function Page({
   const { course } = useCourseDetails(id);
   const { courseStructure, isLoading, error, mutate } =
     useGetCourseStructure(id);
-
-  const resetStructure = useCreateCourseStructure(
-    (state) => state.resetStructure,
-  );
-  const getChapters = useCreateCourseStructure(
-    useShallow((state) => state.getChapters),
-  );
-  const setChapters = useCreateCourseStructure(
-    useShallow((state) => state.setChapters),
-  );
-  const isDirty = useCreateCourseStructure(
-    useShallow((state) => state.isDirty),
-  );
-  const setCourseId = useCreateCourseStructure(
-    useShallow((state) => state.setCourseId),
+  const {
+    resetStructure,
+    getChapters,
+    setChapters,
+    isDirty,
+    setCourseId,
+    publishCourse,
+    isPublished,
+    setCourseDetails,
+    getDetails,
+  } = useEditCourseStructure(
+    useShallow((state) => ({
+      resetStructure: state.resetStructure,
+      getChapters: state.getChapters,
+      setChapters: state.setChapters,
+      isDirty: state.isDirty,
+      setCourseId: state.setCourseId,
+      publishCourse: state.publishCourse,
+      isPublished: state.isPublished,
+      setCourseDetails: state.setDetails,
+      getDetails: state.getDetails,
+    })),
   );
 
   useEffect(() => {
     if (courseStructure) {
       setChapters(courseStructure.chapters);
       setCourseId(courseStructure.courseId);
+      console.log("Course structure loaded:", courseStructure);
     }
   }, [courseStructure]);
+
+  useEffect(() => {
+    if (course) {
+      setCourseDetails({
+        ...course,
+      });
+    }
+  }, [course]);
 
   const handleEdit = async () => {
     try {
       await api.put(`/api/courses/${course?.id}/structure`, {
         chapters: getChapters(),
+        ...getDetails(),
+        isPublished: isPublished,
       });
       mutate();
       toast.success("Course structure updated successfully");
@@ -86,7 +106,7 @@ export default function Page({
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <NavigateBack label="Back to course" fallbackUrl="/courses" />
-                <h1 className="text-3xl font-bold">
+                <h1 className="max-w-3xl text-3xl font-bold">
                   {course.title}'s structure
                 </h1>
                 <p className="text-muted-foreground mt-1">
@@ -95,6 +115,19 @@ export default function Page({
                 </p>
               </div>
               <div>
+                {courseStructure.isPublished ? (
+                  <Button variant="ghost" className="ml-2" disabled>
+                    <IconGlobe /> Published
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    className="ml-2"
+                    onClick={publishCourse}
+                  >
+                    <IconWorld /> Publish Course
+                  </Button>
+                )}
                 <Button
                   disabled={!isDirty}
                   onClick={handleEdit}
@@ -105,7 +138,9 @@ export default function Page({
               </div>
             </div>
           )}
-
+          <div>
+            <CourseHeader />
+          </div>
           <div>
             <CourseStructure />
           </div>

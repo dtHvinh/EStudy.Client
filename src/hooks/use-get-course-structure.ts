@@ -3,6 +3,7 @@ import useSWR from "swr";
 
 export interface GetCourseStructureResponse {
   courseId: number;
+  isPublished: boolean;
   chapters: GetCourseStructureChapterResponse[];
 }
 

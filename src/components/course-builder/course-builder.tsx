@@ -1,5 +1,5 @@
 "use client";
-import { CourseHeader } from "./course-header";
+import { CourseDetails } from "./course-details";
 
 export function CourseDetailBuilder() {
   return (
@@ -14,7 +14,7 @@ export function CourseDetailBuilder() {
       </div>
 
       <div>
-        <CourseHeader />
+        <CourseDetails />
       </div>
     </div>
   );

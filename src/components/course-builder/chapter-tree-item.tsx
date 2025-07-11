@@ -20,7 +20,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateCourseStructure } from "@/hooks/use-create-course-structure";
+import { useEditCourseStructure } from "@/hooks/use-edit-course-structure";
 import {
   BookOpen,
   ChevronDown,
@@ -55,7 +55,7 @@ export function ChapterTreeItem({
     getChapterDescription,
     getChapterIsPublished,
     getChapterLessons,
-  } = useCreateCourseStructure(
+  } = useEditCourseStructure(
     useShallow((state) => ({
       updateChapter: state.updateChapter,
       addLesson: state.addLesson,

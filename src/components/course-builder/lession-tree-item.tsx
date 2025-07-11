@@ -12,8 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   type CourseLesson,
-  useCreateCourseStructure,
-} from "@/hooks/use-create-course-structure";
+  useEditCourseStructure,
+} from "@/hooks/use-edit-course-structure";
 import { useStorage } from "@/hooks/use-storage";
 import {
   ChevronDown,
@@ -72,7 +72,9 @@ export function LessonTreeItem({
     setVideoUrl,
     deleteVideo,
     chapter,
-  } = useCreateCourseStructure(
+    setTranscriptUrl,
+    deleteTranscript,
+  } = useEditCourseStructure(
     useShallow((state) => ({
       courseId: state.courseId,
       updateLesson: state.updateLesson,
@@ -82,8 +84,21 @@ export function LessonTreeItem({
       setVideoUrl: state.setVideoUrl,
       deleteVideo: state.deleteVideo,
       chapter: state.chapters[chapterIndex],
+      setTranscriptUrl: state.setTranscriptUrl,
+      deleteTranscript: state.deleteTranscript,
     })),
   );
+
+  const getFilePath = (fileName: string) => {
+    return [
+      `course_id_${courseId}`,
+      `chapter_order_idx_${chapter.orderIndex}`,
+      `lesson_order_idx_${lesson.orderIndex}`,
+      fileName,
+    ]
+      .filter(Boolean)
+      .join("/");
+  };
 
   const handleSetAttachments = async (files: File[]) => {
     if (files.length === 0) return;
@@ -93,12 +108,7 @@ export function LessonTreeItem({
       }
 
       const tasks = Array.from(files).map((file) => {
-        return uploadFile(
-          file,
-          [`course_id_${courseId}`, `order_idx_${lesson.orderIndex}`, file.name]
-            .filter(Boolean)
-            .join("/"),
-        );
+        return uploadFile(file, getFilePath(file.name));
       });
 
       const urls = await Promise.all(tasks);
@@ -110,12 +120,7 @@ export function LessonTreeItem({
 
   const handleSetVideo = async (files: File[]) => {
     if (files.length === 0) return;
-    const path = await uploadFile(
-      files[0],
-      [`course_id_${courseId}`, `order_idx_${lesson.orderIndex}`, files[0].name]
-        .filter(Boolean)
-        .join("/"),
-    );
+    const path = await uploadFile(files[0], getFilePath(files[0].name));
     setVideoUrl(chapterIndex, lessonIndex, path);
   };
 
@@ -127,6 +132,17 @@ export function LessonTreeItem({
   const handleDeleteVideo = async () => {
     deleteResource(lesson.videoUrl!);
     deleteVideo(chapterIndex, lessonIndex);
+  };
+
+  const handleDeleteTranscript = async () => {
+    deleteResource(lesson.transcriptUrl!);
+    deleteTranscript(chapterIndex, lessonIndex);
+  };
+
+  const handleSetTranscript = async (files: File[]) => {
+    if (files.length === 0) return;
+    const path = await uploadFile(files[0], getFilePath(files[0].name));
+    setTranscriptUrl(chapterIndex, lessonIndex, path);
   };
 
   return (
@@ -288,6 +304,41 @@ export function LessonTreeItem({
                         }
                       />
                     </div>
+
+                    {lesson.videoUrl && (
+                      <div className="mt-4">
+                        <Label className="mb-1 text-xs">Transcript</Label>
+                        <div className="space-y-2">
+                          {lesson.transcriptUrl ? (
+                            <div className="flex items-center gap-2">
+                              <span className="truncate rounded-md border p-2">
+                                {lesson.transcriptUrl}
+                              </span>
+                              <Button
+                                variant={"outline"}
+                                className="hover:bg-destructive/10 h-6 w-6"
+                                onClick={handleDeleteTranscript}
+                              >
+                                <Trash2 className="text-destructive" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <input
+                              type="file"
+                              accept=".srt,.vtt"
+                              onChange={(e) => {
+                                if (e.target.files) {
+                                  handleSetTranscript(
+                                    Array.from(e.target.files),
+                                  );
+                                }
+                              }}
+                              className="w-full rounded-md border p-2"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

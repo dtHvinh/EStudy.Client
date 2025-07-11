@@ -1,14 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useCreateCourseStructure } from "@/hooks/use-create-course-structure";
+import { useEditCourseStructure } from "@/hooks/use-edit-course-structure";
 import { BookOpen, Plus } from "lucide-react";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { ChapterTreeItem } from "./chapter-tree-item";
 
 export default function CourseStructure() {
-  const { addChapter, chapters } = useCreateCourseStructure(
+  const { addChapter, chapters } = useEditCourseStructure(
     useShallow((state) => ({
       addChapter: state.addChapter,
       chapters: state.chapters,

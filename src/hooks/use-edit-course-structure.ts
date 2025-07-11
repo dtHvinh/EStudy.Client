@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
+import { CourseDetails } from "./use-create-course-details";
 
 export interface CourseChapter {
   id?: number;
@@ -24,9 +25,28 @@ export interface CourseLesson {
 
 export interface CourseStructureStore {
   courseId?: number;
+  isPublished?: boolean;
   chapters: CourseChapter[];
   isLoading: boolean;
   isDirty: boolean;
+
+  title: string;
+  description: string;
+  imageUrl?: string;
+  difficultyLevel: "Beginner" | "Intermediate" | "Advanced";
+  price: number;
+  isFree: boolean;
+  prerequisites?: string;
+  learningObjectives?: string;
+  language: string;
+  estimatedDurationHours: number;
+
+  publishCourse: () => void;
+
+  // course details
+  setDetails: (courseDetails: CourseDetails) => void;
+  updateDetails: (updates: Partial<CourseDetails>) => void;
+  getDetails: () => CourseDetails;
 
   // File upload actions
   setAttachmentUrls: (
@@ -36,8 +56,10 @@ export interface CourseStructureStore {
   ) => void;
   deleteAttachment: (chapterId: number, lessonId: number, path: string) => void;
   setVideoUrl: (chapterId: number, lessonId: number, path: string) => void;
+  setTranscriptUrl: (chapterId: number, lessonId: number, path: string) => void;
   deleteVideo: (chapterId: number, lessonId: number) => void;
   clearAttachments: (chapterId: number, lessonId: number) => void;
+  deleteTranscript: (chapterId: number, lessonId: number) => void;
 
   // Course structure actions
   setCourseId: (id: number) => void;
@@ -80,13 +102,67 @@ export interface CourseStructureStore {
   getTotalDuration: () => number;
 }
 
-export const useCreateCourseStructure = create<CourseStructureStore>()(
+export const useEditCourseStructure = create<CourseStructureStore>()(
   immer((set, get) => ({
     courseId: undefined,
     chapters: [],
     isLoading: false,
     isDirty: false,
     pendingUploadFiles: {},
+    isPublished: false,
+
+    title: "",
+    description: "",
+    difficultyLevel: "Beginner",
+    price: 0,
+    isFree: true,
+    language: "English",
+    estimatedDurationHours: 0,
+    prerequisites: "",
+    learningObjectives: "",
+    imageUrl: undefined,
+
+    setDetails: (courseDetails) =>
+      set((state) => {
+        state.title = courseDetails.title;
+        state.description = courseDetails.description;
+        state.imageUrl = courseDetails.imageUrl;
+        state.difficultyLevel = courseDetails.difficultyLevel;
+        state.price = courseDetails.price;
+        state.isFree = courseDetails.isFree;
+        state.prerequisites = courseDetails.prerequisites;
+        state.learningObjectives = courseDetails.learningObjectives;
+        state.language = courseDetails.language;
+        state.estimatedDurationHours = courseDetails.estimatedDurationHours;
+      }),
+
+    getDetails: () => {
+      const state = get();
+      return {
+        title: state.title,
+        description: state.description,
+        imageUrl: state.imageUrl,
+        difficultyLevel: state.difficultyLevel,
+        price: state.price,
+        isFree: state.isFree,
+        prerequisites: state.prerequisites,
+        learningObjectives: state.learningObjectives,
+        language: state.language,
+        estimatedDurationHours: state.estimatedDurationHours,
+      } as CourseDetails;
+    },
+
+    updateDetails: (updates: Partial<CourseDetails>) =>
+      set((state) => {
+        Object.assign(state, updates);
+        state.isDirty = true;
+      }),
+
+    publishCourse: () =>
+      set((state) => {
+        state.isPublished = true;
+        state.isDirty = true;
+      }),
 
     setCourseId: (id) =>
       set((state) => {
@@ -146,6 +222,19 @@ export const useCreateCourseStructure = create<CourseStructureStore>()(
       });
     },
 
+    setTranscriptUrl(chapterId, lessonId, path) {
+      set((state) => {
+        const chapter = state.chapters.find((_, i) => i === chapterId);
+        if (chapter) {
+          const lesson = chapter.lessons.find((_, i) => i === lessonId);
+          if (lesson) {
+            lesson.transcriptUrl = path;
+            state.isDirty = true;
+          }
+        }
+      });
+    },
+
     deleteVideo(chapterId, lessonId) {
       set((state) => {
         const chapter = state.chapters.find((_, i) => i === chapterId);
@@ -153,6 +242,19 @@ export const useCreateCourseStructure = create<CourseStructureStore>()(
           const lesson = chapter.lessons.find((_, i) => i === lessonId);
           if (lesson) {
             lesson.videoUrl = undefined;
+            state.isDirty = true;
+          }
+        }
+      });
+    },
+
+    deleteTranscript(chapterId, lessonId) {
+      set((state) => {
+        const chapter = state.chapters.find((_, i) => i === chapterId);
+        if (chapter) {
+          const lesson = chapter.lessons.find((_, i) => i === lessonId);
+          if (lesson) {
+            lesson.transcriptUrl = undefined;
             state.isDirty = true;
           }
         }

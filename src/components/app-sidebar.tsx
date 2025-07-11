@@ -17,9 +17,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useUserInfo } from "@/hooks/use-user-info";
 import Image from "next/image";
@@ -45,7 +43,7 @@ const data = {
       icon: IconReportSearch,
     },
     {
-      title: "Flash cards",
+      title: "Flashcards",
       url: "sets",
       icon: IconScript,
     },
@@ -73,27 +71,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user, getUserError, isUserLoading, reload } = useUserInfo();
 
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
-            >
-              <Link href="/dashboard">
-                <div className="relative size-28 py-2">
-                  <Image
-                    src="/logo2.png"
-                    fill
-                    alt="Logo"
-                    className="dark:invert"
-                  />
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+    <Sidebar collapsible="icon" {...props}>
+      <SidebarHeader className="flex items-center justify-between">
+        <SidebarMenuButton className="data-[slot=sidebar-menu-button]:!p-1.5">
+          <Link className="ml-14" href="/dashboard">
+            <div className="relative size-28 py-2">
+              <Image src="/logo2.png" fill alt="Logo" className="dark:invert" />
+            </div>
+          </Link>
+        </SidebarMenuButton>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

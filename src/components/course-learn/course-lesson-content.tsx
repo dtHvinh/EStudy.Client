@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Separator } from "../ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Textarea } from "../ui/textarea";
-import VideoPlayer from "../video-player";
+import VideoPlayer from "../video/video-player";
 export default function CourseLessonContent({
   lesson,
 }: {
@@ -20,7 +20,7 @@ export default function CourseLessonContent({
     <div className="col-span-8">
       {/* Video/Content Player */}
       {lesson && (
-        <div className="relative h-[32rem] overflow-hidden bg-black">
+        <div className="relative overflow-hidden bg-black">
           {lesson.videoUrl ? (
             <VideoPlayer
               src={getFileUrl(lesson.videoUrl)}

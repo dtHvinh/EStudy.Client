@@ -1,7 +1,8 @@
 import { useStorage } from "@/hooks/use-storage";
 import { parseSRT } from "@/lib/srt-parser";
+import { convertSRTTextToVTT } from "@/lib/vtt-parser";
 import { useVideoStateStore } from "@/stores/video-state-store";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactPlayer from "react-player";
 import { ReactPlayerProps } from "react-player/types";
 import { toast } from "sonner";
@@ -15,8 +16,9 @@ const VideoPlayer = ({
   src: string;
   transcriptSrc?: string;
 } & ReactPlayerProps) => {
-  const playerRef = useRef<HTMLVideoElement | null>(null);
+  const playerRef = useRef<HTMLVideoElement>(null);
   const { downloadFile } = useStorage();
+  const [vttUrl, setVttUrl] = useState<string>();
 
   const { resetState, updateState, setSubtitleCues } = useVideoStateStore(
     useShallow((state) => ({
@@ -29,22 +31,34 @@ const VideoPlayer = ({
 
   useEffect(() => {
     resetState();
-  }, [src]);
+  }, [src, transcriptSrc]);
 
   useEffect(() => {
     if (!transcriptSrc) return;
-    let blob: Blob;
-    const download = async () => {
+
+    const loadTranscript = async () => {
       try {
-        blob = await downloadFile(transcriptSrc);
-        setSubtitleCues(parseSRT(await blob.text()));
+        const blob = await downloadFile(transcriptSrc);
+        const text = await blob.text();
+
+        // Set subtitle cues for the sidebar
+        setSubtitleCues(parseSRT(text));
+
+        // Set VTT URL for video player
+        if (transcriptSrc.endsWith(".vtt")) {
+          setVttUrl(transcriptSrc);
+        } else {
+          const vttBlob = convertSRTTextToVTT(text);
+          const vttUrl = URL.createObjectURL(vttBlob);
+          setVttUrl(vttUrl);
+        }
       } catch (err) {
         toast.error("Failed to load transcript");
         console.error("Failed to load transcript:", err);
       }
     };
 
-    download();
+    loadTranscript();
   }, [transcriptSrc]);
 
   const handleTimeUpdate = () => {
@@ -63,7 +77,18 @@ const VideoPlayer = ({
       src={src}
       {...props}
       onTimeUpdate={handleTimeUpdate}
-    ></ReactPlayer>
+      controls={true}
+      crossOrigin="anonymous"
+    >
+      {vttUrl && (
+        <track
+          kind="subtitles"
+          src={vttUrl}
+          srcLang="en"
+          label="English subtitles"
+        />
+      )}
+    </ReactPlayer>
   );
 };
 

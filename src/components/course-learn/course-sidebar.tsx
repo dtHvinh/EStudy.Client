@@ -1,8 +1,10 @@
 import { GetCourseToLearnChapterResponse } from "@/hooks/use-get-course-to-learn";
-import { useStorage } from "@/hooks/use-storage";
-import { parseSRT, SubtitleCue } from "@/lib/srt-parser";
+import { SubtitleCue } from "@/lib/srt-parser";
+import { cn } from "@/lib/utils";
+import { useVideoStateStore } from "@/stores/video-state-store";
 import { TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { IconFile, IconListTree } from "@tabler/icons-react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   CheckCircle2,
   ChevronDown,
@@ -11,7 +13,8 @@ import {
   Minus,
   Play,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import {
   Collapsible,
   CollapsibleContent,
@@ -20,41 +23,21 @@ import {
 import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
 import { Tabs, TabsContent } from "../ui/tabs";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export default function CourseSidebar({
   chapters,
   onLessionSelected,
-  transcriptUrl,
 }: {
   chapters: GetCourseToLearnChapterResponse[];
-  transcriptUrl?: string;
   onLessionSelected?: (lessonIndex: number) => void;
 }) {
   const [expandedSections, setExpandedSections] = useState<number[]>([]);
   const [activeTab, setActiveTab] = useState("content");
-  const { downloadFile } = useStorage();
-  const [subtitleCues, setSubtitleCues] = useState<SubtitleCue[]>([]);
   const toggleSection = (index: number) => {
     setExpandedSections((prev) =>
       prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index],
     );
   };
-
-  useEffect(() => {
-    if (!transcriptUrl) return;
-    let blob: Blob;
-    const download = async () => {
-      try {
-        blob = await downloadFile(transcriptUrl);
-        setSubtitleCues(parseSRT(await blob.text()));
-      } catch (err) {
-        console.error("Failed to load transcript:", err);
-      }
-    };
-
-    download();
-  }, [transcriptUrl]);
 
   useEffect(() => {
     if (chapters.length > 0 && !expandedSections.includes(0)) {
@@ -65,7 +48,7 @@ export default function CourseSidebar({
 
   return (
     <Tabs defaultValue="content">
-      <ScrollArea className="h-[calc(100vh-80px)] border-l">
+      <ScrollArea className="h-[calc(100vh-80px)] rounded-b-2xl border-b border-l">
         <div className="flex items-center justify-between border-b p-5">
           <p className="text-xl font-semibold">
             {activeTab === "content" ? "Course Content" : "Transcript"}
@@ -147,36 +130,134 @@ export default function CourseSidebar({
         </TabsContent>
 
         <TabsContent value="transcript">
-          {subtitleCues.length > 0 ? (
-            <div className="space-y-2 p-5">
-              {subtitleCues.map((cue, i) => (
-                <SubtitleLine key={i} cue={cue} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground p-5">
-              No transcript available for this lesson.
-            </p>
-          )}
+          <SubtitleList />
         </TabsContent>
       </ScrollArea>
     </Tabs>
   );
 }
 
-const SubtitleLine = ({ cue }: { cue: SubtitleCue }) => {
+const SubtitleList = () => {
+  const parentRef = useRef<HTMLDivElement>(null);
+  const { subtitleCues } = useVideoStateStore(
+    useShallow((state) => ({
+      subtitleCues: state.subtitleCues || [],
+    })),
+  );
+
+  const virtualizer = useVirtualizer({
+    count: subtitleCues.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 80, // Estimated height of each subtitle line with padding
+    overscan: 5, // Render 5 extra items outside the visible area
+    measureElement:
+      typeof window !== "undefined" &&
+      navigator.userAgent.indexOf("Firefox") === -1
+        ? (element) => element?.getBoundingClientRect().height
+        : undefined,
+  });
+
+  if (subtitleCues.length === 0) {
+    return (
+      <div className="p-5">
+        <p className="text-muted-foreground">
+          No transcript available for this lesson.
+        </p>
+      </div>
+    );
+  }
+
+  const handleSubtitleActive = (index: number) => {
+    virtualizer.scrollToIndex(index, {
+      align: "center",
+      behavior: "smooth",
+    });
+  };
+
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <div className="text-sm">
-          <div className="text-muted-foreground cursor-default">{cue.text}</div>
-        </div>
-      </TooltipTrigger>
-      <TooltipContent>
-        <div className="text-muted-foreground text-xs">
-          {cue.startTime}-{cue.endTime}
-        </div>
-      </TooltipContent>
-    </Tooltip>
+    <div ref={parentRef} className="h-[calc(100vh-2*80px)] overflow-auto p-5">
+      <div
+        style={{
+          height: `${virtualizer.getTotalSize()}px`,
+          width: "100%",
+          position: "relative",
+        }}
+      >
+        {virtualizer.getVirtualItems().map((virtualItem) => {
+          const cue = subtitleCues[virtualItem.index];
+          return (
+            <div
+              key={virtualItem.key}
+              data-index={virtualItem.index}
+              ref={virtualizer.measureElement}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                transform: `translateY(${virtualItem.start}px)`,
+              }}
+            >
+              <SubtitleLine
+                cue={cue}
+                onSubtitleActive={() => handleSubtitleActive(virtualItem.index)}
+              />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+const SubtitleLine = ({
+  cue,
+  onSubtitleActive,
+}: {
+  cue: SubtitleCue;
+  onSubtitleActive?: () => void;
+}) => {
+  const [isActive, setIsActive] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const unsub = useVideoStateStore.subscribe((state) => {
+    const playedTime = state.playedSeconds;
+    setIsActive(playedTime >= cue.startTime && playedTime <= cue.endTime);
+  });
+
+  useEffect(() => {
+    return () => {
+      unsub();
+    };
+  }, [unsub]);
+
+  useEffect(() => {
+    if (isActive && onSubtitleActive) {
+      onSubtitleActive();
+    }
+  }, [isActive]);
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  };
+
+  return (
+    <div
+      ref={ref}
+      className="hover:bg-muted/50 flex cursor-pointer items-center gap-3 rounded-md p-2 text-sm transition-colors"
+    >
+      <div className="text-muted-foreground min-w-0 flex-shrink-0 font-mono text-xs">
+        {formatTime(cue.startTime)}
+      </div>
+      <div
+        className={cn(
+          "text-muted-foreground flex-1 leading-relaxed",
+          isActive && "text-foreground font-semibold",
+        )}
+      >
+        {cue.text}
+      </div>
+    </div>
   );
 };

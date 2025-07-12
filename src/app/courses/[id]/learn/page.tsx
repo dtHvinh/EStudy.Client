@@ -54,7 +54,6 @@ export default function CourseLearningPage({
           {course && (
             <CourseSidebar
               chapters={course.chapters}
-              transcriptUrl={currentLesson?.transcriptUrl}
               onLessionSelected={(lessonIndex) =>
                 setCurrentLesson(course.chapters[0].lessons[lessonIndex])
               }

@@ -1,27 +1,58 @@
-import { SubtitleCue } from "@/lib/srt-parser";
-import { useRef, useState } from "react";
+import { useStorage } from "@/hooks/use-storage";
+import { parseSRT } from "@/lib/srt-parser";
+import { useVideoStateStore } from "@/stores/video-state-store";
+import { useEffect, useRef } from "react";
 import ReactPlayer from "react-player";
 import { ReactPlayerProps } from "react-player/types";
+import { toast } from "sonner";
+import { useShallow } from "zustand/react/shallow";
 
 const VideoPlayer = ({
   src,
-  onTranscriptLoaded,
+  transcriptSrc,
   ...props
 }: {
   src: string;
-  onTranscriptLoaded?: (cues: SubtitleCue[]) => void;
+  transcriptSrc?: string;
 } & ReactPlayerProps) => {
   const playerRef = useRef<HTMLVideoElement | null>(null);
-  const initialState = {
-    playedSeconds: 0,
-  };
-  const [state, setState] = useState(initialState);
+  const { downloadFile } = useStorage();
+
+  const { resetState, updateState, setSubtitleCues } = useVideoStateStore(
+    useShallow((state) => ({
+      resetState: state.resetState,
+      updateState: state.updateState,
+      playedSeconds: state.playedSeconds,
+      setSubtitleCues: state.setSubtitleCues,
+    })),
+  );
+
+  useEffect(() => {
+    resetState();
+  }, [src]);
+
+  useEffect(() => {
+    if (!transcriptSrc) return;
+    let blob: Blob;
+    const download = async () => {
+      try {
+        blob = await downloadFile(transcriptSrc);
+        setSubtitleCues(parseSRT(await blob.text()));
+      } catch (err) {
+        toast.error("Failed to load transcript");
+        console.error("Failed to load transcript:", err);
+      }
+    };
+
+    download();
+  }, [transcriptSrc]);
 
   const handleTimeUpdate = () => {
     if (playerRef.current) {
       const currentTime = playerRef.current.currentTime;
-      setState({
+      updateState({
         playedSeconds: currentTime,
+        duration: playerRef.current.duration || 0,
       });
     }
   };

@@ -1,7 +1,6 @@
 import { GetCourseToLearnLessonResponse } from "@/hooks/use-get-course-to-learn";
 import { useStorage } from "@/hooks/use-storage";
-import { SubtitleCue } from "@/lib/srt-parser";
-import { Download, FileText, MessageSquare, Star } from "lucide-react";
+import { Download, FileText, Star } from "lucide-react";
 import HTMLContent from "../html-content";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -12,10 +11,8 @@ import { Textarea } from "../ui/textarea";
 import VideoPlayer from "../video-player";
 export default function CourseLessonContent({
   lesson,
-  onTranscriptLoaded,
 }: {
   lesson?: GetCourseToLearnLessonResponse;
-  onTranscriptLoaded?: (cues: SubtitleCue[]) => void;
 }) {
   const { getFileUrl } = useStorage();
 
@@ -27,10 +24,12 @@ export default function CourseLessonContent({
           {lesson.videoUrl ? (
             <VideoPlayer
               src={getFileUrl(lesson.videoUrl)}
+              transcriptSrc={
+                lesson.transcriptUrl && getFileUrl(lesson.transcriptUrl)
+              }
               width="100%"
               height="100%"
               controls={true}
-              onTranscriptLoaded={onTranscriptLoaded}
             />
           ) : (
             <div className="bg-muted flex h-full items-center justify-center">
@@ -41,18 +40,6 @@ export default function CourseLessonContent({
               </div>
             </div>
           )}
-
-          {/* Navigation Arrows */}
-          {/* <div className="absolute top-1/2 left-4 z-20 -translate-y-1/2 transform">
-            <Button variant="secondary" size="sm" className="rounded-full">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="absolute top-1/2 right-4 z-20 -translate-y-1/2 transform">
-            <Button variant="secondary" size="sm" className="rounded-full">
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div> */}
         </div>
       )}
 
@@ -78,21 +65,6 @@ export default function CourseLessonContent({
                     </div>
                   </div>
                 )}
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MessageSquare className="h-5 w-5" />
-                      Updates & Community
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">
-                      💡 I share updates on new courses or other important stuff
-                      on my social media channels.
-                    </p>
-                  </CardContent>
-                </Card>
               </div>
             </TabsContent>
 

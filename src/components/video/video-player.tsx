@@ -3,6 +3,7 @@ import { parseSRT } from "@/lib/srt-parser";
 import { convertSRTTextToVTT } from "@/lib/vtt-parser";
 import { useVideoStateStore } from "@/stores/video-state-store";
 import { useEffect, useRef, useState } from "react";
+import { InView } from "react-intersection-observer";
 import ReactPlayer from "react-player";
 import { ReactPlayerProps } from "react-player/types";
 import { toast } from "sonner";
@@ -26,8 +27,23 @@ const VideoPlayer = ({
       updateState: state.updateState,
       playedSeconds: state.playedSeconds,
       setSubtitleCues: state.setSubtitleCues,
+      seekToTime: state.seekToTime,
     })),
   );
+
+  const sub1 = useVideoStateStore.subscribe((state) => {
+    if (state.seekToTime !== undefined && playerRef.current) {
+      playerRef.current.currentTime = state.seekToTime;
+      playerRef.current.pause();
+      updateState({ seekToTime: undefined });
+    }
+  });
+
+  const onVideoInViewStatusChange = async (inView: boolean) => {
+    if (playerRef.current && !inView) {
+      await playerRef.current?.requestPictureInPicture();
+    }
+  };
 
   useEffect(() => {
     resetState();
@@ -72,23 +88,27 @@ const VideoPlayer = ({
   };
 
   return (
-    <ReactPlayer
-      ref={playerRef}
-      src={src}
-      {...props}
-      onTimeUpdate={handleTimeUpdate}
-      controls={true}
-      crossOrigin="anonymous"
-    >
-      {vttUrl && (
-        <track
-          kind="subtitles"
-          src={vttUrl}
-          srcLang="en"
-          label="English subtitles"
-        />
-      )}
-    </ReactPlayer>
+    <InView threshold={0.5} onChange={onVideoInViewStatusChange}>
+      <ReactPlayer
+        ref={playerRef}
+        src={src}
+        {...props}
+        onTimeUpdate={handleTimeUpdate}
+        controls={true}
+        crossOrigin="anonymous"
+        muted={true}
+      >
+        {vttUrl && (
+          <track
+            kind="subtitles"
+            src={vttUrl}
+            srcLang="en"
+            label="English subtitles"
+            default
+          />
+        )}
+      </ReactPlayer>
+    </InView>
   );
 };
 

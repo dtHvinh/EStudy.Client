@@ -1,5 +1,6 @@
-import { GetCourseToLearnLessonResponse } from "@/hooks/use-get-course-to-learn";
+import { GetCourseToLearnLessonResponse } from "@/hooks/use-learn-course";
 import { useStorage } from "@/hooks/use-storage";
+import { IconDeviceFloppy } from "@tabler/icons-react";
 import { Download, FileText, Star } from "lucide-react";
 import HTMLContent from "../html-content";
 import { Badge } from "../ui/badge";
@@ -71,14 +72,19 @@ export default function CourseLessonContent({
             <TabsContent value="notes" className="mt-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>My Notes</CardTitle>
+                  <CardTitle className="flex items-center justify-between">
+                    My Notes
+                    <Button variant={"ghost"} className="mt-4">
+                      <IconDeviceFloppy />
+                    </Button>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Textarea
-                    placeholder="Add your notes for this lesson..."
+                    placeholder="Add your notes for this course..."
                     className="min-h-[200px]"
+                    defaultValue={lesson?.note?.content || ""}
                   />
-                  <Button className="mt-4">Save Notes</Button>
                 </CardContent>
               </Card>
             </TabsContent>

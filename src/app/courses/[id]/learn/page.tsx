@@ -4,9 +4,9 @@ import CourseLessonContent from "@/components/course-learn/course-lesson-content
 import CourseSidebar from "@/components/course-learn/course-sidebar";
 import MainLayout from "@/components/layouts/MainLayout";
 import { Button } from "@/components/ui/button";
-import useGetCourseToLearn, {
+import useLearnCourse, {
   GetCourseToLearnLessonResponse,
-} from "@/hooks/use-get-course-to-learn";
+} from "@/hooks/use-learn-course";
 import { ChevronLeft, Star } from "lucide-react";
 import { use, useState } from "react";
 
@@ -16,7 +16,7 @@ export default function CourseLearningPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { course } = useGetCourseToLearn(id);
+  const { course } = useLearnCourse(id);
   const [currentLesson, setCurrentLesson] =
     useState<GetCourseToLearnLessonResponse>();
   return (

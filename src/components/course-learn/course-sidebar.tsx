@@ -1,4 +1,4 @@
-import { GetCourseToLearnChapterResponse } from "@/hooks/use-get-course-to-learn";
+import { GetCourseToLearnChapterResponse } from "@/hooks/use-learn-course";
 import { SubtitleCue } from "@/lib/srt-parser";
 import { cn } from "@/lib/utils";
 import { useVideoStateStore } from "@/stores/video-state-store";
@@ -175,7 +175,7 @@ const SubtitleList = () => {
   };
 
   return (
-    <div ref={parentRef} className="h-[calc(100vh-2*80px)] overflow-auto p-5">
+    <div ref={parentRef} className="h-[calc(100vh-2*80px)] overflow-auto">
       <div
         style={{
           height: `${virtualizer.getTotalSize()}px`,
@@ -219,6 +219,12 @@ const SubtitleLine = ({
 }) => {
   const [isActive, setIsActive] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { seekTo } = useVideoStateStore(
+    useShallow((state) => ({
+      seekTo: state.seekTo,
+    })),
+  );
+
   const unsub = useVideoStateStore.subscribe((state) => {
     const playedTime = state.playedSeconds;
     setIsActive(playedTime >= cue.startTime && playedTime <= cue.endTime);
@@ -242,10 +248,18 @@ const SubtitleLine = ({
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
+  const handleClick = () => {
+    seekTo(cue.startTime);
+  };
+
   return (
     <div
       ref={ref}
-      className="hover:bg-muted/50 flex cursor-pointer items-center gap-3 rounded-md p-2 text-sm transition-colors"
+      className={cn(
+        "hover:bg-muted/50 flex cursor-pointer items-center gap-3 p-2 px-5 text-sm transition-colors",
+        isActive && "bg-muted",
+      )}
+      onClick={handleClick}
     >
       <div className="text-muted-foreground min-w-0 flex-shrink-0 font-mono text-xs">
         {formatTime(cue.startTime)}

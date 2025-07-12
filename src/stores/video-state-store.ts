@@ -7,10 +7,12 @@ export type VideoState = {
   duration: number;
   volume: number;
   subtitleCues?: SubtitleCue[];
+  seekToTime?: number;
 
   updateState: (state: Partial<VideoState>) => void;
   resetState: () => void;
   setSubtitleCues: (cues: SubtitleCue[]) => void;
+  seekTo: (time: number) => void;
 };
 
 export const useVideoStateStore = create<VideoState>((set) => ({
@@ -19,6 +21,7 @@ export const useVideoStateStore = create<VideoState>((set) => ({
   duration: 0,
   volume: 1,
   subtitleCues: [],
+  seekToTime: undefined,
 
   updateState: (state) =>
     set((prev) => ({
@@ -28,6 +31,14 @@ export const useVideoStateStore = create<VideoState>((set) => ({
 
   setSubtitleCues: (cues) => set(() => ({ subtitleCues: cues })),
 
+  seekTo: (time) => set(() => ({ seekToTime: time })),
+
   resetState: () =>
-    set(() => ({ isPlaying: false, playedSeconds: 0, duration: 0, volume: 1 })),
+    set(() => ({
+      isPlaying: false,
+      playedSeconds: 0,
+      duration: 0,
+      volume: 1,
+      seekToTime: undefined,
+    })),
 }));

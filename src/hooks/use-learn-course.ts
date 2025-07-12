@@ -5,11 +5,10 @@ export interface GetCourseToLearnResponse {
   studentCount: number;
   averageRating: number;
   title: string;
-  note?: GetCourseToLearnNote;
   chapters: GetCourseToLearnChapterResponse[];
 }
 
-export interface GetCourseToLearnNote {
+export interface GetCourseToLearnLessonNote {
   content: string;
 }
 
@@ -31,12 +30,13 @@ export interface GetCourseToLearnLessonResponse {
   description?: string;
   durationMinutes: number;
   orderIndex: number;
+  note?: GetCourseToLearnLessonNote;
   transcriptUrl?: string;
   videoUrl?: string;
   isCompleted: boolean;
 }
 
-export default function useGetCourseToLearn(courseId: string | number) {
+export default function useLearnCourse(courseId: string | number) {
   const { data, isLoading, error } = useSWR<GetCourseToLearnResponse>(
     `/api/courses/${courseId}/learn`,
     api.get,

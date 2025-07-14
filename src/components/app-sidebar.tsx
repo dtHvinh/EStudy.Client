@@ -4,7 +4,6 @@ import {
   IconBallpen,
   IconBrandParsinta,
   IconDashboard,
-  IconDatabase,
   IconLayoutBoard,
   IconMessageChatbot,
   IconReportSearch,
@@ -32,11 +31,6 @@ const data = {
       title: "Dashboard",
       url: "dashboard",
       icon: IconDashboard,
-    },
-    {
-      title: "Resources",
-      url: "resources",
-      icon: IconDatabase,
     },
     {
       title: "Blogs",

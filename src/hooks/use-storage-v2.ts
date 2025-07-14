@@ -18,6 +18,36 @@ export default function useStorageV2() {
     }
   };
 
+  const uploadFiles = async (files: File[]) => {
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    try {
+      const response = await api.postWithFormData<string[]>(
+        "/api/storage/upload/files",
+        formData,
+      );
+      return response;
+    } catch (error) {
+      console.error("Error uploading files:", error);
+      toast.error("Failed to upload files. Please try again.");
+      throw error;
+    }
+  };
+
+  const deleteFiles = async (filePaths: string[]) => {
+    try {
+      await api.put("/api/storage/remove/files", { filePaths });
+      toast.success("Files deleted successfully.");
+    } catch (error) {
+      console.error("Error deleting files:", error);
+      toast.error("Failed to delete files. Please try again.");
+      throw error;
+    }
+  };
+
   const removeVideo = async (filePath: string) => {
     try {
       await api.delete(
@@ -31,11 +61,11 @@ export default function useStorageV2() {
     }
   };
 
-  const getVideoFileUrl = (filePath: string) => {
+  const getFileUrl = (filePath: string) => {
     return `${process.env.NEXT_PUBLIC_MINIO_BASE_URL}/estudy/${filePath}`;
   };
 
-  const getVideoFileRelativeUrl = (filePath: string) => {
+  const getFileRelativeUrl = (filePath: string) => {
     return filePath.replace(
       `${process.env.NEXT_PUBLIC_MINIO_BASE_URL}/estudy/`,
       "",
@@ -45,7 +75,9 @@ export default function useStorageV2() {
   return {
     uploadVideo,
     removeVideo,
-    getVideoFileUrl,
-    getVideoFileRelativeUrl,
+    getFileUrl,
+    getFileRelativeUrl,
+    uploadFiles,
+    deleteFiles,
   };
 }

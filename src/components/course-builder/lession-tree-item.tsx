@@ -14,12 +14,10 @@ import {
   type CourseLesson,
   useEditCourseStructure,
 } from "@/hooks/use-edit-course-structure";
-import { useStorage } from "@/hooks/use-storage";
 import useStorageV2 from "@/hooks/use-storage-v2";
 import {
   ChevronDown,
   ChevronRight,
-  GripVertical,
   Paperclip,
   Play,
   Trash2,
@@ -55,14 +53,13 @@ export function LessonTreeItem({
 }: LessonTreeItemProps) {
   const [isOpen, setIsOpen] = useState(true);
   const {
-    deleteResource,
-    uploadFile,
-    removeFiles,
-    getFileUrl,
+    uploadVideo,
+    removeVideo,
     getFileRelativeUrl,
-  } = useStorage();
-  const { uploadVideo, removeVideo, getVideoFileRelativeUrl, getVideoFileUrl } =
-    useStorageV2();
+    getFileUrl,
+    uploadFiles,
+    deleteFiles,
+  } = useStorageV2();
   const [isEditing, setIsEditing] = useState(false);
   const debounceUpdateLesson = useDebouncedCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -73,7 +70,6 @@ export function LessonTreeItem({
     500,
   );
   const {
-    courseId,
     updateLesson,
     deleteLesson,
     setAttachmentUrls,
@@ -85,7 +81,6 @@ export function LessonTreeItem({
     deleteTranscript,
   } = useEditCourseStructure(
     useShallow((state) => ({
-      courseId: state.courseId,
       updateLesson: state.updateLesson,
       deleteLesson: state.deleteLesson,
       setAttachmentUrls: state.setAttachmentUrls,
@@ -98,29 +93,14 @@ export function LessonTreeItem({
     })),
   );
 
-  const getFilePath = (fileName: string) => {
-    return [
-      `course_id_${courseId}`,
-      `chapter_order_idx_${chapter.orderIndex}`,
-      `lesson_order_idx_${lesson.orderIndex}`,
-      fileName,
-    ]
-      .filter(Boolean)
-      .join("/");
-  };
-
   const handleSetAttachments = async (files: File[]) => {
     if (files.length === 0) return;
     try {
       if (lesson.attachedFileUrls.length > 0) {
-        await removeFiles(lesson.attachedFileUrls);
+        await deleteFiles(lesson.attachedFileUrls);
       }
 
-      const tasks = Array.from(files).map((file) => {
-        return uploadFile(file, getFilePath(file.name));
-      });
-
-      const urls = await Promise.all(tasks);
+      const urls = await uploadFiles(files);
       setAttachmentUrls(chapterIndex, lessonIndex, urls);
     } catch (error) {
       console.error("Failed to handle attachments:", error);
@@ -135,7 +115,7 @@ export function LessonTreeItem({
 
   const handleDeleteAttachments = async () => {
     clearAttachments(chapterIndex, lessonIndex);
-    await removeFiles(lesson.attachedFileUrls);
+    await deleteFiles(lesson.attachedFileUrls);
   };
 
   const handleDeleteVideo = async () => {
@@ -144,34 +124,27 @@ export function LessonTreeItem({
   };
 
   const handleDeleteTranscript = async () => {
-    deleteResource(lesson.transcriptUrl!);
+    deleteFiles([lesson.transcriptUrl!]);
     deleteTranscript(chapterIndex, lessonIndex);
   };
 
   const handleSetTranscript = async (files: File[]) => {
     if (files.length === 0) return;
-    const path = await uploadFile(files[0], getFilePath(files[0].name));
-    setTranscriptUrl(chapterIndex, lessonIndex, path);
+    const path = await uploadFiles([files[0]]);
+    setTranscriptUrl(chapterIndex, lessonIndex, path[0]);
   };
 
   return (
     <div className="group ml-4">
       <div className="hover:bg-muted/20 flex items-start gap-2 rounded-md py-1 transition-colors">
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          <div
-            {...dragHandleProps}
-            className="cursor-grab opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
-          >
-            <GripVertical className="text-muted-foreground h-3 w-3" />
-          </div>
-
           <Collapsible
             open={isOpen}
             onOpenChange={setIsOpen}
             className="flex-1"
           >
-            <div className="flex flex-1 items-end gap-2">
-              <CollapsibleTrigger className="hover:bg-muted/50 -ml-1 flex items-center gap-2 rounded-md p-1">
+            <div className="flex flex-1 gap-2">
+              <CollapsibleTrigger className="hover:bg-muted/50 flex items-center gap-2 rounded-md p-1">
                 {isOpen ? (
                   <ChevronDown className="text-muted-foreground h-3 w-3" />
                 ) : (
@@ -311,8 +284,8 @@ export function LessonTreeItem({
                         maxFiles={1}
                         accept={{ "video/*": [] }}
                         previews={lesson.videoUrl ? [lesson.videoUrl] : []}
-                        getFileUrlFn={getVideoFileUrl}
-                        getFileRelativeUrlFn={getVideoFileRelativeUrl}
+                        getFileUrlFn={getFileUrl}
+                        getFileRelativeUrlFn={getFileRelativeUrl}
                       />
                     </div>
 

@@ -2,6 +2,7 @@
 
 import CourseLessonContent from "@/components/course-learn/course-lesson-content";
 import CourseSidebar from "@/components/course-learn/course-sidebar";
+import { ErrorCard } from "@/components/error-card";
 import MainLayout from "@/components/layouts/MainLayout";
 import { Button } from "@/components/ui/button";
 import useLearnCourse, {
@@ -16,9 +17,21 @@ export default function CourseLearningPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { course } = useLearnCourse(id);
+  const { course, error } = useLearnCourse(id);
   const [currentLesson, setCurrentLesson] =
     useState<GetCourseToLearnLessonResponse>();
+
+  if (error) {
+    return (
+      <MainLayout>
+        <ErrorCard
+          title="Failed to load course"
+          message="You have to enroll to this course to access it "
+        />
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout
       siteHeader={

@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { useStorage } from "@/hooks/use-storage";
 import { File, Loader2, Trash2 } from "lucide-react";
 import React, { memo, useCallback } from "react";
 import { FileWithPath, useDropzone } from "react-dropzone";
@@ -13,6 +12,8 @@ type FileDropzoneProps = {
   maxFiles?: number;
   previews?: string[];
   isLoading?: boolean;
+  getFileRelativeUrlFn: (url: string) => string;
+  getFileUrlFn: (url: string) => string;
 };
 
 const FileDropzone: React.FC<FileDropzoneProps> = ({
@@ -29,8 +30,9 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
   maxFiles = 5,
   previews = [],
   isLoading = false,
+  getFileRelativeUrlFn: getFileRelativeUrl,
+  getFileUrlFn: getFileUrl,
 }) => {
-  const { getFileRelativeUrl } = useStorage();
   const onDrop = useCallback(
     (acceptedFiles: FileWithPath[]) => {
       onFilesSelected?.(acceptedFiles);
@@ -112,7 +114,7 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
             className={`grid grid-cols-${Math.min(2, previews.length)} gap-2`}
           >
             {previews.map((url, i) => (
-              <MediaRenderer key={i} url={url} />
+              <MediaRenderer key={i} url={getFileUrl(url)} />
             ))}
           </div>
         </div>

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
 import { GetMyCourseType } from "@/hooks/use-get-my-course";
+import { useStorage } from "@/hooks/use-storage";
 import {
   BookOpen,
   ChevronDown,
@@ -46,6 +47,7 @@ export function CourseCard({
   isReadonly = false,
 }: CourseCardProps) {
   const [showDetails, setShowDetails] = useState(false);
+  const { getFilePath } = useStorage();
 
   const getDifficultyColor = (level: string) => {
     switch (level) {
@@ -82,8 +84,11 @@ export function CourseCard({
       <CardHeader className="p-0">
         <div className="relative overflow-hidden rounded-t-lg">
           <img
-            src={course.imageUrl || "/placeholder.svg?height=200&width=400"}
-            alt={course.title}
+            src={
+              course.imageUrl
+                ? getFilePath(course.imageUrl)
+                : "https://picsum.photos/seed/picsum/352/192"
+            }
             className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
           <div className="absolute top-3 left-3 flex gap-2">
@@ -213,7 +218,7 @@ export function CourseCard({
                   </RelativeLink>
                 </Button>
               )}
-              {isReadonly && course.isPublished ? (
+              {isReadonly ? (
                 <>
                   <Button
                     size="sm"

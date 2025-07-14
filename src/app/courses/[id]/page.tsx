@@ -1,6 +1,6 @@
 "use client";
 import MainLayout from "@/components/layouts/MainLayout";
-import RelativeLink from "@/components/relative-link";
+import RoleBaseComponent from "@/components/role-base-component";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -78,12 +78,23 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       {course.instructor?.fullName || "Unknown Instructor"}
                     </div>
                     <div className="flex flex-col gap-4 sm:flex-row">
-                      <Button
-                        size="lg"
-                        className="bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-primary/30 transform px-8 py-3 font-semibold shadow-lg transition-all duration-200 hover:-translate-y-0.5"
-                      >
-                        Enroll Now - ${course.price}
-                      </Button>
+                      <RoleBaseComponent requireRoles={["Student"]}>
+                        <Button
+                          size="lg"
+                          className="bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-primary/30 transform px-8 py-3 font-semibold shadow-lg transition-all duration-200 hover:-translate-y-0.5"
+                        >
+                          Enroll Now - ${course.price}
+                        </Button>
+                      </RoleBaseComponent>
+                      <RoleBaseComponent requireRoles={["Instructor", "Admin"]}>
+                        <Button
+                          size="lg"
+                          disabled
+                          className="bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-primary/30 transform px-8 py-3 font-semibold shadow-lg transition-all duration-200 hover:-translate-y-0.5"
+                        >
+                          You are not allowed to enroll
+                        </Button>
+                      </RoleBaseComponent>
                     </div>
                   </div>
 
@@ -102,38 +113,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
             <CourseInfo course={course} />
           </div>
-
-          {/* Final CTA Section */}
-          <section className="from-primary/5 to-primary/10 border-border border-t bg-gradient-to-br py-16">
-            <div className="container mx-auto px-4 text-center">
-              <h2 className="text-foreground mb-4 text-3xl font-extrabold md:text-4xl">
-                Ready to start your journey?
-              </h2>
-              <p className="text-muted-foreground mx-auto mb-8 max-w-2xl text-lg leading-relaxed">
-                Join thousands of students who have already transformed their
-                careers with this course.
-              </p>
-              <div className="flex flex-col justify-center gap-4 sm:flex-row">
-                <Button
-                  size="lg"
-                  asChild
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-primary/30 transform px-8 py-3 font-semibold shadow-lg transition-all duration-200 hover:-translate-y-0.5"
-                >
-                  {/* Implement payment integration */}
-                  <RelativeLink href="/learn">
-                    Enroll Now - ${course.price}
-                  </RelativeLink>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="hover:bg-muted bg-transparent px-8 py-3 font-semibold transition-all duration-200"
-                >
-                  30-Day Money-Back Guarantee
-                </Button>
-              </div>
-            </div>
-          </section>
         </>
       )}
     </MainLayout>

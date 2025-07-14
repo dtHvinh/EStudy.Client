@@ -33,6 +33,7 @@ export function CourseDetails() {
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
+
     if (!file) return;
 
     setUploading(true);

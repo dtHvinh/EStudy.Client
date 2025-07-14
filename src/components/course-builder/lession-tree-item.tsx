@@ -15,6 +15,7 @@ import {
   useEditCourseStructure,
 } from "@/hooks/use-edit-course-structure";
 import { useStorage } from "@/hooks/use-storage";
+import useStorageV2 from "@/hooks/use-storage-v2";
 import {
   ChevronDown,
   ChevronRight,
@@ -53,7 +54,15 @@ export function LessonTreeItem({
   dragHandleProps,
 }: LessonTreeItemProps) {
   const [isOpen, setIsOpen] = useState(true);
-  const { deleteResource, uploadFile, removeFiles, getFilesUrl } = useStorage();
+  const {
+    deleteResource,
+    uploadFile,
+    removeFiles,
+    getFileUrl,
+    getFileRelativeUrl,
+  } = useStorage();
+  const { uploadVideo, removeVideo, getVideoFileRelativeUrl, getVideoFileUrl } =
+    useStorageV2();
   const [isEditing, setIsEditing] = useState(false);
   const debounceUpdateLesson = useDebouncedCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -120,7 +129,7 @@ export function LessonTreeItem({
 
   const handleSetVideo = async (files: File[]) => {
     if (files.length === 0) return;
-    const path = await uploadFile(files[0], getFilePath(files[0].name));
+    const path = await uploadVideo(files[0]);
     setVideoUrl(chapterIndex, lessonIndex, path);
   };
 
@@ -130,7 +139,7 @@ export function LessonTreeItem({
   };
 
   const handleDeleteVideo = async () => {
-    deleteResource(lesson.videoUrl!);
+    removeVideo(lesson.videoUrl!);
     deleteVideo(chapterIndex, lessonIndex);
   };
 
@@ -196,7 +205,7 @@ export function LessonTreeItem({
                   ) : (
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="hover:text-primary w-full truncate rounded-md bg-gray-200 p-2 text-left text-xs transition-colors"
+                      className="hover:text-primary text-md w-full truncate rounded-md bg-gray-100 p-2 text-left transition-colors"
                     >
                       {lesson.title || `Lesson ${lessonIndex + 1}`}
                     </button>
@@ -286,7 +295,9 @@ export function LessonTreeItem({
                           "application/*": [],
                           "text/*": [],
                         }}
-                        previews={getFilesUrl(lesson.attachedFileUrls)}
+                        previews={lesson.attachedFileUrls}
+                        getFileUrlFn={getFileUrl}
+                        getFileRelativeUrlFn={getFileRelativeUrl}
                       />
                     </div>
                   </div>
@@ -299,9 +310,9 @@ export function LessonTreeItem({
                         onFilesRemoved={handleDeleteVideo}
                         maxFiles={1}
                         accept={{ "video/*": [] }}
-                        previews={
-                          lesson.videoUrl ? getFilesUrl([lesson.videoUrl]) : []
-                        }
+                        previews={lesson.videoUrl ? [lesson.videoUrl] : []}
+                        getFileUrlFn={getVideoFileUrl}
+                        getFileRelativeUrlFn={getVideoFileRelativeUrl}
                       />
                     </div>
 

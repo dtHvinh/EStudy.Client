@@ -25,6 +25,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "./contexts/AuthContext";
+import RoleBaseComponent from "./role-base-component";
 import { Skeleton } from "./ui/skeleton";
 import getInitials from "./utils/utilss";
 
@@ -59,7 +60,16 @@ export function NavUser({
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <div className="flex items-center gap-2">
+                  <span className="truncate font-medium">{user.name}</span>
+                  <RoleBaseComponent
+                    requireRoles={["Instructor"]}
+                    className="text-muted-foreground text-xs"
+                  >
+                    Instructor
+                  </RoleBaseComponent>
+                </div>
+
                 <span className="text-muted-foreground truncate text-xs">
                   {user.email}
                 </span>

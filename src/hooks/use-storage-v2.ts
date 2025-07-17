@@ -61,6 +61,35 @@ export default function useStorageV2() {
     }
   };
 
+  const downloadBlob = async (filePath: string) => {
+    try {
+      const response = await api.post(`/api/storage/download/file`, {
+        objectName: getFileRelativeUrl(filePath),
+      });
+      return new Blob([response], { type: "text/vtt" });
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      toast.error("Failed to download file. Please try again.");
+      throw error;
+    }
+  };
+
+  const downloadFile = async (filePath: string) => {
+    try {
+      const response = await api.get(
+        `/api/storage/download/file/${getFileName(filePath)}`,
+      );
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      toast.error("Failed to download file. Please try again.");
+      throw error;
+    }
+  };
+
+  const getDownloadUrl = (filePath: string) => {
+    return `${process.env.NEXT_PUBLIC_API_URL}/storage/download/file/${getFileName(filePath)}`;
+  };
+
   const getFileUrl = (filePath: string) => {
     return `${process.env.NEXT_PUBLIC_MINIO_BASE_URL}/estudy/${filePath}`;
   };
@@ -72,6 +101,10 @@ export default function useStorageV2() {
     );
   };
 
+  const getFileName = (filePath: string) => {
+    return filePath.split("/").pop() || "";
+  };
+
   return {
     uploadVideo,
     removeVideo,
@@ -79,5 +112,9 @@ export default function useStorageV2() {
     getFileRelativeUrl,
     uploadFiles,
     deleteFiles,
+    downloadBlob,
+    downloadFile,
+    getFileName,
+    getDownloadUrl,
   };
 }

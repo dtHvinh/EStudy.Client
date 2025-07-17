@@ -4,6 +4,7 @@ import RelativeLink from "../relative-link";
 import RoleBaseComponent from "../role-base-component";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import H3 from "../ui/h3";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { mock_enrolledCourses } from "../utils/old";
 import StudentPageCourses from "./student-page-course";
@@ -14,14 +15,13 @@ export default function StudentPage() {
       <div className="flex-1 space-y-6">
         <div className="rounded-lg">
           <div className="max-w-2xl">
-            <h1 className="mb-4 text-4xl font-bold">Learn Without Limits</h1>
+            <H3>Learn Without Limits</H3>
             <p className="mb-6 text-xl opacity-90">
               Start, switch, or advance your career with thousands of courses,
               Professional Certificates, and degrees from world-class
               instructors.
             </p>
             <div className="flex items-center gap-4">
-              <Button size="lg">Explore Courses</Button>
               <RoleBaseComponent requireRoles={["Instructor", "Admin"]}>
                 <Button size="lg" variant={"outline"}>
                   <RelativeLink href={"builder"}>Create a course</RelativeLink>

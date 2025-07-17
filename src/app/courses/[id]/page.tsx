@@ -189,7 +189,8 @@ const CourseInfo = ({ course }: { course: GetCourseDetailsType }) => {
                     <div className="text-muted-foreground flex items-center gap-2 text-sm">
                       <Star className="h-4 w-4" />
                       <span>
-                        {course.instructor?.averageRating} instructor rating
+                        {course.instructor?.averageRating.toFixed(1)} ratings (
+                        {course.instructor?.ratingCount})
                       </span>
                     </div>
                     <div className="text-muted-foreground flex items-center gap-2 text-sm">

@@ -15,6 +15,7 @@ export type GetCourseType = {
   language: string;
   estimatedDurationHours: number;
   studentsCount: number;
+  isEnrolled?: boolean;
 };
 
 export default function useGetCourses({ query }: { query?: string } = {}) {

@@ -1,21 +1,33 @@
 import { GetCourseToLearnLessonResponse } from "@/hooks/use-learn-course";
-import { useStorage } from "@/hooks/use-storage";
-import { IconDeviceFloppy } from "@tabler/icons-react";
-import { Download, FileText, Star } from "lucide-react";
+import useStorageV2 from "@/hooks/use-storage-v2";
+import { Download, FileText } from "lucide-react";
 import HTMLContent from "../html-content";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Separator } from "../ui/separator";
+import H3 from "../ui/h3";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Textarea } from "../ui/textarea";
 import VideoPlayer from "../video/video-player";
+import CourseLessonNote from "./course-lesson-note";
+import CourseRatings from "./course-rating";
+
+export type CourseLessonContentEventProps = {
+  onLessonCompleted?: (lessonId: number) => void;
+  onCourseRated?: (rating: number, review: string) => void;
+};
+
 export default function CourseLessonContent({
   lesson,
+  courseId,
+  onLessonCompleted,
+  onNoteSaved,
+  onCourseRated,
 }: {
   lesson?: GetCourseToLearnLessonResponse;
-}) {
-  const { getFileUrl } = useStorage();
+  courseId: string;
+  onNoteSaved?: (lessonId: number, content: string) => void;
+} & CourseLessonContentEventProps) {
+  const { getFileUrl } = useStorageV2();
 
   return (
     <div className="col-span-8">
@@ -31,6 +43,9 @@ export default function CourseLessonContent({
               width="100%"
               height="100%"
               controls={true}
+              onEnded={() => {
+                onLessonCompleted?.(lesson.id);
+              }}
             />
           ) : (
             <div className="bg-muted flex h-full items-center justify-center">
@@ -47,46 +62,42 @@ export default function CourseLessonContent({
       {/* Content Tabs */}
       <div className="flex-1 overflow-auto">
         <div className="p-6">
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+          <Tabs defaultValue="overview">
+            <TabsList className="mx-auto w-full">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="notes">Notes</TabsTrigger>
               <TabsTrigger value="resources">Resources</TabsTrigger>
-              <TabsTrigger value="discussions">Discussions</TabsTrigger>
               <TabsTrigger value="reviews">Reviews</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="mt-6">
               <div className="space-y-6">
                 {lesson && (
-                  <div>
-                    <h2 className="mb-4 text-2xl font-bold">{lesson.title}</h2>
-                    <div className="prose max-w-none">
-                      <HTMLContent content={lesson.content} />
-                    </div>
+                  <div className="space-y-4">
+                    <H3 className="font-bold">{lesson.title}</H3>
+                    {lesson.description && (
+                      <div>
+                        <h2 className="mb-5 text-xl font-semibold">
+                          Description
+                        </h2>
+                        <HTMLContent content={lesson.description} />
+                      </div>
+                    )}
+                    {lesson.content && (
+                      <div className="prose max-w-none">
+                        <h2 className="text-xl font-semibold">Lecture</h2>
+                        <HTMLContent content={lesson.content} />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             </TabsContent>
 
             <TabsContent value="notes" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    My Notes
-                    <Button variant={"ghost"} className="mt-4">
-                      <IconDeviceFloppy />
-                    </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Textarea
-                    placeholder="Add your notes for this course..."
-                    className="min-h-[200px]"
-                    defaultValue={lesson?.note?.content || ""}
-                  />
-                </CardContent>
-              </Card>
+              {lesson && (
+                <CourseLessonNote lesson={lesson} onNoteSaved={onNoteSaved} />
+              )}
             </TabsContent>
 
             <TabsContent value="resources" className="mt-6">
@@ -110,7 +121,13 @@ export default function CourseLessonContent({
                           </div>
                           <Button variant="outline" size="sm">
                             <Download className="mr-2 h-4 w-4" />
-                            Download
+                            <a
+                              href={getFileUrl(resource)}
+                              download
+                              target="_blank"
+                            >
+                              Download
+                            </a>
                           </Button>
                         </div>
                       ))}
@@ -124,40 +141,11 @@ export default function CourseLessonContent({
               </Card>
             </TabsContent>
 
-            <TabsContent value="discussions" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Discussion Forum</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-6 space-y-4">
-                    <Textarea placeholder="Ask a question or share your thoughts..." />
-                    <Button>Post Comment</Button>
-                  </div>
-                  <Separator className="my-6" />
-                  <div className="space-y-4">
-                    <p className="text-muted-foreground py-8 text-center">
-                      No discussions yet. Be the first to start a conversation!
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
             <TabsContent value="reviews" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Course Reviews</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="py-8 text-center">
-                    <Star className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
-                    <p className="text-muted-foreground">
-                      Reviews will appear here
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <CourseRatings
+                courseId={courseId}
+                onCourseRated={onCourseRated}
+              />
             </TabsContent>
           </Tabs>
         </div>

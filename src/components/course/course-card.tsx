@@ -14,7 +14,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
-import { GetMyCourseType } from "@/hooks/use-get-my-course";
+import { GetCourseType } from "@/hooks/use-get-courses";
 import { useStorage } from "@/hooks/use-storage";
 import {
   BookOpen,
@@ -30,7 +30,7 @@ import { useState } from "react";
 import RelativeLink from "../relative-link";
 
 interface CourseCardProps {
-  course: GetMyCourseType;
+  course: GetCourseType;
   onEnroll?: (courseId: number) => void;
   onViewDetails?: (courseId: number) => void;
   showActions?: boolean;
@@ -48,7 +48,6 @@ export function CourseCard({
 }: CourseCardProps) {
   const [showDetails, setShowDetails] = useState(false);
   const { getFilePath } = useStorage();
-
   const getDifficultyColor = (level: string) => {
     switch (level) {
       case "Beginner":
@@ -105,7 +104,8 @@ export function CourseCard({
               </Badge>
             ) : (
               <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
-                <DollarSign className="mr-1 h-3 w-3" />${course.price}
+                <DollarSign className="mr-1 h-3 w-3" />
+                {course.price}
               </Badge>
             )}
           </div>
@@ -220,14 +220,28 @@ export function CourseCard({
               )}
               {isReadonly ? (
                 <>
-                  <Button
-                    size="sm"
-                    onClick={() => onEnroll?.(course.id!)}
-                    className="flex-1"
-                    disabled={!course.isPublished}
-                  >
-                    {course.isFree ? "Enroll Free" : "Enroll Now"}
-                  </Button>
+                  {!course.isEnrolled ? (
+                    <Button
+                      size="sm"
+                      onClick={() => onEnroll?.(course.id!)}
+                      className="flex-1"
+                      disabled={!course.isPublished}
+                    >
+                      {course.isFree ? "Enroll Free" : "Enroll Now"}{" "}
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant={"outline"}
+                      className="flex-1"
+                      disabled={!course.isPublished}
+                      asChild
+                    >
+                      <RelativeLink href={`${course.id}/learn`}>
+                        Continue
+                      </RelativeLink>
+                    </Button>
+                  )}
                 </>
               ) : (
                 <Button size={"sm"} asChild>

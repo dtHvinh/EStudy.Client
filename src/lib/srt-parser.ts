@@ -45,6 +45,59 @@ export function parseSRT(srtContent: string): SubtitleCue[] {
   return cues;
 }
 
+export function parseVTT(vttContent: string): SubtitleCue[] {
+  const cues: SubtitleCue[] = [];
+  const blocks = vttContent.trim().split(/\n\s*\n/);
+
+  let idCounter = 0;
+
+  blocks.forEach((block) => {
+    const lines = block.trim().split("\n").filter(Boolean);
+
+    if (lines.length >= 2) {
+      let id: number;
+      let timeLineIndex = 0;
+
+      // If first line is numeric and second contains time --> treat as ID
+      if (/^\d+$/.test(lines[0]) && lines[1].includes("-->")) {
+        id = Number.parseInt(lines[0]);
+        timeLineIndex = 1;
+      } else {
+        id = idCounter++;
+      }
+
+      const timeMatch = lines[timeLineIndex].match(
+        /(\d{2}):(\d{2}):(\d{2})\.(\d{3})\s-->\s(\d{2}):(\d{2}):(\d{2})\.(\d{3})/,
+      );
+
+      if (timeMatch) {
+        const startTime = parseTime(
+          timeMatch[1],
+          timeMatch[2],
+          timeMatch[3],
+          timeMatch[4],
+        );
+        const endTime = parseTime(
+          timeMatch[5],
+          timeMatch[6],
+          timeMatch[7],
+          timeMatch[8],
+        );
+        const text = lines.slice(timeLineIndex + 1).join(" ");
+
+        cues.push({
+          id,
+          startTime,
+          endTime,
+          text: text.replace(/<[^>]*>/g, ""), // strip styling tags like <c>, <b>
+        });
+      }
+    }
+  });
+
+  return cues;
+}
+
 function parseTime(
   hours: string,
   minutes: string,

@@ -1,5 +1,5 @@
-import { useStorage } from "@/hooks/use-storage";
-import { parseSRT } from "@/lib/srt-parser";
+import useStorageV2 from "@/hooks/use-storage-v2";
+import { parseSRT, parseVTT } from "@/lib/srt-parser";
 import { convertSRTTextToVTT } from "@/lib/vtt-parser";
 import { useVideoStateStore } from "@/stores/video-state-store";
 import { useEffect, useRef, useState } from "react";
@@ -9,16 +9,22 @@ import { ReactPlayerProps } from "react-player/types";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 
+export type VideoProps = {
+  autoPip?: boolean;
+};
+
 const VideoPlayer = ({
   src,
   transcriptSrc,
+  autoPip = false,
   ...props
 }: {
   src: string;
   transcriptSrc?: string;
-} & ReactPlayerProps) => {
+} & ReactPlayerProps &
+  VideoProps) => {
   const playerRef = useRef<HTMLVideoElement>(null);
-  const { downloadFile } = useStorage();
+  const { downloadBlob } = useStorageV2();
   const [vttUrl, setVttUrl] = useState<string>();
 
   const { resetState, updateState, setSubtitleCues } = useVideoStateStore(
@@ -34,13 +40,12 @@ const VideoPlayer = ({
   const sub1 = useVideoStateStore.subscribe((state) => {
     if (state.seekToTime !== undefined && playerRef.current) {
       playerRef.current.currentTime = state.seekToTime;
-      playerRef.current.pause();
       updateState({ seekToTime: undefined });
     }
   });
 
   const onVideoInViewStatusChange = async (inView: boolean) => {
-    if (playerRef.current && !inView) {
+    if (playerRef.current && !inView && autoPip) {
       await playerRef.current?.requestPictureInPicture();
     }
   };
@@ -52,16 +57,17 @@ const VideoPlayer = ({
   useEffect(() => {
     if (!transcriptSrc) return;
 
+    const isVTT = transcriptSrc.endsWith(".vtt");
+
     const loadTranscript = async () => {
       try {
-        const blob = await downloadFile(transcriptSrc);
+        const blob = await downloadBlob(transcriptSrc);
         const text = await blob.text();
 
         // Set subtitle cues for the sidebar
-        setSubtitleCues(parseSRT(text));
+        setSubtitleCues(!isVTT ? parseSRT(text) : parseVTT(text));
 
-        // Set VTT URL for video player
-        if (transcriptSrc.endsWith(".vtt")) {
+        if (isVTT) {
           setVttUrl(transcriptSrc);
         } else {
           const vttBlob = convertSRTTextToVTT(text);
@@ -94,9 +100,10 @@ const VideoPlayer = ({
         src={src}
         {...props}
         onTimeUpdate={handleTimeUpdate}
+        onSeeked={handleTimeUpdate}
         controls={true}
         crossOrigin="anonymous"
-        muted={true}
+        autoPlay
       >
         {vttUrl && (
           <track

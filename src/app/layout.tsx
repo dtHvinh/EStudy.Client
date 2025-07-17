@@ -2,6 +2,7 @@ import { AuthProvider } from "@/components/contexts/AuthContext";
 import { ToasterProvider } from "@/components/contexts/ToasterContext";
 import { ThemeProvider } from "@/components/theme-toggle";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import "@stripe/stripe-js";
 import type { Metadata } from "next";
 import { EB_Garamond, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";

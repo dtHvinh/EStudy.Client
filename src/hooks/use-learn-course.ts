@@ -1,9 +1,11 @@
 import api from "@/components/utils/requestUtils";
+import { toast } from "sonner";
 import useSWR from "swr";
 
 export interface GetCourseToLearnResponse {
   studentCount: number;
   averageRating: number;
+  isRated: boolean;
   title: string;
   chapters: GetCourseToLearnChapterResponse[];
 }
@@ -37,7 +39,7 @@ export interface GetCourseToLearnLessonResponse {
 }
 
 export default function useLearnCourse(courseId: string | number) {
-  const { data, isLoading, error } = useSWR<GetCourseToLearnResponse>(
+  const { data, isLoading, error, mutate } = useSWR<GetCourseToLearnResponse>(
     `/api/courses/${courseId}/learn`,
     api.get,
     {
@@ -47,5 +49,84 @@ export default function useLearnCourse(courseId: string | number) {
     },
   );
 
-  return { course: data, isLoading, error };
+  const getNextLesson = (currentLessonId: number) => {
+    if (!data) return undefined;
+    const allLessons = data.chapters.flatMap((chapter) => chapter.lessons);
+    const currentIndex = allLessons.findIndex(
+      (lesson) => lesson.id === currentLessonId,
+    );
+    return allLessons[currentIndex + 1];
+  };
+
+  const takeNote = async (lessonId: number, content: string) => {
+    try {
+      await api.post(`/api/courses/lessons/${lessonId}/note`, {
+        content,
+      });
+
+      mutate((prevData) => {
+        if (!prevData) return prevData;
+        return {
+          ...prevData,
+          chapters: prevData.chapters.map((chapter) => ({
+            ...chapter,
+            lessons: chapter.lessons.map((lesson) => {
+              if (lesson.id === lessonId)
+                return { ...lesson, note: { content } };
+              return lesson;
+            }),
+          })),
+        };
+      }, false);
+      toast.success("Note saved successfully");
+    } catch (error) {
+      console.error("Failed to save note:", error);
+      toast.error("Failed to save note");
+    }
+  };
+
+  const rateCourse = async (rating: number, review: string) => {
+    try {
+      await api.post(`/api/courses/${courseId}/ratings`, {
+        value: rating,
+        review,
+      });
+      toast.success("Course rated successfully");
+    } catch (error) {
+      console.error("Failed to rate course:", error);
+      toast.error("Failed to rate course");
+    }
+  };
+
+  const markAsCompleted = async (lessonId: number) => {
+    try {
+      await api.post(`/api/courses/lessons/${lessonId}/completed`, {});
+      mutate((prevData) => {
+        if (!prevData) return prevData;
+        return {
+          ...prevData,
+          chapters: prevData.chapters.map((chapter) => ({
+            ...chapter,
+            lessons: chapter.lessons.map((lesson) => {
+              if (lesson.id === lessonId)
+                return { ...lesson, isCompleted: true };
+              return lesson;
+            }),
+          })),
+        };
+      }, false);
+    } catch (error) {
+      console.error("Failed to mark lesson as completed:", error);
+    }
+  };
+
+  return {
+    course: data,
+    isLoading,
+    error,
+    getNextLesson,
+    takeNote,
+    rateCourse,
+    markAsCompleted,
+  };
 }

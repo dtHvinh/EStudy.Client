@@ -1,4 +1,7 @@
-import { GetCourseToLearnChapterResponse } from "@/hooks/use-learn-course";
+import {
+  GetCourseToLearnChapterResponse,
+  GetCourseToLearnLessonResponse,
+} from "@/hooks/use-learn-course";
 import { SubtitleCue } from "@/lib/srt-parser";
 import { cn } from "@/lib/utils";
 import { useVideoStateStore } from "@/stores/video-state-store";
@@ -24,25 +27,43 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
 import { Tabs, TabsContent } from "../ui/tabs";
 
+function findFirstIncompleteLesson(
+  chapters: GetCourseToLearnChapterResponse[],
+): [number, number] {
+  for (let chapterIndex = 0; chapterIndex < chapters.length; chapterIndex++) {
+    const lessons = chapters[chapterIndex].lessons;
+    for (let lessonIndex = 0; lessonIndex < lessons.length; lessonIndex++) {
+      if (!lessons[lessonIndex].isCompleted) {
+        return [chapterIndex, lessonIndex];
+      }
+    }
+  }
+  return [0, 0];
+}
+
 export default function CourseSidebar({
   chapters,
+  currentLesson,
   onLessionSelected,
 }: {
+  currentLesson?: GetCourseToLearnLessonResponse;
   chapters: GetCourseToLearnChapterResponse[];
-  onLessionSelected?: (lessonIndex: number) => void;
+  onLessionSelected?: (chapterIndex: number, lessonIndex: number) => void;
 }) {
-  const [expandedSections, setExpandedSections] = useState<number[]>([]);
+  const [expandedChapters, setExpandedChapters] = useState<number[]>([]);
   const [activeTab, setActiveTab] = useState("content");
   const toggleSection = (index: number) => {
-    setExpandedSections((prev) =>
+    setExpandedChapters((prev) =>
       prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index],
     );
   };
 
   useEffect(() => {
-    if (chapters.length > 0 && !expandedSections.includes(0)) {
-      setExpandedSections([0]);
-      onLessionSelected?.(0);
+    if (chapters.length > 0 && !expandedChapters.includes(0)) {
+      const [initialChapterIndex, initialLessonIndex] =
+        findFirstIncompleteLesson(chapters);
+      setExpandedChapters([initialChapterIndex]);
+      onLessionSelected?.(initialChapterIndex, initialLessonIndex);
     }
   }, [chapters]);
 
@@ -72,61 +93,87 @@ export default function CourseSidebar({
         </div>
 
         <TabsContent value="content">
-          {chapters.map((section, sectionIndex) => (
-            <Collapsible
-              open={expandedSections.includes(sectionIndex)}
-              onOpenChange={() => toggleSection(sectionIndex)}
-              key={sectionIndex}
-            >
-              <CollapsibleTrigger className="hover:bg-muted flex w-full items-center justify-between border-b p-5 text-left">
-                <div>
-                  <p className="text-xl font-semibold">
-                    Section {sectionIndex + 1}: {section.title}
-                  </p>
-                  <div className="flex h-5 items-center space-x-4 text-sm">
-                    <div>
-                      {section.lessons.filter((l) => l.isCompleted).length} /{" "}
-                      {section.lessons.length}
-                    </div>
-                    <Separator orientation="vertical" />
-                    <div>{section.totalMinutes} mins</div>
-                  </div>
-                </div>
-                {expandedSections.includes(sectionIndex) ? (
-                  <Minus />
-                ) : (
-                  <ChevronDown />
-                )}
-              </CollapsibleTrigger>
-
-              <CollapsibleContent className="space-y-1">
-                {section.lessons.map((lesson, lessonIndex) => (
-                  <div
-                    key={lessonIndex}
-                    className="hover:bg-muted flex cursor-pointer items-center gap-3 rounded p-2 pl-8"
-                    onClick={() => onLessionSelected?.(lessonIndex)}
-                  >
-                    {lesson.isCompleted ? (
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <Circle className="text-muted-foreground h-4 w-4" />
-                    )}
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{lesson.title}</p>
-                      <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                        {lesson.videoUrl ? (
-                          <Play className="h-3 w-3" />
-                        ) : (
-                          <FileText className="h-3 w-3" />
-                        )}
-                        <span>{lesson.durationMinutes} mins</span>
+          {chapters.map((chapter, sectionIndex) => {
+            const isChapterSelected = chapter.lessons.some(
+              (lesson) => lesson.id === currentLesson?.id,
+            );
+            return (
+              <Collapsible
+                open={expandedChapters.includes(sectionIndex)}
+                onOpenChange={() => toggleSection(sectionIndex)}
+                key={sectionIndex}
+              >
+                <CollapsibleTrigger
+                  className={cn(
+                    "hover:bg-muted flex w-full items-center justify-between border-b p-5 text-left",
+                    isChapterSelected && "bg-muted",
+                  )}
+                >
+                  <div>
+                    <p className="text-xl font-semibold">
+                      Chapter {sectionIndex + 1}: {chapter.title}
+                    </p>
+                    <div className="flex h-5 items-center space-x-4 text-sm">
+                      <div>
+                        {chapter.lessons.filter((l) => l.isCompleted).length} /{" "}
+                        {chapter.lessons.length}
                       </div>
+                      <Separator orientation="vertical" />
+                      <div>{chapter.totalMinutes} mins</div>
                     </div>
                   </div>
-                ))}
-              </CollapsibleContent>
-            </Collapsible>
-          ))}
+                  {expandedChapters.includes(sectionIndex) ? (
+                    <Minus />
+                  ) : (
+                    <ChevronDown />
+                  )}
+                </CollapsibleTrigger>
+
+                <CollapsibleContent className="space-y-1">
+                  {chapter.lessons.map((lesson, lessonIndex) => {
+                    const isLessonSelected = lesson.id === currentLesson?.id;
+                    const isLessonCompleted = lesson.isCompleted;
+                    return (
+                      <div
+                        key={lessonIndex}
+                        className={cn(
+                          "hover:bg-muted flex cursor-pointer items-center gap-3 rounded p-2 pl-8",
+                          isLessonSelected && "bg-muted",
+                        )}
+                        onClick={() =>
+                          onLessionSelected?.(sectionIndex, lessonIndex)
+                        }
+                      >
+                        {lesson.isCompleted ? (
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Circle className="text-muted-foreground h-4 w-4" />
+                        )}
+                        <div className="flex-1">
+                          <p
+                            className={cn(
+                              "text-sm font-medium",
+                              isLessonCompleted && "text-muted-foreground",
+                            )}
+                          >
+                            {lesson.title}
+                          </p>
+                          <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                            {lesson.videoUrl ? (
+                              <Play className="h-3 w-3" />
+                            ) : (
+                              <FileText className="h-3 w-3" />
+                            )}
+                            <span>{lesson.durationMinutes} mins</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </CollapsibleContent>
+              </Collapsible>
+            );
+          })}
         </TabsContent>
 
         <TabsContent value="transcript">
@@ -227,7 +274,7 @@ const SubtitleLine = ({
 
   const unsub = useVideoStateStore.subscribe((state) => {
     const playedTime = state.playedSeconds;
-    setIsActive(playedTime >= cue.startTime && playedTime <= cue.endTime);
+    setIsActive(playedTime > cue.startTime && playedTime < cue.endTime);
   });
 
   useEffect(() => {

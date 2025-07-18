@@ -51,6 +51,7 @@ export default function ExplorePage() {
               <div className="relative flex-1">
                 <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
                 <Input
+                  spellCheck="false"
                   type="text"
                   placeholder="Search for blogs about grammar, vocabulary, pronunciation..."
                   onChange={(e) => debounced(e.target.value)}
@@ -77,7 +78,7 @@ export default function ExplorePage() {
                 <BlogCardSkeleton number={6} />
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="flex flex-col gap-5">
                 {blogs.length > 0 ? (
                   blogs.map((blog) => <BlogCard key={blog.id} blog={blog} />)
                 ) : (

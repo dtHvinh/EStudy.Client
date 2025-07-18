@@ -53,7 +53,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         <div className="container mx-auto max-w-6xl space-y-5">
           <div className="grid grid-cols-8 gap-5">
             <div className="col-span-8">
-              <NavigateBack fallbackUrl="/" />
+              <NavigateBack />
               <TestHeader
                 testId={details.id}
                 title={details.title}

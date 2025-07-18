@@ -14,7 +14,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateCourseDetails } from "@/hooks/use-create-course-details";
-import { useStorage } from "@/hooks/use-storage";
+import useStorageV2 from "@/hooks/use-storage-v2";
 import { ImageIcon, Save, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type React from "react";
@@ -26,7 +26,7 @@ export function CourseDetails() {
   const { courseDetails, updateCourseDetails } = useCreateCourseDetails();
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const { uploadFile, getFileUrl } = useStorage({});
+  const { uploadImages, getFileUrl } = useStorageV2();
   const router = useRouter();
 
   const handleImageUpload = async (
@@ -38,9 +38,8 @@ export function CourseDetails() {
 
     setUploading(true);
     try {
-      const fileName = `${Date.now()}-${file.name}`;
-      const imageUrl = await uploadFile(file, fileName);
-      updateCourseDetails({ imageUrl: getFileUrl(imageUrl) });
+      const imageUrl = await uploadImages([file]);
+      updateCourseDetails({ imageUrl: imageUrl[0] });
       toast.success("Course image uploaded successfully");
     } catch (error) {
       toast.error("Failed to upload image");
@@ -217,7 +216,11 @@ export function CourseDetails() {
                   {courseDetails.imageUrl ? (
                     <div className="space-y-2">
                       <img
-                        src={courseDetails.imageUrl || "/placeholder.svg"}
+                        src={
+                          courseDetails.imageUrl
+                            ? getFileUrl(courseDetails.imageUrl)
+                            : "/placeholder.svg"
+                        }
                         alt="Course"
                         className="mx-auto rounded-md object-cover"
                       />

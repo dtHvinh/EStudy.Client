@@ -8,6 +8,7 @@ import getInitials from "@/components/utils/utilss";
 import useCourseDetails, {
   GetCourseDetailsType,
 } from "@/hooks/use-course-details";
+import useStorageV2 from "@/hooks/use-storage-v2";
 import { IconPencil } from "@tabler/icons-react";
 import { Award, Clock, Globe, PlayCircle, Star, Users } from "lucide-react";
 import { use } from "react";
@@ -15,6 +16,7 @@ import { use } from "react";
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { course } = useCourseDetails(id);
+  const { getFileUrl } = useStorageV2();
   return (
     <MainLayout>
       {course && (
@@ -101,9 +103,13 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   <div className="flex justify-center">
                     <div className="relative overflow-hidden rounded-md">
                       <img
-                        src={course.imageUrl || "/placeholder.svg"}
+                        src={
+                          course.imageUrl
+                            ? getFileUrl(course.imageUrl)
+                            : "https://picsum.photos/seed/picsum/600/400"
+                        }
                         alt="Course preview"
-                        className="h-[300px] w-full object-cover"
+                        className="w-full object-cover"
                       />
                     </div>
                   </div>

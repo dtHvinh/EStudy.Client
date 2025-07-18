@@ -52,7 +52,6 @@ export default function Page({
     if (courseStructure) {
       setChapters(courseStructure.chapters);
       setCourseId(courseStructure.courseId);
-      console.log("Course structure loaded:", courseStructure);
     }
   }, [courseStructure]);
 
@@ -92,9 +91,11 @@ export default function Page({
 
   useEffect(() => {
     if (isLoading) {
-      toast.loading("Loading course structure...");
+      toast.loading("Loading course structure...", {
+        id: "loading-course-structure",
+      });
     } else {
-      toast.dismiss();
+      toast.dismiss("loading-course-structure");
     }
   }, [isLoading]);
 

@@ -1,7 +1,7 @@
 import useGetCourses from "@/hooks/use-get-courses";
 
 import { useGenericToggle } from "@/hooks/use-generic-toggle";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
 import CheckoutForm from "../checkout/checkout-form";
@@ -29,16 +29,6 @@ export default function StudentPageCourses() {
   );
   const { opened, openChange } = useGenericToggle();
   const [clientSecret, setClientSecret] = useState<string>();
-
-  useEffect(() => {
-    if (isLoading) {
-      toast.loading("Loading courses...", {
-        id: "loading-courses",
-      });
-    } else {
-      toast.dismiss("loading-courses");
-    }
-  }, [isLoading]);
 
   const handleEnroll = async (courseId: number) => {
     const course = courses.find((c) => c.id === courseId);

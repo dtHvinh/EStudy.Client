@@ -1,7 +1,7 @@
 import { GetTestResponseType } from "@/hooks/use-tests";
 import { cn } from "@/lib/utils";
 import { Clock, MessageCircle, Users } from "lucide-react";
-import RelativeLink from "./relative-link";
+import Link from "next/link";
 import { Button } from "./ui/button";
 import {
   Card,
@@ -76,11 +76,11 @@ export default function TestCard({
         </Button> */}
       </CardContent>
       <CardAction className="w-full px-5">
-        <RelativeLink href={`${props.id}`}>
+        <Link href={`tests/${props.id}`}>
           <Button variant={"outline"} className="w-full">
             Details
           </Button>
-        </RelativeLink>
+        </Link>
       </CardAction>
     </Card>
   );

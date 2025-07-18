@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
 import { GetCourseType } from "@/hooks/use-get-courses";
-import { useStorage } from "@/hooks/use-storage";
+import useStorageV2 from "@/hooks/use-storage-v2";
 import {
   BookOpen,
   ChevronDown,
@@ -47,7 +47,7 @@ export function CourseCard({
   isReadonly = false,
 }: CourseCardProps) {
   const [showDetails, setShowDetails] = useState(false);
-  const { getFilePath } = useStorage();
+  const { getFileUrl } = useStorageV2();
   const getDifficultyColor = (level: string) => {
     switch (level) {
       case "Beginner":
@@ -85,7 +85,7 @@ export function CourseCard({
           <img
             src={
               course.imageUrl
-                ? getFilePath(course.imageUrl)
+                ? getFileUrl(course.imageUrl)
                 : "https://picsum.photos/seed/picsum/352/192"
             }
             className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"

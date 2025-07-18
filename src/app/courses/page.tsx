@@ -13,7 +13,7 @@ export default function Page() {
     <MainLayout>
       <RoleBaseComponent requireRoles={["Admin", "Instructor"]}>
         <InstructorPage />
-      </RoleBaseComponent>{" "}
+      </RoleBaseComponent>
       <RoleBaseComponent requireRoles={["Student"]}>
         <StudentPage />
       </RoleBaseComponent>

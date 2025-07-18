@@ -16,6 +16,7 @@ export type GetMyCourseType = {
   estimatedDurationHours: number;
   studentsCount: number;
   isReadOnly?: boolean;
+  creationDate: string;
 };
 
 export default function useGetMyCourse() {

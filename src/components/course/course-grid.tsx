@@ -46,13 +46,14 @@ export function CourseGrid({
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {courses.map((course) => (
-        <CourseCard
-          isReadonly={false}
-          key={course.id}
-          course={course}
-          onEnroll={onEnroll}
-          onViewDetails={onViewDetails}
-        />
+        <div key={course.id}>
+          <CourseCard
+            isReadonly={false}
+            course={course}
+            onEnroll={onEnroll}
+            onViewDetails={onViewDetails}
+          />
+        </div>
       ))}
     </div>
   );

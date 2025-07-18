@@ -1,5 +1,4 @@
 import api from "@/components/utils/requestUtils";
-import { toast } from "sonner";
 
 export default function useStorageV2() {
   const uploadVideo = async (file: File) => {
@@ -13,7 +12,6 @@ export default function useStorageV2() {
       return response.videoUrl;
     } catch (error) {
       console.error("Error uploading file:", error);
-      toast.error("Failed to upload video. Please try again.");
       throw error;
     }
   };
@@ -32,7 +30,24 @@ export default function useStorageV2() {
       return response;
     } catch (error) {
       console.error("Error uploading files:", error);
-      toast.error("Failed to upload files. Please try again.");
+      throw error;
+    }
+  };
+
+  const uploadImages = async (files: File[]) => {
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    try {
+      const response = await api.postWithFormData<string[]>(
+        "/api/storage/upload/images",
+        formData,
+      );
+      return response;
+    } catch (error) {
+      console.error("Error uploading images:", error);
       throw error;
     }
   };
@@ -40,10 +55,8 @@ export default function useStorageV2() {
   const deleteFiles = async (filePaths: string[]) => {
     try {
       await api.put("/api/storage/remove/files", { filePaths });
-      toast.success("Files deleted successfully.");
     } catch (error) {
       console.error("Error deleting files:", error);
-      toast.error("Failed to delete files. Please try again.");
       throw error;
     }
   };
@@ -53,10 +66,8 @@ export default function useStorageV2() {
       await api.delete(
         `/api/storage/remove/video/` + encodeURIComponent(filePath),
       );
-      toast.success("Video deleted successfully.");
     } catch (error) {
       console.error("Error deleting video:", error);
-      toast.error("Failed to delete video. Please try again.");
       throw error;
     }
   };
@@ -69,7 +80,6 @@ export default function useStorageV2() {
       return new Blob([response], { type: "text/vtt" });
     } catch (error) {
       console.error("Error downloading file:", error);
-      toast.error("Failed to download file. Please try again.");
       throw error;
     }
   };
@@ -81,7 +91,6 @@ export default function useStorageV2() {
       );
     } catch (error) {
       console.error("Error downloading file:", error);
-      toast.error("Failed to download file. Please try again.");
       throw error;
     }
   };
@@ -111,6 +120,7 @@ export default function useStorageV2() {
     getFileUrl,
     getFileRelativeUrl,
     uploadFiles,
+    uploadImages,
     deleteFiles,
     downloadBlob,
     downloadFile,

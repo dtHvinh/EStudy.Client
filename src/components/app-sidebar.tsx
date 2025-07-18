@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  IconAffiliate,
   IconBallpen,
   IconBrandParsinta,
   IconDashboard,
@@ -24,6 +25,7 @@ import Image from "next/image";
 import Link from "next/link";
 import DataErrorAlert from "./data-error-alert";
 import NavMain from "./nav-main";
+import NavAdmin from "./nav/nav-admin";
 
 const data = {
   navMain: [
@@ -65,6 +67,13 @@ const data = {
   ],
   navSecondary: [],
   documents: [],
+  adminNav: [
+    {
+      title: "Admin Panel",
+      url: "admin",
+      icon: IconAffiliate,
+    },
+  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -83,6 +92,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
+        <NavAdmin items={data.adminNav} />
         {/* <NavDocuments items={data.documents} /> */}
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>

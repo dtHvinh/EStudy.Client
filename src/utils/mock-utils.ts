@@ -57,4 +57,3 @@ const generateUsers = () => {
 };
 
 export const mock_reportedContent = generateReportedContent();
-export const mock_allUsers = generateUsers();

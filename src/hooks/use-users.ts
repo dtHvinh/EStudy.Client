@@ -1,18 +1,8 @@
 import { useMemo, useState } from "react";
 import useSWR from "swr";
 
+import api from "@/components/utils/requestUtils";
 import { User } from "@/types/admin";
-import { mock_allUsers } from "@/utils/mock-utils";
-
-// Mock fetcher function - replace with your actual API call
-const fetchUsers = async (): Promise<User[]> => {
-  // Simulate API call
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(mock_allUsers);
-    }, 500);
-  });
-};
 
 export function useUsers() {
   const {
@@ -20,7 +10,7 @@ export function useUsers() {
     error,
     isLoading,
     mutate,
-  } = useSWR<User[]>("/api/users", fetchUsers);
+  } = useSWR<User[]>("/api/users", api.get);
 
   return {
     users: users || [],

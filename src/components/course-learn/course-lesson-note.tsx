@@ -26,10 +26,14 @@ export default function CourseLessonNote({
   useEffect(() => {
     textareaRef.current?.addEventListener("keydown", (e) => {
       if (e.ctrlKey && e.key === "s") {
-        handleSave();
         e.preventDefault();
+        handleSave();
       }
     });
+
+    return () => {
+      textareaRef.current?.removeEventListener("keydown", handleSave);
+    };
   }, []);
 
   useEffect(() => {

@@ -1,10 +1,8 @@
 import { GetCourseToLearnLessonResponse } from "@/hooks/use-learn-course";
 import useStorageV2 from "@/hooks/use-storage-v2";
-import { Download, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import HTMLContent from "../html-content";
 import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import H3 from "../ui/h3";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import VideoPlayer from "../video/video-player";
@@ -30,7 +28,7 @@ export default function CourseLessonContent({
   const { getFileUrl } = useStorageV2();
 
   return (
-    <div className="col-span-8">
+    <div>
       {/* Video/Content Player */}
       {lesson && (
         <div className="relative overflow-hidden bg-black">
@@ -66,7 +64,6 @@ export default function CourseLessonContent({
             <TabsList className="mx-auto w-full">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="notes">Notes</TabsTrigger>
-              <TabsTrigger value="resources">Resources</TabsTrigger>
               <TabsTrigger value="reviews">Reviews</TabsTrigger>
             </TabsList>
 
@@ -98,47 +95,6 @@ export default function CourseLessonContent({
               {lesson && (
                 <CourseLessonNote lesson={lesson} onNoteSaved={onNoteSaved} />
               )}
-            </TabsContent>
-
-            <TabsContent value="resources" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Downloadable Resources</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {lesson && lesson.attachedFileUrls.length > 0 ? (
-                    <div className="space-y-3">
-                      {lesson.attachedFileUrls.map((resource, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between rounded-lg border p-3"
-                        >
-                          <div className="flex items-center gap-3">
-                            <FileText className="text-muted-foreground h-5 w-5" />
-                            <div className="truncate">
-                              {resource.split("/").pop() || resource}
-                            </div>
-                          </div>
-                          <Button variant="outline" size="sm">
-                            <Download className="mr-2 h-4 w-4" />
-                            <a
-                              href={getFileUrl(resource)}
-                              download
-                              target="_blank"
-                            >
-                              Download
-                            </a>
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground py-8 text-center">
-                      No downloadable resources available for this lesson.
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
             </TabsContent>
 
             <TabsContent value="reviews" className="mt-6">

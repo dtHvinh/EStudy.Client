@@ -8,14 +8,7 @@ import { useVideoStateStore } from "@/stores/video-state-store";
 import { TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { IconFile, IconListTree } from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import {
-  CheckCircle2,
-  ChevronDown,
-  Circle,
-  FileText,
-  Minus,
-  Play,
-} from "lucide-react";
+import { ChevronDown, Minus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import {
@@ -26,6 +19,7 @@ import {
 import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
 import { Tabs, TabsContent } from "../ui/tabs";
+import CourseSidebarLesson from "./course-sidebar-lesson";
 
 function findFirstIncompleteLesson(
   chapters: GetCourseToLearnChapterResponse[],
@@ -92,6 +86,7 @@ export default function CourseSidebar({
           </TabsList>
         </div>
 
+        {/* Render chapters */}
         <TabsContent value="content">
           {chapters.map((chapter, sectionIndex) => {
             const isChapterSelected = chapter.lessons.some(
@@ -129,45 +124,21 @@ export default function CourseSidebar({
                   )}
                 </CollapsibleTrigger>
 
+                {/* Render lessons */}
                 <CollapsibleContent className="space-y-1">
                   {chapter.lessons.map((lesson, lessonIndex) => {
                     const isLessonSelected = lesson.id === currentLesson?.id;
                     const isLessonCompleted = lesson.isCompleted;
                     return (
-                      <div
-                        key={lessonIndex}
-                        className={cn(
-                          "hover:bg-muted flex cursor-pointer items-center gap-3 rounded p-2 pl-8",
-                          isLessonSelected && "bg-muted",
-                        )}
-                        onClick={() =>
+                      <CourseSidebarLesson
+                        key={lesson.id}
+                        lesson={lesson}
+                        isLessonSelected={isLessonSelected}
+                        isLessonCompleted={isLessonCompleted}
+                        onLessionSelected={() =>
                           onLessionSelected?.(sectionIndex, lessonIndex)
                         }
-                      >
-                        {lesson.isCompleted ? (
-                          <CheckCircle2 className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <Circle className="text-muted-foreground h-4 w-4" />
-                        )}
-                        <div className="flex-1">
-                          <p
-                            className={cn(
-                              "text-sm font-medium",
-                              isLessonCompleted && "text-muted-foreground",
-                            )}
-                          >
-                            {lesson.title}
-                          </p>
-                          <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                            {lesson.videoUrl ? (
-                              <Play className="h-3 w-3" />
-                            ) : (
-                              <FileText className="h-3 w-3" />
-                            )}
-                            <span>{lesson.durationMinutes} mins</span>
-                          </div>
-                        </div>
-                      </div>
+                      />
                     );
                   })}
                 </CollapsibleContent>

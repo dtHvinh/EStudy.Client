@@ -20,7 +20,8 @@ export default function HTMLContent({ content }: { content: string }) {
         initialContent={content as unknown as JSONContent}
         editorProps={{
           attributes: {
-            class: `prose prose-lg dark:prose-invert prose-headings:font-title font-default focus:outline-none max-w-full`,
+            "data-prose-no-padding": "true",
+            class: `prose just-text prose-lg dark:prose-invert prose-headings:font-title font-default focus:outline-none max-w-full`,
           },
         }}
         editable={false}

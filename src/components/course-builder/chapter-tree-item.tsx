@@ -29,6 +29,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
+import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { useShallow } from "zustand/react/shallow";
 import ChapterTitle from "./chapter-tree-item-title";
@@ -47,6 +48,16 @@ export function ChapterTreeItem({
   isExpanded = false,
   onToggle,
 }: ChapterTreeItemProps) {
+  const [expandedLessonIndex, setExpandedLessonIndex] = useState<number | null>(
+    null,
+  );
+
+  const handleLessonToggle = (lessonIndex: number) => {
+    setExpandedLessonIndex(
+      expandedLessonIndex === lessonIndex ? null : lessonIndex,
+    );
+  };
+
   const {
     updateChapter,
     addLesson,
@@ -74,7 +85,6 @@ export function ChapterTreeItem({
 
   return (
     <div className="group">
-      {/* Chapter Header */}
       <div className="hover:bg-muted/30 flex items-start gap-2 rounded-lg py-2 transition-colors">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <div
@@ -190,18 +200,30 @@ export function ChapterTreeItem({
                         lesson={lesson}
                         chapterIndex={chapterIndex}
                         lessonIndex={lessonIndex}
+                        isExpanded={expandedLessonIndex === lessonIndex}
+                        onToggle={() => handleLessonToggle(lessonIndex)}
                       />
                     ),
                   )}
 
-                  <Button
-                    variant="ghost"
-                    onClick={() => addLesson(chapterIndex)}
-                    className="text-muted-foreground hover:text-foreground h-8 w-full justify-start text-xs"
-                  >
-                    <Plus className="mr-2 h-3 w-3" />
-                    Add Lesson
-                  </Button>
+                  <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                    <Button
+                      variant="ghost"
+                      onClick={() => addLesson(chapterIndex)}
+                      className="text-muted-foreground hover:text-foreground h-8 w-full justify-start text-xs"
+                    >
+                      <Plus className="mr-2 h-3 w-3" />
+                      Add Lesson
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => addLesson(chapterIndex)}
+                      className="text-muted-foreground hover:text-foreground h-8 w-full justify-start text-xs"
+                    >
+                      <Plus className="mr-2 h-3 w-3" />
+                      Add Quiz
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CollapsibleContent>

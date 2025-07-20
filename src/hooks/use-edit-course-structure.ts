@@ -8,7 +8,21 @@ export interface CourseChapter {
   description?: string;
   orderIndex: number;
   isPublished: boolean;
+
   lessons: CourseLesson[];
+  quizes: CourseQuiz[];
+}
+
+export interface CourseQuiz {
+  id?: number;
+  orderIndex: number;
+  questions: CourseQuizQuestion[];
+}
+
+export interface CourseQuizQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: number;
 }
 
 export interface CourseLesson {
@@ -307,6 +321,7 @@ export const useEditCourseStructure = create<CourseStructureStore>()(
           orderIndex: state.chapters.length,
           isPublished: false,
           lessons: [],
+          quizes: [],
         };
         state.chapters.push(newChapter);
         state.isDirty = true;

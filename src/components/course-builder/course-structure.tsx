@@ -52,14 +52,17 @@ export default function CourseStructure() {
         ) : (
           <>
             <div className="space-y-0">
-              {chapters.map((_, index) => (
-                <ChapterTreeItem
-                  key={index}
-                  chapterIndex={index}
-                  isExpanded={expandedChapterIndex === index}
-                  onToggle={() => handleChapterToggle(index)}
-                />
-              ))}
+              {chapters
+                .slice()
+                .sort((a, b) => a.orderIndex - b.orderIndex)
+                .map((_, index) => (
+                  <ChapterTreeItem
+                    key={index}
+                    chapterIndex={index}
+                    isExpanded={expandedChapterIndex === index}
+                    onToggle={() => handleChapterToggle(index)}
+                  />
+                ))}
             </div>
 
             <div className="mt-6 border-t pt-4">

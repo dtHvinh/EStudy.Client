@@ -2,11 +2,7 @@
 
 import TailwindEditor from "@/components/text-editor/text-editor";
 import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -43,6 +39,8 @@ interface LessonTreeItemProps {
   chapterIndex: number;
   lessonIndex: number;
   dragHandleProps?: any;
+  isExpanded?: boolean;
+  onToggle?: () => void;
 }
 
 export function LessonTreeItem({
@@ -50,8 +48,9 @@ export function LessonTreeItem({
   chapterIndex,
   lessonIndex,
   dragHandleProps,
+  isExpanded = false,
+  onToggle,
 }: LessonTreeItemProps) {
-  const [isOpen, setIsOpen] = useState(true);
   const {
     uploadVideo,
     removeVideo,
@@ -138,23 +137,22 @@ export function LessonTreeItem({
     <div className="group ml-4">
       <div className="hover:bg-muted/20 flex items-start gap-2 rounded-md py-1 transition-colors">
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          <Collapsible
-            open={isOpen}
-            onOpenChange={setIsOpen}
-            className="flex-1"
-          >
+          <Collapsible open={isExpanded} className="flex-1">
             <div className="flex flex-1 gap-2">
-              <CollapsibleTrigger className="hover:bg-muted/50 flex items-center gap-2 rounded-md p-1">
-                {isOpen ? (
+              <Button
+                variant={"ghost"}
+                onClick={onToggle}
+                className="hover:bg-muted/50 flex items-center gap-2 rounded-md p-1"
+              >
+                {isExpanded ? (
                   <ChevronDown className="text-muted-foreground h-3 w-3" />
                 ) : (
                   <ChevronRight className="text-muted-foreground h-3 w-3" />
                 )}
-              </CollapsibleTrigger>
+              </Button>
 
               <div className="flex min-w-0 flex-1 items-center gap-2">
                 <span>
-                  Chapter:{" "}
                   <span className="font-semibold">{chapter.title}</span>
                 </span>
                 <Play className="text-primary/70 h-3 w-3 flex-shrink-0" />

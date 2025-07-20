@@ -11,7 +11,7 @@ import { useEditCourseStructure } from "@/hooks/use-edit-course-structure";
 import useGetCourseStructure from "@/hooks/use-get-course-structure";
 import { IconGlobe, IconWorld } from "@tabler/icons-react";
 import { SaveIcon } from "lucide-react";
-import { use, useEffect } from "react";
+import { use, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useShallow } from "zustand/react/shallow";
 
@@ -47,6 +47,7 @@ export default function Page({
       getDetails: state.getDetails,
     })),
   );
+  const saveBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (courseStructure) {
@@ -64,22 +65,37 @@ export default function Page({
   }, [course]);
 
   const handleEdit = async () => {
-    try {
-      await api.put(`/api/courses/${course?.id}/structure`, {
-        chapters: getChapters(),
-        ...getDetails(),
-        isPublished: isPublished,
-      });
-      mutate();
-      toast.success("Course structure updated successfully");
-    } catch (error) {
-      toast.error("Failed to update course structure");
+    if (isDirty) {
+      try {
+        await api.put(`/api/courses/${course?.id}/structure`, {
+          chapters: getChapters(),
+          ...getDetails(),
+          isPublished: isPublished,
+        });
+        mutate();
+        toast.success("Course structure updated successfully");
+      } catch (error) {
+        toast.error("Failed to update course structure");
+      }
     }
   };
 
   useEffect(() => {
     return () => {
       resetStructure();
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleSave = async (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === "s") {
+        e.preventDefault();
+        saveBtnRef.current?.click();
+      }
+    };
+    window.addEventListener("keydown", handleSave);
+    return () => {
+      window.removeEventListener("keydown", handleSave);
     };
   }, []);
 
@@ -133,6 +149,7 @@ export default function Page({
                   disabled={!isDirty}
                   onClick={handleEdit}
                   variant="ghost"
+                  ref={saveBtnRef}
                 >
                   <SaveIcon /> Save Changes
                 </Button>

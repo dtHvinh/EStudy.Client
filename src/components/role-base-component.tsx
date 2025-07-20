@@ -13,6 +13,10 @@ export default function RoleBaseComponent({
 } & HTMLAttributes<HTMLDivElement>) {
   const { roles, isRoleLoading } = useUserRole();
 
+  if (isRoleLoading) {
+    return null;
+  }
+
   if (!isRoleLoading && roles) {
     const requiredRoles = Array.isArray(requireRoles)
       ? requireRoles

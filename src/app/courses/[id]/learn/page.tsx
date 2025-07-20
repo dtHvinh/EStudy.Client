@@ -89,17 +89,19 @@ export default function CourseLearningPage({
         )
       }
     >
-      <div className="-mt-6 grid grid-cols-11">
+      <div className="-mt-6 grid grid-cols-12">
         {/* Main Content */}
-        <CourseLessonContent
-          courseId={id}
-          lesson={currentLesson}
-          onLessonCompleted={handleLessonCompleted}
-          onNoteSaved={takeNote}
-          onCourseRated={rateCourse}
-        />
+        <div className="col-span-8">
+          <CourseLessonContent
+            courseId={id}
+            lesson={currentLesson}
+            onLessonCompleted={handleLessonCompleted}
+            onNoteSaved={takeNote}
+            onCourseRated={rateCourse}
+          />
+        </div>
         {/* Sidebar */}
-        <div className="sticky top-0 col-span-3 h-screen overflow-hidden">
+        <div className="sticky top-0 col-span-4 h-screen overflow-hidden">
           {course && (
             <CourseSidebar
               currentLesson={currentLesson}

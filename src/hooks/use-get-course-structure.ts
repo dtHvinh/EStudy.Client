@@ -14,6 +14,27 @@ export interface GetCourseStructureChapterResponse {
   orderIndex: number;
   isPublished: boolean;
   lessons: GetCourseStructureLessonResponse[];
+  quizzes: GetCourseStructureQuizResponse[];
+}
+
+export interface GetCourseStructureQuizResponse {
+  id?: number;
+  title: string;
+  description?: string;
+  orderIndex: number;
+  questions: GetCourseStructureQuizQuestionResponse[];
+}
+
+export interface GetCourseStructureQuizQuestionResponse {
+  id?: number;
+  text: string;
+  options: GetCourseStructureQuizQuestionOptionResponse[];
+}
+
+export interface GetCourseStructureQuizQuestionOptionResponse {
+  id?: number;
+  text: string;
+  isCorrect: boolean;
 }
 
 export interface GetCourseStructureLessonResponse {

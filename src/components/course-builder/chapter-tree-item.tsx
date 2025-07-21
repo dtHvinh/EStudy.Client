@@ -34,6 +34,7 @@ import { useDebouncedCallback } from "use-debounce";
 import { useShallow } from "zustand/react/shallow";
 import ChapterTitle from "./chapter-tree-item-title";
 import { LessonTreeItem } from "./lession-tree-item";
+import { QuizTreeItem } from "./quiz-tree-item";
 
 interface ChapterTreeItemProps {
   chapterIndex: number;
@@ -51,6 +52,9 @@ export function ChapterTreeItem({
   const [expandedLessonIndex, setExpandedLessonIndex] = useState<number | null>(
     null,
   );
+  const [expandedQuizIndex, setExpandedQuizIndex] = useState<number | null>(
+    null,
+  );
 
   const handleLessonToggle = (lessonIndex: number) => {
     setExpandedLessonIndex(
@@ -58,23 +62,33 @@ export function ChapterTreeItem({
     );
   };
 
+  const handleQuizToggle = (quizIndex: number) => {
+    setExpandedQuizIndex(expandedQuizIndex === quizIndex ? null : quizIndex);
+  };
+
   const {
     updateChapter,
     addLesson,
+    addQuiz,
     deleteChapter,
     getChapterLessonLength,
+    getChapterQuizLength,
     getChapterDescription,
     getChapterIsPublished,
     getChapterLessons,
+    getChapterQuizes,
   } = useEditCourseStructure(
     useShallow((state) => ({
       updateChapter: state.updateChapter,
       addLesson: state.addLesson,
+      addQuiz: state.addQuiz,
       deleteChapter: state.deleteChapter,
       getChapterLessonLength: state.getChapterLessonLength,
+      getChapterQuizLength: state.getChapterQuizLength,
       getChapterDescription: state.getChapterDescription,
       getChapterIsPublished: state.getChapterIsPublished,
       getChapterLessons: state.getChapterLessons,
+      getChapterQuizes: state.getChapterQuizes,
     })),
   );
   const d = useDebouncedCallback((e) => {
@@ -206,6 +220,17 @@ export function ChapterTreeItem({
                     ),
                   )}
 
+                  {getChapterQuizes(chapterIndex).map((quiz, quizIndex) => (
+                    <QuizTreeItem
+                      key={`quiz-${quizIndex}`}
+                      quiz={quiz}
+                      chapterIndex={chapterIndex}
+                      quizIndex={quizIndex}
+                      isExpanded={expandedQuizIndex === quizIndex}
+                      onToggle={() => handleQuizToggle(quizIndex)}
+                    />
+                  ))}
+
                   <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
                     <Button
                       variant="ghost"
@@ -217,7 +242,7 @@ export function ChapterTreeItem({
                     </Button>
                     <Button
                       variant="ghost"
-                      onClick={() => addLesson(chapterIndex)}
+                      onClick={() => addQuiz(chapterIndex)}
                       className="text-muted-foreground hover:text-foreground h-8 w-full justify-start text-xs"
                     >
                       <Plus className="mr-2 h-3 w-3" />

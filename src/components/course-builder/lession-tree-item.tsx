@@ -18,7 +18,7 @@ import {
   Play,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { useShallow } from "zustand/react/shallow";
 import FileDropzone from "../file-dropzone";
@@ -60,6 +60,15 @@ export function LessonTreeItem({
     deleteFiles,
   } = useStorageV2();
   const [isEditing, setIsEditing] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Scroll to this lesson when created
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, []);
+
   const debounceUpdateLesson = useDebouncedCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       updateLesson(chapterIndex, lessonIndex, {
@@ -134,7 +143,7 @@ export function LessonTreeItem({
   };
 
   return (
-    <div className="group ml-4">
+    <div ref={ref} className="group ml-4">
       <div className="hover:bg-muted/20 flex items-start gap-2 rounded-md py-1 transition-colors">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <Collapsible open={isExpanded} className="flex-1">
@@ -159,7 +168,7 @@ export function LessonTreeItem({
                 <div className="min-w-0 flex-1">
                   {isEditing ? (
                     <Input
-                      value={lesson.title}
+                      defaultValue={lesson.title}
                       onChange={(e) =>
                         updateLesson(chapterIndex, lessonIndex, {
                           title: e.target.value,

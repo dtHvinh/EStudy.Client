@@ -126,21 +126,23 @@ export default function CourseSidebar({
 
                 {/* Render lessons */}
                 <CollapsibleContent className="space-y-1">
-                  {chapter.lessons.map((lesson, lessonIndex) => {
-                    const isLessonSelected = lesson.id === currentLesson?.id;
-                    const isLessonCompleted = lesson.isCompleted;
-                    return (
-                      <CourseSidebarLesson
-                        key={lesson.id}
-                        lesson={lesson}
-                        isLessonSelected={isLessonSelected}
-                        isLessonCompleted={isLessonCompleted}
-                        onLessionSelected={() =>
-                          onLessionSelected?.(sectionIndex, lessonIndex)
-                        }
-                      />
-                    );
-                  })}
+                  {chapter.lessons
+                    .sort((a, b) => a.orderIndex - b.orderIndex)
+                    .map((lesson, lessonIndex) => {
+                      const isLessonSelected = lesson.id === currentLesson?.id;
+                      const isLessonCompleted = lesson.isCompleted;
+                      return (
+                        <CourseSidebarLesson
+                          key={lesson.id}
+                          lesson={lesson}
+                          isLessonSelected={isLessonSelected}
+                          isLessonCompleted={isLessonCompleted}
+                          onLessionSelected={() =>
+                            onLessionSelected?.(sectionIndex, lessonIndex)
+                          }
+                        />
+                      );
+                    })}
                 </CollapsibleContent>
               </Collapsible>
             );

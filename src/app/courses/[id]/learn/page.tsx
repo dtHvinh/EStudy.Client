@@ -91,7 +91,7 @@ export default function CourseLearningPage({
     >
       <div className="-mt-6 grid grid-cols-12">
         {/* Main Content */}
-        <div className="col-span-8">
+        <div className="col-span-9">
           <CourseLessonContent
             courseId={id}
             lesson={currentLesson}
@@ -101,7 +101,7 @@ export default function CourseLearningPage({
           />
         </div>
         {/* Sidebar */}
-        <div className="sticky top-0 col-span-4 h-screen overflow-hidden">
+        <div className="sticky top-0 col-span-3 h-screen overflow-hidden">
           {course && (
             <CourseSidebar
               currentLesson={currentLesson}

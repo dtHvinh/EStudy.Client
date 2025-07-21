@@ -22,6 +22,27 @@ export interface GetCourseToLearnChapterResponse {
   isPublished: boolean;
   totalMinutes: number;
   lessons: GetCourseToLearnLessonResponse[];
+  quizzes: GetCourseToLearnQuizResponse[];
+}
+export interface GetCourseToLearnQuizResponse {
+  id: number;
+  title: string;
+  description?: string;
+  orderIndex: number;
+  questions: GetCourseToLearnQuizQuestionResponse[];
+}
+
+export interface GetCourseToLearnQuizQuestionResponse {
+  id: number;
+  text: string;
+  orderIndex: number;
+  options: GetCourseToLearnQuizQuestionOptionResponse[];
+}
+
+export interface GetCourseToLearnQuizQuestionOptionResponse {
+  id: number;
+  text: string;
+  isCorrect: boolean;
 }
 
 export interface GetCourseToLearnLessonResponse {

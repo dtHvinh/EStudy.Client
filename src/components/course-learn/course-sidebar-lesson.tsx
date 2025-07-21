@@ -92,9 +92,9 @@ function ResourceDownloadButton({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">
-          <Folder className="h-4 w-4" />
-          Resources
+        <Button size={"sm"} variant="ghost">
+          <Folder />
+
           <ChevronDown />
         </Button>
       </DropdownMenuTrigger>

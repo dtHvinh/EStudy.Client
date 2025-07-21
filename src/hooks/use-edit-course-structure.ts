@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import { CourseDetails } from "./use-create-course-details";
+import type { CourseDetails } from "./use-create-course-details";
 
 export interface CourseChapter {
   id?: number;
@@ -10,19 +10,27 @@ export interface CourseChapter {
   isPublished: boolean;
 
   lessons: CourseLesson[];
-  quizes: CourseQuiz[];
+  quizzes: CourseQuiz[];
 }
 
 export interface CourseQuiz {
   id?: number;
+  title: string;
+  description?: string;
   orderIndex: number;
   questions: CourseQuizQuestion[];
 }
 
+export interface CourseQuizOption {
+  id?: number;
+  text: string;
+  isCorrect: boolean;
+}
+
 export interface CourseQuizQuestion {
-  question: string;
-  options: string[];
-  correctAnswer: number;
+  id?: number;
+  text: string;
+  options: CourseQuizOption[];
 }
 
 export interface CourseLesson {
@@ -86,9 +94,11 @@ export interface CourseStructureStore {
   deleteChapter: (chapterId: number) => void;
   reorderChapters: (startIndex: number, endIndex: number) => void;
   getChapterLessonLength: (chapterIndex: number) => number;
+  getChapterQuizLength: (chapterIndex: number) => number;
   getChapterDescription: (chapterIndex: number) => string;
   getChapterIsPublished: (chapterIndex: number) => boolean;
   getChapterLessons: (chapterIndex: number) => CourseLesson[];
+  getChapterQuizes: (chapterIndex: number) => CourseQuiz[];
   getChapterTitle: (chapterIndex: number) => string;
 
   // Lesson actions
@@ -105,6 +115,40 @@ export interface CourseStructureStore {
     endIndex: number,
   ) => void;
 
+  // Quiz actions
+  addQuiz: (chapterId: number) => void;
+  updateQuiz: (
+    chapterId: number,
+    quizId: number,
+    updates: Partial<CourseQuiz>,
+  ) => void;
+  deleteQuiz: (chapterId: number, quizId: number) => void;
+  reorderQuizes: (
+    chapterId: number,
+    startIndex: number,
+    endIndex: number,
+  ) => void;
+
+  // Quiz question actions
+  addQuizQuestion: (chapterId: number, quizId: number) => void;
+  updateQuizQuestion: (
+    chapterId: number,
+    quizId: number,
+    questionId: number,
+    updates: Partial<CourseQuizQuestion>,
+  ) => void;
+  deleteQuizQuestion: (
+    chapterId: number,
+    quizId: number,
+    questionId: number,
+  ) => void;
+  reorderQuizQuestions: (
+    chapterId: number,
+    quizId: number,
+    startIndex: number,
+    endIndex: number,
+  ) => void;
+
   // Utility actions
   setLoading: (loading: boolean) => void;
   markClean: () => void;
@@ -113,6 +157,7 @@ export interface CourseStructureStore {
 
   // Computed values
   getTotalLessons: () => number;
+  getTotalQuizes: () => number;
   getTotalDuration: () => number;
 }
 
@@ -285,6 +330,11 @@ export const useEditCourseStructure = create<CourseStructureStore>()(
       return state.chapters[chapterIndex]?.lessons.length || 0;
     },
 
+    getChapterQuizLength: (chapterIndex) => {
+      const state = get();
+      return state.chapters[chapterIndex]?.quizzes.length || 0;
+    },
+
     getChapterDescription: (chapterIndex) => {
       const state = get();
       return state.chapters[chapterIndex].description || "";
@@ -307,6 +357,11 @@ export const useEditCourseStructure = create<CourseStructureStore>()(
       return state.chapters[chapterIndex].lessons || [];
     },
 
+    getChapterQuizes: (chapterIndex) => {
+      const state = get();
+      return state.chapters[chapterIndex].quizzes || [];
+    },
+
     setChapters: (chapters) =>
       set((state) => {
         state.chapters = chapters;
@@ -321,7 +376,7 @@ export const useEditCourseStructure = create<CourseStructureStore>()(
           orderIndex: state.chapters.length,
           isPublished: false,
           lessons: [],
-          quizes: [],
+          quizzes: [],
         };
         state.chapters.push(newChapter);
         state.isDirty = true;
@@ -409,6 +464,106 @@ export const useEditCourseStructure = create<CourseStructureStore>()(
         }
       }),
 
+    // Quiz actions
+    addQuiz: (chapterId) =>
+      set((state) => {
+        const chapter = state.chapters[chapterId];
+        if (chapter) {
+          const newQuiz: CourseQuiz = {
+            title: `Quiz ${chapter.quizzes.length + 1}`,
+            description: "",
+            orderIndex: chapter.quizzes.length,
+            questions: [],
+          };
+          chapter.quizzes.push(newQuiz);
+          state.isDirty = true;
+        }
+      }),
+
+    updateQuiz: (chapterId, quizId, updates) =>
+      set((state) => {
+        const quiz = state.chapters[chapterId]?.quizzes[quizId];
+        if (quiz) {
+          Object.assign(quiz, updates);
+          state.isDirty = true;
+        }
+      }),
+
+    deleteQuiz: (chapterId, quizId) =>
+      set((state) => {
+        const chapter = state.chapters[chapterId];
+        if (chapter) {
+          chapter.quizzes.splice(quizId, 1);
+          // Reorder remaining quizes
+          chapter.quizzes.forEach((quiz, index) => {
+            quiz.orderIndex = index;
+          });
+          state.isDirty = true;
+        }
+      }),
+
+    reorderQuizes: (chapterId, startIndex, endIndex) =>
+      set((state) => {
+        const chapter = state.chapters[chapterId];
+        if (chapter) {
+          const [removed] = chapter.quizzes.splice(startIndex, 1);
+          chapter.quizzes.splice(endIndex, 0, removed);
+          // Update order indices
+          chapter.quizzes.forEach((quiz, index) => {
+            quiz.orderIndex = index;
+          });
+          state.isDirty = true;
+        }
+      }),
+
+    // Quiz question actions
+    addQuizQuestion: (chapterId, quizId) =>
+      set((state) => {
+        const quiz = state.chapters[chapterId]?.quizzes[quizId];
+        if (quiz) {
+          const newQuestion: CourseQuizQuestion = {
+            text: "",
+            options: [
+              { text: "", isCorrect: true },
+              { text: "", isCorrect: false },
+              { text: "", isCorrect: false },
+              { text: "", isCorrect: false },
+            ],
+          };
+          quiz.questions.push(newQuestion);
+          state.isDirty = true;
+        }
+      }),
+
+    updateQuizQuestion: (chapterId, quizId, questionId, updates) =>
+      set((state) => {
+        const question =
+          state.chapters[chapterId]?.quizzes[quizId]?.questions[questionId];
+        if (question) {
+          Object.assign(question, updates);
+          state.isDirty = true;
+        }
+      }),
+
+    deleteQuizQuestion: (chapterId, quizId, questionId) =>
+      set((state) => {
+        const quiz = state.chapters[chapterId]?.quizzes[quizId];
+        if (quiz) {
+          quiz.questions.splice(questionId, 1);
+          state.isDirty = true;
+        }
+      }),
+
+    reorderQuizQuestions: (chapterId, quizId, startIndex, endIndex) =>
+      set((state) => {
+        const quiz = state.chapters[chapterId]?.quizzes[quizId];
+        if (quiz) {
+          const [removed] = quiz.questions.splice(startIndex, 1);
+          quiz.questions.splice(endIndex, 0, removed);
+          state.isDirty = true;
+        }
+      }),
+
     setLoading: (loading) =>
       set((state) => {
         state.isLoading = loading;
@@ -435,6 +590,14 @@ export const useEditCourseStructure = create<CourseStructureStore>()(
       const state = get();
       return state.chapters.reduce(
         (total, chapter) => total + chapter.lessons.length,
+        0,
+      );
+    },
+
+    getTotalQuizes: () => {
+      const state = get();
+      return state.chapters.reduce(
+        (total, chapter) => total + chapter.quizzes.length,
         0,
       );
     },

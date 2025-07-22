@@ -9,6 +9,7 @@ import { Card, CardContent } from "../ui/card";
 import H3 from "../ui/h3";
 import { Progress } from "../ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import getInitials from "../utils/utilss";
 import StudentPageCourses from "./student-page-course";
 
 export default function StudentPage() {
@@ -58,24 +59,26 @@ export default function StudentPage() {
         <TabsContent value="enrolled" className="space-y-6">
           <div>
             <h2 className="mb-4 text-2xl font-bold">Continue Learning</h2>
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-3">
               {courses.map((course) => (
                 <RelativeLink href={`${course.id}/learn`} key={course.id}>
                   <Card className="border-0 shadow-sm transition-transform hover:scale-105">
                     <CardContent>
-                      <div className="flex gap-4">
+                      <div className="flex min-h-24 gap-4">
                         <img
                           src={
                             course.imageUrl
                               ? getFileUrl(course.imageUrl)
                               : "https://picsum.photos/seed/picsum/352/192"
                           }
-                          alt={course.title}
+                          alt={getInitials(course.title)}
                           className="h-16 w-24 rounded object-cover"
                         />
-                        <div className="flex-1 space-y-2">
-                          <h3 className="font-semibold">{course.title}</h3>
-                          <div className="space-y-1">
+                        <div className="flex flex-1 flex-col space-y-2">
+                          <h3 className="line-clamp-2 font-semibold">
+                            {course.title}
+                          </h3>
+                          <div className="mt-auto space-y-1">
                             <div className="flex justify-between text-sm">
                               <span>Progress</span>
                               <span>

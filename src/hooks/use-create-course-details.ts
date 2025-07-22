@@ -1,3 +1,4 @@
+import { CourseDifficultyLevel } from "@/types/constants";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
@@ -6,7 +7,7 @@ export interface CourseDetails {
   title: string;
   description: string;
   imageUrl?: string;
-  difficultyLevel: "Beginner" | "Intermediate" | "Advanced";
+  difficultyLevel: CourseDifficultyLevel;
   price: number;
   isFree: boolean;
   isPublished: boolean;

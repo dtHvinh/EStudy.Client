@@ -1,6 +1,7 @@
 import {
   GetCourseToLearnChapterResponse,
   GetCourseToLearnLessonResponse,
+  GetCourseToLearnQuizResponse,
 } from "@/hooks/use-learn-course";
 import { SubtitleCue } from "@/lib/srt-parser";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
 import { Tabs, TabsContent } from "../ui/tabs";
 import CourseSidebarLesson from "./course-sidebar-lesson";
+import CourseSidebarQuiz from "./course-sidebar-quiz";
 
 function findFirstIncompleteLesson(
   chapters: GetCourseToLearnChapterResponse[],
@@ -38,11 +40,15 @@ function findFirstIncompleteLesson(
 export default function CourseSidebar({
   chapters,
   currentLesson,
+  currentQuiz,
   onLessionSelected,
+  onQuizSelected,
 }: {
   currentLesson?: GetCourseToLearnLessonResponse;
+  currentQuiz?: GetCourseToLearnQuizResponse;
   chapters: GetCourseToLearnChapterResponse[];
   onLessionSelected?: (chapterIndex: number, lessonIndex: number) => void;
+  onQuizSelected?: (chapterIndex: number, quizIndex: number) => void;
 }) {
   const [expandedChapters, setExpandedChapters] = useState<number[]>([]);
   const [activeTab, setActiveTab] = useState("content");
@@ -139,6 +145,22 @@ export default function CourseSidebar({
                           isLessonCompleted={isLessonCompleted}
                           onLessionSelected={() =>
                             onLessionSelected?.(sectionIndex, lessonIndex)
+                          }
+                        />
+                      );
+                    })}
+                  {/* Render quizzes */}
+                  {chapter.quizzes
+                    .sort((a, b) => a.orderIndex - b.orderIndex)
+                    .map((quiz, quizIndex) => {
+                      const isQuizSeleceted = quiz.id === currentQuiz?.id;
+                      return (
+                        <CourseSidebarQuiz
+                          key={quiz.id}
+                          quiz={quiz}
+                          isQuizSelected={isQuizSeleceted}
+                          onQuizSelected={() =>
+                            onQuizSelected?.(sectionIndex, quizIndex)
                           }
                         />
                       );

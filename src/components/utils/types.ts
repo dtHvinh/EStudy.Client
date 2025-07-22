@@ -4,8 +4,6 @@ export default interface PagedResponse<T> {
   pageSize: number;
   totalCount: number;
   totalPages: number;
-  hasPrevious: boolean;
-  hasNext: boolean;
 }
 
 export interface AuthorType {

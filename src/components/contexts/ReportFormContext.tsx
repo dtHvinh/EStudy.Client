@@ -1,11 +1,13 @@
 import { createContext, useCallback, useContext, useState } from "react";
 
+import { toast } from "sonner";
 import { ReportDialog } from "../report/report-dialog";
+import api from "../utils/requestUtils";
 
 export interface ReportType {
   type?: string;
   targetId?: string;
-  reason?: string;
+  reasonId?: string;
   description?: string;
 }
 
@@ -24,7 +26,7 @@ const ReportFormContext = createContext<ReportFormContextType | undefined>(
 const defaultReport: ReportType = {
   type: "",
   targetId: "",
-  reason: "",
+  reasonId: "",
   description: "",
 };
 
@@ -55,26 +57,12 @@ export function ReportFormContextProvider({
   const submitReport = useCallback(
     async (data: ReportType) => {
       try {
-        // TODO: Implement your actual API call here
-        console.log("Submitting report:", data);
-
-        // Example API call structure:
-        // const response = await fetch('/api/reports', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify(data),
-        // });
-        //
-        // if (!response.ok) {
-        //   throw new Error('Failed to submit report');
-        // }
-
-        // Close dialog on successful submission
+        await api.post("/api/reports", data);
         closeReport();
+        toast.success("Report submitted successfully");
       } catch (error) {
         console.error("Error submitting report:", error);
-        // You might want to show an error toast or handle errors differently
-        throw error;
+        toast.error("You already submitted a report for this content");
       }
     },
     [closeReport],

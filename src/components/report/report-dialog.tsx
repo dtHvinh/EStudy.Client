@@ -38,7 +38,7 @@ import useReportReasons from "@/hooks/use-report-reasons";
 export interface ReportType {
   type: string;
   targetId?: string;
-  reason: string;
+  reasonId: string;
   description: string;
 }
 
@@ -48,7 +48,7 @@ const reportFormSchema = z.object({
     required_error: "Please select a report type",
   }),
   targetId: z.string().optional(),
-  reason: z.string().nonempty({
+  reasonId: z.string().nonempty({
     message: "Please select a reason for reporting",
   }),
   description: z.string().nonempty({
@@ -78,7 +78,7 @@ export function ReportDialog({
     values: {
       type: initialType || "",
       targetId: initialTargetId,
-      reason: "",
+      reasonId: "",
       description: "",
     },
   });
@@ -107,7 +107,7 @@ export function ReportDialog({
           >
             <FormField
               control={form.control}
-              name="reason"
+              name="reasonId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Reason</FormLabel>
@@ -150,6 +150,7 @@ export function ReportDialog({
                   <FormLabel>Description</FormLabel>
                   <FormControl>
                     <Textarea
+                      spellCheck="false"
                       {...field}
                       placeholder="Provide more details about the issue"
                       className="resize-none"

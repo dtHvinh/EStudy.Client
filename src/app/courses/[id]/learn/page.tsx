@@ -1,6 +1,6 @@
 "use client";
 
-import CourseLessonContent from "@/components/course-learn/course-lesson-content";
+import CourseContent from "@/components/course-learn/course-content";
 import CourseSidebar from "@/components/course-learn/course-sidebar";
 import { ErrorCard } from "@/components/error-card";
 import MainLayout from "@/components/layouts/MainLayout";
@@ -8,6 +8,7 @@ import NavigateBack from "@/components/navigate-back";
 import { Button } from "@/components/ui/button";
 import useLearnCourse, {
   GetCourseToLearnLessonResponse,
+  GetCourseToLearnQuizResponse,
 } from "@/hooks/use-learn-course";
 import { use, useState } from "react";
 
@@ -23,10 +24,13 @@ export default function CourseLearningPage({
     getNextLesson,
     takeNote,
     rateCourse,
-    markAsCompleted,
+    markLessonAsCompleted,
+    markQuizAsCompleted,
   } = useLearnCourse(id);
   const [currentLesson, setCurrentLesson] =
     useState<GetCourseToLearnLessonResponse>();
+  const [currentQuiz, setCurrentQuiz] =
+    useState<GetCourseToLearnQuizResponse>();
 
   if (error) {
     return (
@@ -41,7 +45,7 @@ export default function CourseLearningPage({
 
   const handleLessonCompleted = async (lessonId: number) => {
     try {
-      await markAsCompleted(lessonId);
+      await markLessonAsCompleted(lessonId);
       const nextLesson = getNextLesson(lessonId);
       if (nextLesson) {
         setCurrentLesson(nextLesson);
@@ -51,9 +55,37 @@ export default function CourseLearningPage({
     }
   };
 
+  const handleQuizCompleted = async (quizId: number) => {
+    try {
+      if (currentQuiz && !currentQuiz.isCompleted)
+        await markQuizAsCompleted(quizId);
+    } catch (error) {
+      console.error("Failed to mark lesson as completed:", error);
+    }
+  };
+
   const handleMarkAsCompleted = async () => {
-    if (currentLesson) {
+    if (currentLesson && !currentLesson.isCompleted) {
       await handleLessonCompleted(currentLesson.id);
+    }
+  };
+
+  const handleQuestionSelected = (
+    chapterIndex: number,
+    lessonIndex: number,
+  ) => {
+    const selectedLesson = course?.chapters[chapterIndex].lessons[lessonIndex];
+    if (selectedLesson) {
+      setCurrentLesson(selectedLesson);
+      setCurrentQuiz(undefined);
+    }
+  };
+
+  const handleQuizSelected = (chapterIndex: number, quizIndex: number) => {
+    const selectedQuiz = course?.chapters[chapterIndex].quizzes[quizIndex];
+    if (selectedQuiz) {
+      setCurrentLesson(undefined);
+      setCurrentQuiz(selectedQuiz);
     }
   };
 
@@ -92,10 +124,12 @@ export default function CourseLearningPage({
       <div className="-mt-6 grid grid-cols-12">
         {/* Main Content */}
         <div className="col-span-9">
-          <CourseLessonContent
+          <CourseContent
             courseId={id}
             lesson={currentLesson}
+            quiz={currentQuiz}
             onLessonCompleted={handleLessonCompleted}
+            onQuizCompleted={handleQuizCompleted}
             onNoteSaved={takeNote}
             onCourseRated={rateCourse}
           />
@@ -104,13 +138,11 @@ export default function CourseLearningPage({
         <div className="sticky top-0 col-span-3 h-screen overflow-hidden">
           {course && (
             <CourseSidebar
+              currentQuiz={currentQuiz}
               currentLesson={currentLesson}
               chapters={course.chapters}
-              onLessionSelected={(chapterIndex, lessonIndex) =>
-                setCurrentLesson(
-                  course.chapters[chapterIndex].lessons[lessonIndex],
-                )
-              }
+              onLessionSelected={handleQuestionSelected}
+              onQuizSelected={handleQuizSelected}
             />
           )}
         </div>

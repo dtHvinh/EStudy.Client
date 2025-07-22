@@ -29,6 +29,7 @@ export interface GetCourseToLearnQuizResponse {
   title: string;
   description?: string;
   orderIndex: number;
+  isCompleted: boolean;
   questions: GetCourseToLearnQuizQuestionResponse[];
 }
 
@@ -119,7 +120,7 @@ export default function useLearnCourse(courseId: string | number) {
     }
   };
 
-  const markAsCompleted = async (lessonId: number) => {
+  const markLessonAsCompleted = async (lessonId: number) => {
     try {
       await api.post(`/api/courses/lessons/${lessonId}/completed`, {});
       mutate((prevData) => {
@@ -141,6 +142,27 @@ export default function useLearnCourse(courseId: string | number) {
     }
   };
 
+  const markQuizAsCompleted = async (quizId: number) => {
+    try {
+      await api.post(`/api/courses/quizzes/${quizId}/completed`, {});
+      mutate((prevData) => {
+        if (!prevData) return prevData;
+        return {
+          ...prevData,
+          chapters: prevData.chapters.map((chapter) => ({
+            ...chapter,
+            quizzes: chapter.quizzes.map((quiz) => {
+              if (quiz.id === quizId) return { ...quiz, isCompleted: true };
+              return quiz;
+            }),
+          })),
+        };
+      }, false);
+    } catch (error) {
+      console.error("Failed to mark quiz as completed:", error);
+    }
+  };
+
   return {
     course: data,
     isLoading,
@@ -148,6 +170,7 @@ export default function useLearnCourse(courseId: string | number) {
     getNextLesson,
     takeNote,
     rateCourse,
-    markAsCompleted,
+    markLessonAsCompleted,
+    markQuizAsCompleted,
   };
 }

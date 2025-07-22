@@ -1,4 +1,5 @@
 import api from "@/components/utils/requestUtils";
+import { PriceFilterValues } from "@/types/course-price-constants";
 import useSWRInfinite from "swr/infinite";
 
 export type GetCourseType = {
@@ -18,10 +19,24 @@ export type GetCourseType = {
   isEnrolled?: boolean;
 };
 
-export default function useGetCourses({ query }: { query?: string } = {}) {
+export default function useGetCourses({
+  query,
+  price,
+}: {
+  query?: string;
+  price?: PriceFilterValues;
+}) {
   const getKey = (pageIndex: number, previousPageData: any) => {
     if (previousPageData && !previousPageData.length) return null;
-    return `/api/courses?page=${pageIndex + 1}&pageSize=10&query=${query || ""}`;
+    const params = new URLSearchParams({
+      page: (pageIndex + 1).toString(),
+      pageSize: "10",
+    });
+
+    if (query) params.append("query", query);
+    if (price) params.append("price", price.toString());
+
+    return `/api/courses?${params.toString()}`;
   };
 
   const { data, error, isLoading, setSize } = useSWRInfinite<GetCourseType[]>(

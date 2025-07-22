@@ -13,6 +13,7 @@ export interface GetTestResponseType {
   commentCount: number;
   questionCount: number;
   attemptCount: number;
+  authorName: string;
 }
 
 export default function useTests({ pageSize = 10 }: { pageSize?: number }) {

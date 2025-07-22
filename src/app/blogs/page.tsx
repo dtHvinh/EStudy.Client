@@ -51,7 +51,7 @@ const CreateBlogButton = () => {
   const handleCreateBlog = async () => {
     const { id } = await createUntitledBlog();
     if (id) {
-      router.push(`/blog/${id}`);
+      router.push(`/blogs/${id}`);
     }
   };
   return (

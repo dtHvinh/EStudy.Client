@@ -1,6 +1,7 @@
 import useMyLearningCourse, {
   GetEnrolledCourseResponse,
 } from "@/hooks/use-my-learning-course";
+import useStorageV2 from "@/hooks/use-storage-v2";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import {
@@ -40,7 +41,13 @@ export default function DashboardUserLearningCourses() {
                 <CourseCardSkeleton key={index} />
               ))
             : courses.map((course) => (
-                <CourseCard key={course.id} course={course} />
+                <Link
+                  key={course.id}
+                  href={`/courses/${course.id}`}
+                  className="no-underline"
+                >
+                  <CourseCard key={course.id} course={course} />
+                </Link>
               ))}
         </div>
       </CardContent>
@@ -53,6 +60,7 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ course, onClick }: CourseCardProps) {
+  const { getFileUrl } = useStorageV2();
   return (
     <Card
       className="cursor-pointer transition-shadow hover:shadow-md"
@@ -68,7 +76,7 @@ export function CourseCard({ course, onClick }: CourseCardProps) {
           </div>
           {course.imageUrl && (
             <img
-              src={course.imageUrl || "/placeholder.svg"}
+              src={getFileUrl(course.imageUrl) || "/placeholder.svg"}
               alt={course.title}
               className="h-16 w-16 flex-shrink-0 rounded-lg object-cover"
             />
@@ -80,7 +88,9 @@ export function CourseCard({ course, onClick }: CourseCardProps) {
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Progress</span>
-            <span className="font-medium">{course.completionPercentage}%</span>
+            <span className="font-medium">
+              {course.completionPercentage.toFixed(0)}%
+            </span>
           </div>
           <Progress value={course.completionPercentage} className="h-2" />
         </div>

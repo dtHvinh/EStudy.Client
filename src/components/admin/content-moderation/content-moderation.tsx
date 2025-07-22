@@ -13,6 +13,7 @@ import {
 import {
   Table,
   TableBody,
+  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -22,15 +23,15 @@ import PaginationControls from "../pagination-controls";
 import ReportRow from "./report-row";
 
 export default function ContentModeration() {
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("All");
   const [contentCurrentPage, setContentCurrentPage] = useState(1);
   const [contentItemsPerPage, setContentItemsPerPage] = useState(10);
 
-  const { reports, totalCount, totalPages, isLoading, error, refetch } =
-    useReports({
-      page: contentCurrentPage,
-      pageSize: contentItemsPerPage,
-    });
+  const { reports, totalCount, totalPages, refetch } = useReports({
+    page: contentCurrentPage,
+    pageSize: contentItemsPerPage,
+    filterProps: { status: statusFilter },
+  });
 
   const contentStartIndex = (contentCurrentPage - 1) * contentItemsPerPage;
 
@@ -52,16 +53,17 @@ export default function ContentModeration() {
         <CardContent>
           <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
             <div className="flex flex-1 flex-col items-start gap-4 sm:flex-row sm:items-center">
+              Status:
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="All">All Status</SelectItem>
                   <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="Under Review">Under Review</SelectItem>
+                  <SelectItem value="UnderReview">Under Review</SelectItem>
                   <SelectItem value="Resolved">Resolved</SelectItem>
-                  <SelectItem value="Dismissed">Dismissed</SelectItem>
+                  <SelectItem value="Rejected">Rejected</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -106,8 +108,19 @@ export default function ContentModeration() {
               </TableHeader>
               <TableBody>
                 {reports.map((content) => (
-                  <ReportRow key={content.id} report={content} />
+                  <ReportRow
+                    key={content.id}
+                    report={content}
+                    onReportProcessSuccess={refetch}
+                  />
                 ))}
+                {reports.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="py-5 text-center">
+                      No reports found or matching the selected filters.
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>

@@ -110,21 +110,21 @@ const BlogCardDisplay = ({
   return (
     <Card
       className={cn(
-        "w-full max-w-4xl mx-auto shadow border-0 bg-card",
-        className
+        "bg-card mx-auto w-full max-w-4xl border-0 shadow",
+        className,
       )}
     >
       <CardHeader className="pb-4">
         <div className="space-y-3">
-          <h1 className="text-2xl font-normal leading-tight tracking-tight">
-            <Link className="hover:underline" href={`/blog/${blog.id}`}>
+          <h1 className="text-2xl leading-tight font-normal tracking-tight">
+            <Link className="hover:underline" href={`/blogs/${blog.id}`}>
               {blog.title}
             </Link>
           </h1>
 
           <div className="flex flex-wrap items-center gap-4 text-sm">
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4" />
+              <Calendar className="h-4 w-4" />
               <span>Created {formatDate(blog.creationDate)}</span>
               <Badge variant="secondary" className="text-xs">
                 {getRelativeTime(blog.creationDate)}
@@ -133,7 +133,7 @@ const BlogCardDisplay = ({
 
             {blog.modificationDate && (
               <div className="flex items-center gap-1.5">
-                <Edit3 className="w-4 h-4" />
+                <Edit3 className="h-4 w-4" />
                 <span>Modified {formatDate(blog.modificationDate)}</span>
                 <Badge variant="secondary" className="text-xs hover:bg-blue-50">
                   {getRelativeTime(blog.modificationDate)}
@@ -183,7 +183,7 @@ export const BlogCardSkeleton = ({ number }: { number: number }) => {
       {Array.from({ length: number }).map((_, index) => (
         <Skeleton
           key={index}
-          className="max-w-4xl mx-auto w-full h-48 @container/card"
+          className="@container/card mx-auto h-48 w-full max-w-4xl"
           data-slot="card"
         />
       ))}

@@ -1,5 +1,6 @@
 "use client";
 
+import AdminAction from "@/components/admin/admin-action";
 import { useReportForm } from "@/components/contexts/ReportFormContext";
 import { ErrorCard } from "@/components/error-card";
 import HTMLContent from "@/components/html-content";
@@ -8,6 +9,7 @@ import NavigateBack from "@/components/navigate-back";
 import TailwindEditor from "@/components/text-editor/text-editor";
 import { Button } from "@/components/ui/button";
 import H3 from "@/components/ui/h3";
+import useAdminActions from "@/hooks/use-admin-actions";
 import useBlogDetail from "@/hooks/use-blog-detail";
 import { IconAlertTriangle } from "@tabler/icons-react";
 import { Loader2Icon } from "lucide-react";
@@ -59,7 +61,7 @@ export default function Page() {
       {blog &&
         (!blog.isReadOnly ? (
           <>
-            <Title blogId={id} title={title} />
+            <Title blogId={id} title={title} isHidden={blog.isHidden} />
             <div spellCheck={false} className="pb-9 md:px-20">
               <TailwindEditor
                 autoFocus
@@ -70,7 +72,7 @@ export default function Page() {
           </>
         ) : (
           <>
-            <Title blogId={id} title={title} />
+            <Title blogId={id} title={title} isHidden={blog.isHidden} />
             <div spellCheck={false} className="pb-9 md:px-20">
               <HTMLContent content={blog.content} />
             </div>
@@ -83,19 +85,34 @@ export default function Page() {
 const Title = ({
   title,
   blogId,
+  isHidden,
 }: {
   title: string;
   isLock?: boolean;
   blogId: string;
+  isHidden: boolean;
 }) => {
   const { openReport } = useReportForm();
+  const { changeBlogVisibility } = useAdminActions();
+  const showBlog = async () => {
+    await changeBlogVisibility(blogId, true);
+  };
+  const hideBlog = async () => {
+    await changeBlogVisibility(blogId, false);
+  };
+
+  useEffect(() => {
+    console.log("isHidden changed:", isHidden);
+  }, [isHidden]);
+
   return (
     <div className="flex items-center justify-between gap-4 border-b px-4 pb-2 lg:px-6">
       <div className="flex items-center gap-2">
         <NavigateBack />
         <H3 className="text-muted-foreground">{title}</H3>
       </div>
-      <div>
+      <div className="flex items-center gap-2">
+        <AdminAction onHideContent={hideBlog} onShowContent={showBlog} />
         <Button
           variant="outline"
           size="sm"

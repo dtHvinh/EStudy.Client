@@ -20,13 +20,26 @@ export interface Report {
 export interface UseReportHookProps {
   pageSize?: number;
   page?: number;
+  filterProps?: {
+    status?: string;
+    reasonId?: string;
+  };
 }
 
-export default function useReports({ pageSize, page }: UseReportHookProps) {
+export default function useReports({
+  pageSize,
+  page,
+  filterProps,
+}: UseReportHookProps) {
   const getKey = () => {
     const params = new URLSearchParams();
     if (pageSize) params.append("pageSize", String(pageSize));
     if (page) params.append("page", String(page));
+    if (filterProps) {
+      Object.entries(filterProps).forEach(([key, value]) => {
+        if (value) params.append(key, String(value));
+      });
+    }
     return `/api/reports?${params.toString()}`;
   };
 
@@ -44,5 +57,42 @@ export default function useReports({ pageSize, page }: UseReportHookProps) {
     isLoading,
     error,
     refetch: () => mutate(),
+  };
+}
+
+export function useReportActions({
+  onActionSuccess,
+  reportId,
+}: {
+  onActionSuccess?: (action: string) => void;
+  reportId: number;
+}) {
+  //The action ("Resolved", "Rejected", "UnderReview", ...) is in capital letters
+  // to match the backend conversion logic.
+  const resolveReport = async () => {
+    await api.put(`/api/reports/${reportId}?action=Resolved`, {});
+    onActionSuccess?.("Resolved");
+  };
+
+  const rejectReport = async () => {
+    await api.put(`/api/reports/${reportId}?action=Rejected`, {});
+    onActionSuccess?.("Rejected");
+  };
+
+  const reviewReport = async () => {
+    await api.put(`/api/reports/${reportId}?action=UnderReview`, {});
+    onActionSuccess?.("UnderReview");
+  };
+
+  const warnUser = async () => {
+    await api.put(`/api/reports/${reportId}?action=warn-user`, {});
+    onActionSuccess?.("WarnedUser");
+  };
+
+  return {
+    rejectReport,
+    resolveReport,
+    warnUser,
+    reviewReport,
   };
 }

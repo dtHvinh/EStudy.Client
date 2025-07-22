@@ -4,3 +4,7 @@ export default function getCheckoutPageUrl(
 ) {
   return `/checkout/${itemType}/${id}`;
 }
+
+export function getCourseLearnPageUrl(courseId: string) {
+  return `courses/${courseId}/learn`;
+}

@@ -9,6 +9,7 @@ export interface BlogDetailsResponseType {
   creationDate: string;
   modificationDate: string;
   isReadOnly: boolean;
+  isHidden: boolean;
 }
 
 export default function useBlogDetail(id: number | string) {

@@ -6,9 +6,12 @@ lưu đoạn hội thoại của người dùng và AI, đưa đọn text cho ai
 transcript has multiple
 
 text-editor //
-add more payment method,
-test filter
-make content unselectable
-report actions
 
 logout -> login page (this page will delete auth token)
+
+hide blog // 
+
+admin page user management
+test filter
+test collection
+

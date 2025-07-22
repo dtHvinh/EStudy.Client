@@ -36,7 +36,7 @@ const data = {
     },
     {
       title: "Blogs",
-      url: "blog",
+      url: "blogs",
       icon: IconReportSearch,
     },
     {

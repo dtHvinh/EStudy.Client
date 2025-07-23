@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGoogleLogin } from "@react-oauth/google";
 import { IconBrandGoogle } from "@tabler/icons-react";
-import { deleteCookie, setCookie } from "cookies-next/client";
+import { deleteCookie } from "cookies-next/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -29,7 +29,7 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { getErrorMessage, setFormErrors } from "./utils/errorUtils";
-import { ACCESS_TOKEN_COOKIE, post } from "./utils/requestUtils";
+import { ACCESS_TOKEN_COOKIE, post, tokenUtils } from "./utils/requestUtils";
 
 const loginFormSchema = z.object({
   usernameOrEmail: z.string().min(1, "Username or email is required"),
@@ -49,14 +49,11 @@ export function LoginForm({
         const res = await post(
           "/api/account/google-login?access_token=" +
             tokenResponse.access_token,
-          {}
+          {},
         );
         toast.dismiss(loadingToastId);
         toast.success("Logged in successfully!");
-        setCookie(ACCESS_TOKEN_COOKIE, res.accessToken, {
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
-        });
+        tokenUtils.setTokens(res.accessToken, res.refreshToken);
         router.push("/dashboard");
       } catch (error) {
         toast.error(getErrorMessage(error) || "Login failed!");
@@ -91,10 +88,7 @@ export function LoginForm({
       });
       toast.dismiss(loadingToastId);
       toast.success("Logged in successfully!");
-      setCookie(ACCESS_TOKEN_COOKIE, res.accessToken, {
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-      });
+      tokenUtils.setTokens(res.accessToken, res.refreshToken);
       router.push("/dashboard");
     } catch (error) {
       setFormErrors(error, form.setError);
@@ -117,7 +111,7 @@ export function LoginForm({
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="flex flex-col gap-6">
                 {form.formState.errors.root && (
-                  <div className="text-sm text-destructive">
+                  <div className="text-destructive text-sm">
                     {form.formState.errors.root.message}
                   </div>
                 )}

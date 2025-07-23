@@ -17,7 +17,7 @@ export default function UserSearchBar({
   searchTerm,
   onSearchChange,
   placeholder = "Search users...",
-  debounceMs = 300,
+  debounceMs = 500,
 }: UserSearchBarProps) {
   const debouncedSearch = useDebouncedCallback(
     useCallback(

@@ -4,7 +4,7 @@ import type {
   GetCourseToLearnLessonResponse,
   GetCourseToLearnQuizResponse,
 } from "@/hooks/use-learn-course";
-import HTMLContent from "../html-content";
+import HTMLContent from "../content/html-content";
 import { Badge } from "../ui/badge";
 import H3 from "../ui/h3";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";

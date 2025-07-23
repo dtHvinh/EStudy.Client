@@ -2,8 +2,8 @@ import { useGenericToggle } from "@/hooks/use-generic-toggle";
 import { EditorContent, EditorRoot, JSONContent } from "novel";
 import AutoJoiner from "tiptap-extension-auto-joiner";
 import GlobalDragHandle from "tiptap-extension-global-drag-handle";
-import { defaultExtensions } from "./text-editor/default-extensions";
-import { slashCommand } from "./text-editor/slash-commands";
+import { defaultExtensions } from "../text-editor/default-extensions";
+import { slashCommand } from "../text-editor/slash-commands";
 
 export default function HTMLContent({ content }: { content: string }) {
   const { opened: openNode, openChange: setOpenNode } = useGenericToggle(false);

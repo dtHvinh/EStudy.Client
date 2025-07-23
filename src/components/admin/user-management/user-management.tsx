@@ -2,40 +2,33 @@
 
 import { useState } from "react";
 
+import useAdminUserManagement from "@/hooks/use-admin-user-management";
 import { useUserFilters } from "@/hooks/use-users";
-import PaginationControls from "./pagination-controls";
-import UserFilters from "./user-filters";
-import UserStats from "./user-stats";
-import UserTable from "./user-table";
+import PaginationControls from "../pagination-controls";
+import UserFilters from "../user-filters";
+import UserTable from "../user-table";
 
 export default function UserManagement() {
-  // User pagination state
-  const [userCurrentPage, setUserCurrentPage] = useState(1);
-  const [userItemsPerPage, setUserItemsPerPage] = useState(10);
-
-  // Use the custom hook for user management
   const {
-    filteredUsers,
     searchTerm,
     setSearchTerm,
     roleFilter,
     setRoleFilter,
     statusFilter,
     setStatusFilter,
-    isLoading,
-    error,
   } = useUserFilters();
+  const [userCurrentPage, setUserCurrentPage] = useState(1);
+  const [userItemsPerPage, setUserItemsPerPage] = useState(10);
 
-  // Pagination for users
-  const userTotalPages = Math.ceil(filteredUsers.length / userItemsPerPage);
-  const userStartIndex = (userCurrentPage - 1) * userItemsPerPage;
-  const paginatedUsers = filteredUsers.slice(
-    userStartIndex,
-    userStartIndex + userItemsPerPage,
-  );
+  const { users, isLoading, error, refetch, totalCount, totalPages } =
+    useAdminUserManagement({
+      page: userCurrentPage,
+      pageSize: userItemsPerPage,
+      name: searchTerm,
+    });
 
   const goToUserPage = (page: number) => {
-    setUserCurrentPage(Math.max(1, Math.min(page, userTotalPages)));
+    setUserCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
 
   if (error) {
@@ -50,13 +43,12 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="space-y-6">
+    <div>
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
           <p className="text-gray-600">Manage user accounts and permissions</p>
         </div>
-        <UserStats users={filteredUsers} />
       </div>
 
       {/* User Filters */}
@@ -69,16 +61,25 @@ export default function UserManagement() {
         onStatusChange={setStatusFilter}
       />
 
-      {/* Users Table */}
-      <UserTable users={paginatedUsers} isLoading={isLoading} />
+      <PaginationControls
+        currentPage={userCurrentPage}
+        totalPages={totalPages}
+        onPageChange={goToUserPage}
+        startIndex={(userCurrentPage - 1) * userItemsPerPage}
+        itemsPerPage={userItemsPerPage}
+        totalItems={totalCount}
+        itemName="users"
+      />
+
+      <UserTable users={users} isLoading={isLoading} />
 
       <PaginationControls
         currentPage={userCurrentPage}
-        totalPages={userTotalPages}
+        totalPages={totalPages}
         onPageChange={goToUserPage}
-        startIndex={userStartIndex}
+        startIndex={(userCurrentPage - 1) * userItemsPerPage}
         itemsPerPage={userItemsPerPage}
-        totalItems={filteredUsers.length}
+        totalItems={totalCount}
         itemName="users"
       />
     </div>

@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,12 +31,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { User } from "@/types/admin";
+import { AdminGetUserResponse } from "@/hooks/use-admin-user-management";
+import dayjs from "dayjs";
+import TextContent from "../content/text-content";
 import getInitials from "../utils/utilss";
 import UserDetailsDialog from "./user-details-dialog";
 
 interface UserTableProps {
-  users: User[];
+  users: AdminGetUserResponse[];
   isLoading?: boolean;
 }
 
@@ -44,7 +46,9 @@ export default function UserTable({
   users,
   isLoading = false,
 }: UserTableProps) {
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<AdminGetUserResponse | null>(
+    null,
+  );
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const getUserStatusColor = (status: string) => {
@@ -62,7 +66,7 @@ export default function UserTable({
     }
   };
 
-  const handleViewDetails = (user: User) => {
+  const handleViewDetails = (user: AdminGetUserResponse) => {
     setSelectedUser(user);
     setDialogOpen(true);
   };
@@ -76,7 +80,7 @@ export default function UserTable({
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[250px]">User</TableHead>
-                  <TableHead>Role</TableHead>
+                  <TableHead className="w-[250px]">Role</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Warnings</TableHead>
                   <TableHead>Join Date</TableHead>
@@ -92,46 +96,49 @@ export default function UserTable({
                       <TableCell>
                         <div className="flex items-center space-x-3">
                           <Avatar className="h-8 w-8">
+                            <AvatarImage src={user.profilePicture} />
                             <AvatarFallback>
                               {getInitials(user.name)}
                             </AvatarFallback>
                           </Avatar>
                           <div>
                             <div className="font-medium">{user.name}</div>
-                            <div className="text-sm text-gray-500">
-                              {user.email}
-                            </div>
+                            {user.email && (
+                              <div className="text-sm text-gray-500">
+                                <TextContent text={user.email} />
+                              </div>
+                            )}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            user.role === "Admin"
-                              ? "default"
-                              : user.role === "Moderator"
-                                ? "secondary"
-                                : "outline"
-                          }
-                        >
-                          {user.role}
-                        </Badge>
+                      <TableCell className="space-x-2 overflow-x-auto">
+                        {user.roles.map((role) => (
+                          <Badge
+                            className="no-selectable"
+                            key={role.id}
+                            variant={
+                              role.name === "Admin"
+                                ? "default"
+                                : role.name === "Moderator"
+                                  ? "secondary"
+                                  : "outline"
+                            }
+                          >
+                            {role.name}
+                          </Badge>
+                        ))}
                       </TableCell>
-                      <TableCell>
-                        <Badge variant={getUserStatusColor(user.status)}>
-                          {user.status}
-                        </Badge>
-                      </TableCell>
+                      <TableCell>Active</TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-1">
-                          <span className="text-sm">{user.warningsCount}</span>
-                          {user.warningsCount > 2 && (
+                          <span className="text-sm">{user.warningCount}</span>
+                          {user.warningCount > 2 && (
                             <AlertTriangle className="h-3 w-3 text-orange-500" />
                           )}
                         </div>
                       </TableCell>
                       <TableCell className="text-sm text-gray-600">
-                        {user.joinDate}
+                        {dayjs(user.creationDate).fromNow(true)}
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>

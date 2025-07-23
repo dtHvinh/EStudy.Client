@@ -24,8 +24,8 @@ const PaginationControls = ({
   totalItems: number;
   itemName: string;
 }) => (
-  <Card>
-    <CardContent className="pt-6">
+  <Card className="border-0 shadow-none">
+    <CardContent>
       <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
         <div className="text-sm text-gray-600">
           Showing {startIndex + 1} to{" "}

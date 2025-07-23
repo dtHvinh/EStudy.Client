@@ -3,7 +3,7 @@
 import { Shield, Users } from "lucide-react";
 
 import ContentModeration from "@/components/admin/content-moderation/content-moderation";
-import UserManagement from "@/components/admin/user-management";
+import UserManagement from "@/components/admin/user-management/user-management";
 import MainLayout from "@/components/layouts/MainLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 

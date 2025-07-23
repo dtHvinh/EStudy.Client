@@ -32,6 +32,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { User } from "@/types/admin";
+import getInitials from "../utils/utilss";
 import UserDetailsDialog from "./user-details-dialog";
 
 interface UserTableProps {
@@ -77,152 +78,99 @@ export default function UserTable({
                   <TableHead className="w-[250px]">User</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Level</TableHead>
-                  <TableHead>Reports</TableHead>
                   <TableHead>Warnings</TableHead>
                   <TableHead>Join Date</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoading
-                  ? // Loading skeleton
-                    Array.from({ length: 5 }).map((_, i) => (
-                      <TableRow key={i}>
-                        <TableCell>
-                          <div className="flex items-center space-x-3">
-                            <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200"></div>
-                            <div className="space-y-2">
-                              <div className="h-4 w-24 animate-pulse rounded bg-gray-200"></div>
-                              <div className="h-3 w-32 animate-pulse rounded bg-gray-200"></div>
+                {isLoading ? (
+                  <Skeleton />
+                ) : (
+                  users.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <div className="flex items-center space-x-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback>
+                              {getInitials(user.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="font-medium">{user.name}</div>
+                            <div className="text-sm text-gray-500">
+                              {user.email}
                             </div>
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="h-4 w-16 animate-pulse rounded bg-gray-200"></div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="h-4 w-16 animate-pulse rounded bg-gray-200"></div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="h-4 w-16 animate-pulse rounded bg-gray-200"></div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="h-4 w-8 animate-pulse rounded bg-gray-200"></div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="h-4 w-8 animate-pulse rounded bg-gray-200"></div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="h-4 w-20 animate-pulse rounded bg-gray-200"></div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="h-4 w-20 animate-pulse rounded bg-gray-200"></div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="h-4 w-8 animate-pulse rounded bg-gray-200"></div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  : users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>
-                          <div className="flex items-center space-x-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarFallback>
-                                {user.name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="font-medium">{user.name}</div>
-                              <div className="text-sm text-gray-500">
-                                {user.email}
-                              </div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              user.role === "Admin"
-                                ? "default"
-                                : user.role === "Moderator"
-                                  ? "secondary"
-                                  : "outline"
-                            }
-                          >
-                            {user.role}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={getUserStatusColor(user.status)}>
-                            {user.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{user.level}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-1">
-                            <span className="text-sm">{user.reportsCount}</span>
-                            {user.reportsCount > 5 && (
-                              <AlertTriangle className="h-3 w-3 text-red-500" />
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-1">
-                            <span className="text-sm">
-                              {user.warningsCount}
-                            </span>
-                            {user.warningsCount > 2 && (
-                              <AlertTriangle className="h-3 w-3 text-orange-500" />
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-sm text-gray-600">
-                          {user.joinDate}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() => handleViewDetails(user)}
-                              >
-                                <Eye className="mr-2 h-4 w-4" />
-                                View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit Role
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <MessageSquare className="mr-2 h-4 w-4" />
-                                Send Warning
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem>
-                                <UserMinus className="mr-2 h-4 w-4" />
-                                Suspend User
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-red-600">
-                                <Ban className="mr-2 h-4 w-4" />
-                                Ban User
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            user.role === "Admin"
+                              ? "default"
+                              : user.role === "Moderator"
+                                ? "secondary"
+                                : "outline"
+                          }
+                        >
+                          {user.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getUserStatusColor(user.status)}>
+                          {user.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-1">
+                          <span className="text-sm">{user.warningsCount}</span>
+                          {user.warningsCount > 2 && (
+                            <AlertTriangle className="h-3 w-3 text-orange-500" />
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm text-gray-600">
+                        {user.joinDate}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem
+                              onClick={() => handleViewDetails(user)}
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit Role
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <MessageSquare className="mr-2 h-4 w-4" />
+                              Send Warning
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem>
+                              <UserMinus className="mr-2 h-4 w-4" />
+                              Suspend User
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-red-600">
+                              <Ban className="mr-2 h-4 w-4" />
+                              Ban User
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
@@ -238,4 +186,44 @@ export default function UserTable({
       )}
     </>
   );
+}
+
+function Skeleton() {
+  return Array.from({ length: 5 }).map((_, i) => (
+    <TableRow key={i}>
+      <TableCell>
+        <div className="flex items-center space-x-3">
+          <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200"></div>
+          <div className="space-y-2">
+            <div className="h-4 w-24 animate-pulse rounded bg-gray-200"></div>
+            <div className="h-3 w-32 animate-pulse rounded bg-gray-200"></div>
+          </div>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="h-4 w-16 animate-pulse rounded bg-gray-200"></div>
+      </TableCell>
+      <TableCell>
+        <div className="h-4 w-16 animate-pulse rounded bg-gray-200"></div>
+      </TableCell>
+      <TableCell>
+        <div className="h-4 w-16 animate-pulse rounded bg-gray-200"></div>
+      </TableCell>
+      <TableCell>
+        <div className="h-4 w-8 animate-pulse rounded bg-gray-200"></div>
+      </TableCell>
+      <TableCell>
+        <div className="h-4 w-8 animate-pulse rounded bg-gray-200"></div>
+      </TableCell>
+      <TableCell>
+        <div className="h-4 w-20 animate-pulse rounded bg-gray-200"></div>
+      </TableCell>
+      <TableCell>
+        <div className="h-4 w-20 animate-pulse rounded bg-gray-200"></div>
+      </TableCell>
+      <TableCell>
+        <div className="h-4 w-8 animate-pulse rounded bg-gray-200"></div>
+      </TableCell>
+    </TableRow>
+  ));
 }

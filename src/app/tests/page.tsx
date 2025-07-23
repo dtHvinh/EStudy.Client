@@ -5,7 +5,7 @@ import MainLayout from "@/components/layouts/MainLayout";
 import RelativeLink from "@/components/relative-link";
 import RoleBaseComponent from "@/components/role-base-component";
 import TestCard from "@/components/test-card";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -25,7 +25,6 @@ import useTestCollection, {
 } from "@/hooks/use-test-collection";
 import useTests from "@/hooks/use-tests";
 import { IconPlus } from "@tabler/icons-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
@@ -61,43 +60,14 @@ export default function Page() {
       <div className="space-y-4 px-4 lg:px-6">
         <div className="flex flex-col space-y-5">
           <div className="flex items-center justify-between">
-            <H3>Your Collections</H3>
+            <H3>Tests</H3>
             <div className="flex items-center gap-2">
               <RoleBaseComponent requireRoles={["Instructor", "Admin"]}>
                 <CreateTestButton />
               </RoleBaseComponent>
-              <RoleBaseComponent requireRoles={["Instructor", "Admin"]}>
-                <CreateTestCollectionButton onCollectionCreated={mutate} />
-              </RoleBaseComponent>
-            </div>
-          </div>
-          <div>
-            <div className="grid grid-cols-2 gap-x-5 gap-y-8 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              {collections.map((collection) => (
-                <RelativeLink
-                  key={collection.id}
-                  href={`collections/${collection.id}`}
-                >
-                  <TestCollectionCard {...collection} />
-                </RelativeLink>
-              ))}
-              {collections.length === 0 && (
-                <div className="col-span-full">
-                  There are no test collections available.
-                </div>
-              )}
-              {collections.length == 5 && (
-                <Link
-                  href="/tests/collections"
-                  className={`${buttonVariants({ variant: "outline" })} col-span-full text-center`}
-                >
-                  See more
-                </Link>
-              )}
             </div>
           </div>
           <div className="space-y-5">
-            <H3>Tests</H3>
             <div className="grid grid-cols-2 gap-x-5 gap-y-8 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               {tests.map((item) => (
                 <TestCard key={item.id} {...item} />
@@ -115,27 +85,6 @@ export default function Page() {
     </MainLayout>
   );
 }
-
-export const TestCollectionCard = ({
-  id,
-  name,
-  description,
-}: {
-  id: string;
-  name: string;
-  description?: string;
-}) => {
-  return (
-    <div className="group relative flex h-32 cursor-pointer items-center justify-center rounded-lg border border-dashed border-gray-300 bg-white p-4 shadow-sm hover:border-gray-400">
-      <div className="text-center">
-        <h4 className="text-lg font-semibold text-gray-800">{name}</h4>
-        {description && (
-          <p className="mt-1 text-sm text-gray-600">{description}</p>
-        )}
-      </div>
-    </div>
-  );
-};
 
 export const CreateTestButton = () => {
   return (

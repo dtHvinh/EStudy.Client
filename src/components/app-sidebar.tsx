@@ -6,6 +6,7 @@ import {
   IconBrandParsinta,
   IconDashboard,
   IconLayoutBoard,
+  IconLibrary,
   IconMessageChatbot,
   IconReportSearch,
   IconScript,
@@ -58,6 +59,11 @@ const data = {
       title: "Tests",
       url: "tests",
       icon: IconBallpen,
+    },
+    {
+      title: "Test Collections",
+      url: "test-collections",
+      icon: IconLibrary,
     },
     {
       title: "Playground",

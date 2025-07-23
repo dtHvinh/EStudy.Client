@@ -69,7 +69,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         {data && !isLoading && (
           <div className="space-y-6">
             {/* Collection Header */}
-            <NavigateBack fallbackUrl={`/tests/collections`} />
+            <NavigateBack fallbackUrl={`/test-collections`} />
             <div className="space-y-2">
               <H3>{data.name}</H3>
               {data.description && (

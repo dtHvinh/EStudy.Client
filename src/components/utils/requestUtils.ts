@@ -13,6 +13,9 @@ export interface RequestOptions extends AxiosRequestConfig {
   skipTokenRefresh?: boolean;
 }
 
+let refreshPromise: Promise<string | null> | null = null;
+let redirectTriggered = false;
+
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -20,24 +23,6 @@ const axiosInstance = axios.create({
     Accept: "application/json",
   },
 });
-
-let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (value: any) => void;
-  reject: (error: any) => void;
-}> = [];
-
-const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error) {
-      reject(error);
-    } else {
-      resolve(token);
-    }
-  });
-
-  failedQueue = [];
-};
 
 const refreshAccessToken = async (): Promise<string | null> => {
   try {
@@ -78,7 +63,8 @@ const refreshAccessToken = async (): Promise<string | null> => {
     deleteCookie(ACCESS_TOKEN_COOKIE);
     deleteCookie(REFRESH_TOKEN_COOKIE);
 
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && !redirectTriggered) {
+      redirectTriggered = true;
       window.location.href = "/login";
     }
 
@@ -99,68 +85,47 @@ axiosInstance.interceptors.request.use((config) => {
 });
 
 axiosInstance.interceptors.response.use(
-  function (response) {
-    return response;
-  },
-  async function (error: AxiosError) {
+  (response) => response,
+  async (error: AxiosError) => {
     const originalRequest = error.config!;
-    if (error.response?.status === StatusCodes.AccountBanned) {
-      window.location.href = "/login";
+    const status = error.response?.status;
+
+    if (status === StatusCodes.AccountBanned) {
+      if (typeof window !== "undefined" && !redirectTriggered) {
+        redirectTriggered = true;
+        window.location.href = "/login";
+      }
       return Promise.reject(error);
     }
 
-    if (error.response?.status === 401) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
+    if (status === 401) {
+      const config = originalRequest as RequestOptions;
+      if (config.skipTokenRefresh) {
+        return Promise.reject(error);
+      }
+
+      // If no refresh in progress, start one
+      if (!refreshPromise) {
+        refreshPromise = refreshAccessToken()
           .then((token) => {
-            if (originalRequest.headers) {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-            }
-            return axiosInstance(error.config!);
+            refreshPromise = null;
+            return token;
           })
           .catch((err) => {
-            return Promise.reject(err);
+            refreshPromise = null;
+            throw err;
           });
       }
 
-      try {
-        const newToken = await refreshAccessToken();
-        processQueue(null, newToken);
-
+      return refreshPromise.then((newToken) => {
+        // Update the original request with the new token
         if (originalRequest.headers && newToken) {
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
         }
-
         return axiosInstance(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError, null);
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
+      });
     }
 
-    if (error.response?.status === 401) {
-      console.error("Unauthorized request. Please log in again.");
-      deleteCookie(ACCESS_TOKEN_COOKIE);
-      deleteCookie(REFRESH_TOKEN_COOKIE);
-
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
-      }
-    }
-
-    return Promise.reject(error);
-  },
-);
-
-axiosInstance.interceptors.response.use(
-  function (response) {
-    return response;
-  },
-  function (error: AxiosError) {
     const customConfig = error.config as RequestOptions;
     if (customConfig?.skipErrorHandling) {
       return Promise.reject(error);
@@ -184,7 +149,6 @@ const containsFiles = (data: any): boolean => {
       if (data[key] instanceof File || data[key] instanceof FileList) {
         return true;
       }
-      // Check for nested objects/arrays
       if (typeof data[key] === "object" && containsFiles(data[key])) {
         return true;
       }
@@ -194,7 +158,6 @@ const containsFiles = (data: any): boolean => {
   return false;
 };
 
-// Helper function to convert data with files to FormData
 const prepareFormData = (data: any): FormData => {
   if (data instanceof FormData) {
     return data;
@@ -236,9 +199,6 @@ const prepareFormData = (data: any): FormData => {
   return formData;
 };
 
-/**
- * HTTP GET request
- */
 export async function get<T = any>(
   url: string,
   options: RequestOptions = {},
@@ -247,9 +207,6 @@ export async function get<T = any>(
   return handleResponse<T>(response);
 }
 
-/**
- * HTTP POST request
- */
 export async function post<T = any>(
   url: string,
   data?: any,
@@ -289,9 +246,6 @@ export async function putWithFormData<T = any>(
   return handleResponse<T>(response);
 }
 
-/**
- * HTTP PUT request
- */
 export async function put<T = any>(
   url: string,
   data?: any,
@@ -301,9 +255,6 @@ export async function put<T = any>(
   return handleResponse<T>(response);
 }
 
-/**
- * HTTP PATCH request
- */
 export async function patch<T = any>(
   url: string,
   data?: any,
@@ -313,9 +264,6 @@ export async function patch<T = any>(
   return handleResponse<T>(response);
 }
 
-/**
- * HTTP DELETE request
- */
 export async function del<T = any>(
   url: string,
   options: RequestOptions = {},
@@ -324,9 +272,6 @@ export async function del<T = any>(
   return handleResponse<T>(response);
 }
 
-/**
- * Upload files using FormData
- */
 export async function uploadFile<T = any>(
   url: string,
   formData: FormData,
@@ -341,7 +286,6 @@ export async function uploadFile<T = any>(
   return handleResponse<T>(response);
 }
 
-// Export functions as an object for easier imports
 const api = {
   get,
   post,
@@ -355,15 +299,14 @@ const api = {
 
 export const tokenUtils = {
   setTokens: (accessToken: string, refreshToken: string) => {
-    console.log("Setting tokens:", accessToken, refreshToken);
     setCookie(ACCESS_TOKEN_COOKIE, accessToken, {
-      maxAge: 15 * 60, // 15 minutes
+      maxAge: 15 * 60,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
 
     setCookie(REFRESH_TOKEN_COOKIE, refreshToken, {
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      maxAge: 7 * 24 * 60 * 60,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });

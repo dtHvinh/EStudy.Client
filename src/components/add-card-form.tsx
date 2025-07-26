@@ -1,3 +1,4 @@
+import { useAddCard } from "@/components/contexts/AddCardContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React from "react";
 import { UseFormReturn, useForm } from "react-hook-form";
@@ -52,21 +53,20 @@ const requestSchema = z.object({
 export default function AddCardForm({
   trigger,
   onSubmit,
-  initalTerm,
 }: {
   trigger: React.ReactNode;
-  initalTerm?: string;
   onSubmit: (
     data: z.infer<typeof requestSchema>,
     form: UseFormReturn<typeof data>,
   ) => Promise<boolean>;
 }) {
   const [open, setOpen] = React.useState(false);
+  const { initialTerm, clearInitialTerm } = useAddCard();
 
   const form = useForm<z.infer<typeof requestSchema>>({
     resolver: zodResolver(requestSchema),
     values: {
-      term: initalTerm || "",
+      term: initialTerm || "",
       definition: "",
       example: "",
       partOfSpeech: "",
@@ -78,13 +78,17 @@ export default function AddCardForm({
   const _onSubmit = async (data: z.infer<typeof requestSchema>) => {
     if (await onSubmit(data, form)) {
       form.reset();
+      clearInitialTerm(); // Clear the initial term after successful submission
       setOpen(false);
     }
   };
 
   const _onOpenChange = (open: boolean) => {
     setOpen(open);
-    if (!open) form.reset();
+    if (!open) {
+      form.reset();
+      clearInitialTerm(); // Clear the initial term when dialog is closed
+    }
   };
 
   return (

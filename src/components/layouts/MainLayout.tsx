@@ -5,6 +5,7 @@ import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
 import React from "react";
 import { AppSidebar } from "../app-sidebar";
+import { AddCardProvider } from "../contexts/AddCardContext";
 import FloatingToolboxProvider from "../contexts/FloatingToolboxContext";
 import { ReportFormContextProvider } from "../contexts/ReportFormContext";
 import SiteFooter from "../site-footer";
@@ -30,23 +31,25 @@ export default function MainLayout({
       }
     >
       <ReportFormContextProvider>
-        <FloatingToolboxProvider>
-          <AppSidebar variant="inset" />
-          <SidebarInset>
-            <SiteHeader />
-            {siteHeader}
-            <div className="flex min-h-[calc(100vh_-_var(--header-height))] flex-col">
-              <div className="flex flex-1 flex-col">
-                <div className="@container/main flex flex-1 flex-col gap-2">
-                  <div className="flex flex-col gap-4 pt-4 md:gap-6 md:pt-6">
-                    {children}
+        <AddCardProvider>
+          <FloatingToolboxProvider>
+            <AppSidebar variant="inset" />
+            <SidebarInset>
+              <SiteHeader />
+              {siteHeader}
+              <div className="flex min-h-[calc(100vh_-_var(--header-height))] flex-col">
+                <div className="flex flex-1 flex-col">
+                  <div className="@container/main flex flex-1 flex-col gap-2">
+                    <div className="flex flex-col gap-4 pt-4 md:gap-6 md:pt-6">
+                      {children}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <SiteFooter />
-          </SidebarInset>
-        </FloatingToolboxProvider>
+              <SiteFooter />
+            </SidebarInset>
+          </FloatingToolboxProvider>
+        </AddCardProvider>
       </ReportFormContextProvider>
     </SidebarProvider>
   );

@@ -52,19 +52,21 @@ const requestSchema = z.object({
 export default function AddCardForm({
   trigger,
   onSubmit,
+  initalTerm,
 }: {
   trigger: React.ReactNode;
+  initalTerm?: string;
   onSubmit: (
     data: z.infer<typeof requestSchema>,
-    form: UseFormReturn<typeof data>
+    form: UseFormReturn<typeof data>,
   ) => Promise<boolean>;
 }) {
   const [open, setOpen] = React.useState(false);
 
   const form = useForm<z.infer<typeof requestSchema>>({
     resolver: zodResolver(requestSchema),
-    defaultValues: {
-      term: "",
+    values: {
+      term: initalTerm || "",
       definition: "",
       example: "",
       partOfSpeech: "",

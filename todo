@@ -6,11 +6,18 @@ lưu đoạn hội thoại của người dùng và AI, đưa đọn text cho ai
 transcript has multiple
 
 text-editor //
+hide blog +/ 
+
+global add flash card
 
 logout -> login page (this page will delete auth token)
 
-hide blog // 
-
 admin page user management
-test filter
 
+delete paymentindent wen close
+
+report comment
+
+store words
+
+ai

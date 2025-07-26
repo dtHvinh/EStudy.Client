@@ -4,12 +4,10 @@ import {
   AlertTriangle,
   Ban,
   Edit,
-  Eye,
   MessageSquare,
+  MessageSquareOff,
   MoreHorizontal,
-  UserMinus,
 } from "lucide-react";
-import { useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -31,44 +29,41 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AdminGetUserResponse } from "@/hooks/use-admin-user-management";
+import {
+  AdminGetUserResponse,
+  useAdminUserActions,
+} from "@/hooks/use-admin-user-management";
+import { preventDialogClose } from "@/lib/functions";
 import dayjs from "dayjs";
+import { toast } from "sonner";
 import TextContent from "../content/text-content";
+import api from "../utils/requestUtils";
 import getInitials from "../utils/utilss";
-import UserDetailsDialog from "./user-details-dialog";
+import UserBanButton from "./user-management/user-ban-button";
+import UserRoleButton from "./user-management/user-role-button";
 
 interface UserTableProps {
   users: AdminGetUserResponse[];
   isLoading?: boolean;
+  onDataChange?: () => void;
 }
 
 export default function UserTable({
   users,
   isLoading = false,
+  onDataChange,
 }: UserTableProps) {
-  const [selectedUser, setSelectedUser] = useState<AdminGetUserResponse | null>(
-    null,
-  );
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const { warningUser, clearWarnings } = useAdminUserActions(onDataChange);
 
-  const getUserStatusColor = (status: string) => {
-    switch (status) {
-      case "Active":
-        return "default";
-      case "Suspended":
-        return "secondary";
-      case "Banned":
-        return "destructive";
-      case "Inactive":
-        return "outline";
-      default:
-        return "outline";
+  const unbanUser = async (userId: string | number) => {
+    try {
+      await api.post(`/api/admin/users/${userId}/unban`, {});
+      onDataChange?.();
+      toast.success("User unbanned successfully");
+    } catch (error) {
+      console.error("Failed to unban user:", error);
+      toast.error("Failed to unban user");
     }
-  };
-
-  const handleViewDetails = (user: AdminGetUserResponse) => {
-    setSelectedUser(user);
-    setDialogOpen(true);
   };
 
   return (
@@ -128,7 +123,7 @@ export default function UserTable({
                           </Badge>
                         ))}
                       </TableCell>
-                      <TableCell>Active</TableCell>
+                      <TableCell>{user.status}</TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-1">
                           <span className="text-sm">{user.warningCount}</span>
@@ -138,7 +133,8 @@ export default function UserTable({
                         </div>
                       </TableCell>
                       <TableCell className="text-sm text-gray-600">
-                        {dayjs(user.creationDate).fromNow(true)}
+                        {dayjs(user.creationDate).format("MMM DD, YYYY")}&nbsp;
+                        ({dayjs(user.creationDate).fromNow(true)})
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
@@ -149,28 +145,48 @@ export default function UserTable({
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={preventDialogClose}>
+                              <UserRoleButton
+                                onRoleChange={onDataChange}
+                                user={user}
+                              >
+                                <div className="flex items-center">
+                                  <Edit className="mr-4 h-4 w-4" />
+                                  Edit Role
+                                </div>
+                              </UserRoleButton>
+                            </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => handleViewDetails(user)}
+                              onClick={() => warningUser(user.id)}
                             >
-                              <Eye className="mr-2 h-4 w-4" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit Role
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
                               <MessageSquare className="mr-2 h-4 w-4" />
                               Send Warning
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>
-                              <UserMinus className="mr-2 h-4 w-4" />
-                              Suspend User
+                            <DropdownMenuItem
+                              onClick={() => clearWarnings(user.id)}
+                            >
+                              <MessageSquareOff className="mr-2 h-4 w-4" />
+                              Clear Warnings
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-600">
-                              <Ban className="mr-2 h-4 w-4" />
-                              Ban User
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={preventDialogClose}
+                              className="hover:bg-destructive/10 text-red-600"
+                            >
+                              {!(user.status === "Banned") ? (
+                                <UserBanButton
+                                  userId={user.id}
+                                  onBanSuccess={onDataChange}
+                                />
+                              ) : (
+                                <button
+                                  className="flex items-center gap-2"
+                                  onClick={() => unbanUser(user.id)}
+                                >
+                                  <Ban className="text-destructive mr-2 h-4 w-4" />
+                                  Unban User
+                                </button>
+                              )}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -183,14 +199,6 @@ export default function UserTable({
           </div>
         </CardContent>
       </Card>
-
-      {selectedUser && (
-        <UserDetailsDialog
-          user={selectedUser}
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-        />
-      )}
     </>
   );
 }

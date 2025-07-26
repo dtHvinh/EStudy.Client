@@ -23,13 +23,6 @@ const ReportFormContext = createContext<ReportFormContextType | undefined>(
   undefined,
 );
 
-const defaultReport: ReportType = {
-  type: "",
-  targetId: "",
-  reasonId: "",
-  description: "",
-};
-
 export function ReportFormContextProvider({
   children,
 }: {

@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGoogleLogin } from "@react-oauth/google";
 import { IconBrandGoogle } from "@tabler/icons-react";
+import axios from "axios";
 import { deleteCookie } from "cookies-next/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -29,12 +30,24 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { getErrorMessage, setFormErrors } from "./utils/errorUtils";
-import { ACCESS_TOKEN_COOKIE, post, tokenUtils } from "./utils/requestUtils";
+import {
+  ACCESS_TOKEN_COOKIE,
+  API_BASE_URL,
+  tokenUtils,
+} from "./utils/requestUtils";
 
 const loginFormSchema = z.object({
   usernameOrEmail: z.string().min(1, "Username or email is required"),
   password: z.string().min(1, "Password is required"),
 });
+
+const loginPost = async (url: string, data: any) => {
+  const axiosF = axios.create({
+    baseURL: API_BASE_URL,
+  });
+  const response = await axiosF.post(url, data);
+  return response.data;
+};
 
 export function LoginForm({
   className,
@@ -46,7 +59,7 @@ export function LoginForm({
       let loadingToastId;
       try {
         loadingToastId = toast.loading("Logging in...");
-        const res = await post(
+        const res = await loginPost(
           "/api/account/google-login?access_token=" +
             tokenResponse.access_token,
           {},
@@ -82,7 +95,7 @@ export function LoginForm({
     let loadingToastId;
     try {
       loadingToastId = toast.loading("Logging in...");
-      const res = await post("/api/account/login", {
+      const res = await loginPost("/api/account/login", {
         usernameOrEmail: values.usernameOrEmail,
         password: values.password,
       });
@@ -92,6 +105,9 @@ export function LoginForm({
       router.push("/dashboard");
     } catch (error) {
       setFormErrors(error, form.setError);
+      console.error("Login error eee:", error);
+
+      toast.error(getErrorMessage(error) || "Login failed!");
     } finally {
       toast.dismiss(loadingToastId);
     }

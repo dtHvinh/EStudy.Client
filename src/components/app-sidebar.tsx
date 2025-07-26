@@ -20,6 +20,7 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarMenuButton,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { useUserInfo } from "@/hooks/use-user-info";
 import Image from "next/image";
@@ -61,7 +62,7 @@ const data = {
       icon: IconBallpen,
     },
     {
-      title: "Test Collections",
+      title: "Collections",
       url: "test-collections",
       icon: IconLibrary,
     },
@@ -75,7 +76,7 @@ const data = {
   documents: [],
   adminNav: [
     {
-      title: "Admin Panel",
+      title: "Admin",
       url: "admin",
       icon: IconAffiliate,
     },
@@ -96,8 +97,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </Link>
         </SidebarMenuButton>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="overflow-hidden">
         <NavMain items={data.navMain} />
+        <SidebarSeparator />
         <NavAdmin items={data.adminNav} />
         {/* <NavDocuments items={data.documents} /> */}
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}

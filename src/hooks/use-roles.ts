@@ -1,6 +1,10 @@
 import api from "@/components/utils/requestUtils";
-import { Role } from "@/types/admin";
 import useSWR from "swr";
+
+export type Role = {
+  id: string;
+  name: string;
+};
 
 export default function useRoles() {
   const {

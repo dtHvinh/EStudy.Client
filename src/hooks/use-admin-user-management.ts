@@ -10,10 +10,11 @@ export interface AdminGetUserResponse {
   creationDate: string;
   email: string;
   profilePicture: string;
+  status: string;
 }
 
 export interface UserRoleObject {
-  id: number;
+  id: number | string;
   name: string;
 }
 
@@ -45,4 +46,30 @@ export default function useAdminUserManagement(query: UserQueryParams) {
     totalPages: data?.totalPages || 0,
     refetch: () => mutate(),
   };
+}
+
+export function useAdminUserActions(callback?: () => void) {
+  const warningUser = async (userId: number) => {
+    try {
+      await api.post(`/api/admin/users/${userId}/warnings/increment`, {});
+      callback?.();
+      return true;
+    } catch (error) {
+      console.error("Error warning user:", error);
+      return false;
+    }
+  };
+
+  const clearWarnings = async (userId: number) => {
+    try {
+      await api.post(`/api/admin/users/${userId}/warnings/clear`, {});
+      callback?.();
+      return true;
+    } catch (error) {
+      console.error("Error clearing warnings:", error);
+      return false;
+    }
+  };
+
+  return { warningUser, clearWarnings };
 }

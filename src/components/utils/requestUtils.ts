@@ -1,3 +1,4 @@
+import { StatusCodes } from "@/types/constants";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { deleteCookie, getCookie, setCookie } from "cookies-next/client";
 
@@ -103,6 +104,11 @@ axiosInstance.interceptors.response.use(
   },
   async function (error: AxiosError) {
     const originalRequest = error.config!;
+    if (error.response?.status === StatusCodes.AccountBanned) {
+      window.location.href = "/login";
+      return Promise.reject(error);
+    }
+
     if (error.response?.status === 401) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -118,8 +124,6 @@ axiosInstance.interceptors.response.use(
             return Promise.reject(err);
           });
       }
-
-      isRefreshing = true;
 
       try {
         const newToken = await refreshAccessToken();

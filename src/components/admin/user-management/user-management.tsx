@@ -25,6 +25,7 @@ export default function UserManagement() {
       page: userCurrentPage,
       pageSize: userItemsPerPage,
       name: searchTerm,
+      role: roleFilter,
     });
 
   const goToUserPage = (page: number) => {
@@ -71,7 +72,7 @@ export default function UserManagement() {
         itemName="users"
       />
 
-      <UserTable users={users} isLoading={isLoading} />
+      <UserTable users={users} isLoading={isLoading} onDataChange={refetch} />
 
       <PaginationControls
         currentPage={userCurrentPage}

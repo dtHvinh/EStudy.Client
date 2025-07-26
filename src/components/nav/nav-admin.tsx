@@ -29,7 +29,6 @@ const NavAdmin = ({
   return (
     <RoleBaseComponent requireRoles={["Admin"]}>
       <SidebarGroup>
-        <div className="text-lg">Admin</div>
         <SidebarGroupContent className="flex flex-col gap-2">
           <SidebarMenu>
             {items.map((item) => (

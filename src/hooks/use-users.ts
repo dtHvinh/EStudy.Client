@@ -2,7 +2,7 @@ import { useState } from "react";
 
 export function useUserFilters() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState("All");
+  const [roleFilter, setRoleFilter] = useState("0");
   const [statusFilter, setStatusFilter] = useState("all");
 
   return {

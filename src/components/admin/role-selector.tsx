@@ -8,29 +8,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import useRoles from "@/hooks/use-roles";
-import { Role } from "@/types/admin";
 
 interface RoleSelectorProps {
   value: string;
   onValueChange: (value: string) => void;
   className?: string;
 }
-
-// Mock fetcher function - replace with your actual API call
-const fetchRoles = async (): Promise<Role[]> => {
-  // Simulate API call
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        { id: "all", name: "All" },
-        { id: "Student", name: "Student" },
-        { id: "Teacher", name: "Teacher" },
-        { id: "Admin", name: "Admin" },
-        { id: "Moderator", name: "Moderator" },
-      ]);
-    }, 100);
-  });
-};
 
 export default function RoleSelector({
   value,
@@ -46,7 +29,7 @@ export default function RoleSelector({
           <SelectValue placeholder="Error loading roles" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Roles</SelectItem>
+          <SelectItem value="0">All Roles</SelectItem>
         </SelectContent>
       </Select>
     );
@@ -58,11 +41,11 @@ export default function RoleSelector({
         <SelectValue placeholder={isLoading ? "Loading roles..." : "Role"} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem key={99} value={"All"}>
+        <SelectItem key={99} value={"0"}>
           All
         </SelectItem>
         {roles?.map((role) => (
-          <SelectItem key={role.id} value={role.name}>
+          <SelectItem key={role.id} value={role.id}>
             {role.name}
           </SelectItem>
         ))}

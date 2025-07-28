@@ -9,6 +9,8 @@ import {
   TiptapLink,
   UpdatedImage,
 } from "novel";
+import { Markdown } from "tiptap-markdown";
+import { ThinkNode } from "../content/nodes/think-node";
 
 // TODO I am using cx here to get tailwind autocomplete working, idk if someone else can write a regex to just capture the class key in objects
 
@@ -17,7 +19,7 @@ const placeholder = Placeholder;
 const tiptapLink = TiptapLink.configure({
   HTMLAttributes: {
     class: cx(
-      "text-muted-foreground underline underline-offset-[3px] hover:text-primary transition-colors cursor-pointer"
+      "text-muted-foreground underline underline-offset-[3px] hover:text-primary transition-colors cursor-pointer",
     ),
   },
 });
@@ -89,4 +91,6 @@ export const defaultExtensions = [
   taskList,
   taskItem,
   horizontalRule,
+  ThinkNode,
+  Markdown,
 ];

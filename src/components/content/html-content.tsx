@@ -1,4 +1,11 @@
-import { EditorBubble, EditorContent, EditorRoot, JSONContent } from "novel";
+import {
+  EditorBubble,
+  EditorContent,
+  EditorRoot,
+  JSONContent,
+  useEditor,
+} from "novel";
+import { useEffect } from "react";
 import AutoJoiner from "tiptap-extension-auto-joiner";
 import GlobalDragHandle from "tiptap-extension-global-drag-handle";
 import { defaultExtensions } from "../text-editor/default-extensions";
@@ -24,6 +31,7 @@ export default function HTMLContent({ content }: { content: string }) {
         }}
         editable={false}
       >
+        <StreamContentUpdator content={content} />
         <EditorBubble
           tippyOptions={{
             // Ensure the bubble is on top of these global form like add card form
@@ -40,3 +48,11 @@ export default function HTMLContent({ content }: { content: string }) {
     </EditorRoot>
   );
 }
+
+const StreamContentUpdator = ({ content }: { content: string }) => {
+  const { editor } = useEditor();
+  useEffect(() => {
+    editor?.commands.setContent(content, false);
+  }, [content]);
+  return null;
+};

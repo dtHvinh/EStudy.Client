@@ -3,6 +3,7 @@
   padding-left: 2rem;
   padding-right: 2rem;
 }
+
 .ProseMirror[data-prose-no-padding="true"] {
   padding: 0;
   padding-left: 0;

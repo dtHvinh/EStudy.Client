@@ -216,6 +216,15 @@ export async function post<T = any>(
   return handleResponse<T>(response);
 }
 
+export async function postRaw<T = any>(
+  url: string,
+  data?: any,
+  options: RequestOptions = {},
+): Promise<T> {
+  const response = await axiosInstance.post(url, data, options);
+  return handleResponse<T>(response);
+}
+
 export async function postWithFormData<T = any>(
   url: string,
   data: any,

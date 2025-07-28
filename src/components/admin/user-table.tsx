@@ -123,7 +123,15 @@ export default function UserTable({
                           </Badge>
                         ))}
                       </TableCell>
-                      <TableCell>{user.status}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            user.status === "Active" ? "default" : "destructive"
+                          }
+                        >
+                          {user.status}
+                        </Badge>
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-1">
                           <span className="text-sm">{user.warningCount}</span>

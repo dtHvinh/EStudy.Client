@@ -2,10 +2,11 @@
 
 import {
   IconAffiliate,
+  IconApi,
   IconBallpen,
+  IconBook2,
   IconBrandParsinta,
   IconDashboard,
-  IconLayoutBoard,
   IconLibrary,
   IconMessageChatbot,
   IconReportSearch,
@@ -67,9 +68,9 @@ const data = {
       icon: IconLibrary,
     },
     {
-      title: "Playground",
-      url: "playground",
-      icon: IconLayoutBoard,
+      title: "Words",
+      url: "words",
+      icon: IconBook2,
     },
   ],
   navSecondary: [],
@@ -79,6 +80,11 @@ const data = {
       title: "Admin",
       url: "admin",
       icon: IconAffiliate,
+    },
+    {
+      title: "API",
+      url: "api",
+      icon: IconApi,
     },
   ],
 };

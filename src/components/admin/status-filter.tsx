@@ -7,7 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { StatusOption } from "@/types/admin";
 
 interface StatusFilterProps {
   value: string;
@@ -15,11 +14,10 @@ interface StatusFilterProps {
   className?: string;
 }
 
-const statusOptions: StatusOption[] = [
+const statusOptions = [
   { value: "all", label: "All Status" },
-  { value: "Active", label: "Active" },
-  { value: "Suspended", label: "Suspended" },
-  { value: "Banned", label: "Banned" },
+  { value: "active", label: "Active" },
+  { value: "banned", label: "Banned" },
 ];
 
 export default function StatusFilter({

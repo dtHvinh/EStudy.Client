@@ -2,7 +2,6 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import RoleSelector from "./role-selector";
-import StatusFilter from "./status-filter";
 import UserSearchBar from "./user-search-bar";
 
 interface UserFiltersProps {
@@ -32,7 +31,7 @@ export default function UserFilters({
               onSearchChange={onSearchChange}
             />
             <RoleSelector value={roleFilter} onValueChange={onRoleChange} />
-            <StatusFilter value={statusFilter} onValueChange={onStatusChange} />
+            {/* <StatusFilter value={statusFilter} onValueChange={onStatusChange} /> */}
           </div>
         </div>
       </CardContent>

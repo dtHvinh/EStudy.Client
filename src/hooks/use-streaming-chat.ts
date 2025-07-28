@@ -10,6 +10,8 @@ export interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  timestamp: Date;
+  sender?: string;
 }
 
 export function useStreamingChat() {
@@ -24,6 +26,10 @@ export function useStreamingChat() {
     },
     [],
   );
+
+  const setInputDirectly = useCallback((value: string) => {
+    setInput(value);
+  }, []);
 
   const stop = useCallback(() => {
     if (abortControllerRef.current) {
@@ -43,6 +49,8 @@ export function useStreamingChat() {
         id: Date.now().toString(),
         role: "user",
         content: input.trim(),
+        timestamp: new Date(),
+        sender: "You",
       };
 
       const newMessages = [...messages, userMessage];
@@ -54,6 +62,8 @@ export function useStreamingChat() {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: "",
+        timestamp: new Date(),
+        sender: "Assistant",
       };
 
       setMessages([...newMessages, assistantMessage]);
@@ -149,5 +159,6 @@ export function useStreamingChat() {
     isLoading,
     stop,
     setMessages: setMessagesDirectly,
+    setInput: setInputDirectly,
   };
 }

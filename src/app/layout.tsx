@@ -5,6 +5,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import "@stripe/stripe-js";
 import type { Metadata } from "next";
 import { EB_Garamond, Geist, Geist_Mono } from "next/font/google";
+import "regenerator-runtime/runtime";
 import "./globals.css";
 import "./prosemirror.css";
 

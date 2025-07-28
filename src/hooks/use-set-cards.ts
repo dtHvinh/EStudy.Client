@@ -46,7 +46,7 @@ export default function useSetCards({ ...props }: UseGetCardProps) {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const getKey = (
     pageIndex: number,
-    previousPageData: FlashCardResponseType[] | null
+    previousPageData: FlashCardResponseType[] | null,
   ) => {
     if (previousPageData && !previousPageData.length) return null;
     const params = new URLSearchParams({
@@ -113,13 +113,13 @@ export default function useSetCards({ ...props }: UseGetCardProps) {
         return false;
       }
     },
-    [mutate]
+    [mutate],
   );
 
   const createCard = useCallback(
     async (
       data: CreateFlashCardRequestType,
-      form: UseFormReturn<CreateFlashCardRequestType>
+      form: UseFormReturn<CreateFlashCardRequestType>,
     ): Promise<boolean> => {
       try {
         await api.postWithFormData(`/api/flash-cards/add-to/${props.id}`, data);
@@ -132,7 +132,7 @@ export default function useSetCards({ ...props }: UseGetCardProps) {
         return false;
       }
     },
-    [props.id, mutate]
+    [props.id, mutate],
   );
 
   const deleteCard = useCallback(
@@ -145,13 +145,13 @@ export default function useSetCards({ ...props }: UseGetCardProps) {
         toast.error("Failed to delete card.");
       }
     },
-    [mutate]
+    [mutate],
   );
 
   const editCard = useCallback(
     async (
       newData: EditFlashCardRequestType,
-      form: UseFormReturn<EditFlashCardRequestType>
+      form: UseFormReturn<EditFlashCardRequestType>,
     ) => {
       try {
         await api.putWithFormData(`/api/flash-cards/${newData.id}`, newData);
@@ -164,7 +164,7 @@ export default function useSetCards({ ...props }: UseGetCardProps) {
         return false;
       }
     },
-    [mutate]
+    [mutate],
   );
 
   return {
@@ -180,3 +180,30 @@ export default function useSetCards({ ...props }: UseGetCardProps) {
     search,
   };
 }
+
+export const useCreateCardAction = (collectionId: string | number) => {
+  const createCard = useCallback(
+    async (
+      data: CreateFlashCardRequestType,
+      form: UseFormReturn<CreateFlashCardRequestType>,
+    ): Promise<boolean> => {
+      try {
+        await api.postWithFormData(
+          `/api/flash-cards/add-to/${collectionId}`,
+          data,
+        );
+        toast.success("Card created successfully!");
+        return true;
+      } catch (error) {
+        setFormErrors(error, form.setError);
+        toast.error("Failed to create card.");
+        return false;
+      }
+    },
+    [collectionId],
+  );
+
+  return {
+    createCard,
+  };
+};

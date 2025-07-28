@@ -1,6 +1,9 @@
 "use client";
 
-import useSetCards, { CreateFlashCardRequestType } from "@/hooks/use-set-cards";
+import {
+  CreateFlashCardRequestType,
+  useCreateCardAction,
+} from "@/hooks/use-set-cards";
 import useMyFlashCardSet from "@/hooks/useMyFlashCardSet";
 import { createContext, ReactNode, useContext, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
@@ -37,10 +40,7 @@ export function AddCardProvider({ children }: AddCardProviderProps) {
     setInitialTermState(term);
   };
   const [tabIndex, setTabIndex] = useState<number>(0);
-  const { createCard } = useSetCards({
-    pageSize: 0,
-    id: collectionId,
-  });
+  const { createCard } = useCreateCardAction(collectionId);
 
   const handleCreateCard = async (
     data: CreateFlashCardRequestType,

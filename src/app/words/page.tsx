@@ -23,13 +23,15 @@ interface GroupedWords {
 export default function Page() {
   const [searchQuery, setSearchQuery] = useState("");
   const getKey = (pageIndex: number, previousPageData: any) => {
-    if (previousPageData && !previousPageData.length) return null;
-    return `/api/words?page=${pageIndex + 1}&pageSize=50&name=${encodeURIComponent(searchQuery)}`;
+    return `/api/words?page=${pageIndex + 1}&pageSize=24&name=${encodeURIComponent(searchQuery)}`;
   };
 
   const { data, isLoading, error, setSize } = useSWRInfinite<Word[]>(
     getKey,
     api.get,
+    {
+      parallel: true,
+    },
   );
 
   useEffect(() => {
@@ -74,6 +76,7 @@ export default function Page() {
   const { ref } = useInView({
     onChange: (inView) => {
       if (inView) {
+        console.log("Loading more words...");
         setSize((size) => size + 1);
       }
     },
@@ -149,9 +152,7 @@ export default function Page() {
                 </div>
               ))
             )}
-
-            {/* Loading indicator for infinite scroll */}
-            {words.length > 0 && <div ref={ref} />}
+            <div className="h-4 w-full bg-transparent" ref={ref} />
 
             {/* Empty state */}
             {!isLoading && words.length === 0 && !searchQuery && (

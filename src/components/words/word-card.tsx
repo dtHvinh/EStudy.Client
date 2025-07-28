@@ -1,8 +1,6 @@
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "../ui/hover-card";
+import useWordDefinition from "@/hooks/use-word-definition";
+import { useState } from "react";
+import { HoverCard, HoverCardTrigger } from "../ui/hover-card";
 
 interface Word {
   id: number | string;
@@ -15,6 +13,16 @@ interface WordCardProps {
 }
 
 export default function WordCard({ word, searchQuery }: WordCardProps) {
+  const [opened, setOpen] = useState(false);
+  const { data, fetchDefinition } = useWordDefinition();
+
+  const handleOpenChange = (open: boolean) => {
+    setOpen(open);
+    if (open) {
+      fetchDefinition(word.text);
+    }
+  };
+
   const highlightText = (text: string, query: string) => {
     if (!query) return text;
 
@@ -48,7 +56,9 @@ export default function WordCard({ word, searchQuery }: WordCardProps) {
           </div>
         </div>
       </HoverCardTrigger>
-      <HoverCardContent className="dark w-80">Hello</HoverCardContent>
+      {/* <HoverCardContent className="w-80 flex-wrap invert">
+        <Markdown>{data?.definition}</Markdown>
+      </HoverCardContent> */}
     </HoverCard>
   );
 }

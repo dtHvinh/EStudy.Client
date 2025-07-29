@@ -55,7 +55,9 @@ export function Message({ message, isLast, isLoading }: MessageProps) {
             isUser ? "bg-mutedv rounded-br-md" : "bg-muted rounded-bl-md",
           )}
         >
-          <HTMLContent content={message.content}></HTMLContent>
+          {message.content.length > 0 && (
+            <HTMLContent content={message.content}></HTMLContent>
+          )}
           {isLast && isLoading && message.role === "assistant" && (
             <motion.span
               animate={{ opacity: [0, 1, 0] }}

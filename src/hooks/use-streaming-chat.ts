@@ -147,6 +147,108 @@ export function useStreamingChat() {
     [input, messages, isLoading],
   );
 
+  const handleVoiceSubmit = useCallback(
+    async (voiceInput: string) => {
+      if (!voiceInput.trim() || isLoading) return;
+
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: "user",
+        content: voiceInput.trim(),
+        timestamp: new Date(),
+        sender: "You",
+      };
+
+      const newMessages = [...messages, userMessage];
+      setMessages(newMessages);
+      setIsLoading(true);
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "",
+        timestamp: new Date(),
+        sender: "Assistant",
+      };
+
+      setMessages([...newMessages, assistantMessage]);
+
+      try {
+        abortControllerRef.current = new AbortController();
+
+        const response = await fetch(`${API_BASE_URL}/api/ai/text-chat`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getAccessToken()}`,
+          },
+          body: JSON.stringify({ messages: newMessages }),
+          signal: abortControllerRef.current.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const reader = response.body?.getReader();
+        if (!reader) {
+          throw new Error("No reader available");
+        }
+
+        const decoder = new TextDecoder();
+        let assistantContent = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split("\n");
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              try {
+                const content = line.slice(6);
+                if (!content) continue;
+
+                assistantContent += content;
+
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === assistantMessage.id
+                      ? { ...msg, content: assistantContent }
+                      : msg,
+                  ),
+                );
+              } catch (parseError) {
+                console.error("Error parsing SSE data:", parseError);
+              }
+            }
+          }
+        }
+      } catch (error: any) {
+        if (error.name !== "AbortError") {
+          console.error("Chat error:", error);
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessage.id
+                ? {
+                    ...msg,
+                    content: "Sorry, I encountered an error. Please try again.",
+                  }
+                : msg,
+            ),
+          );
+        }
+      } finally {
+        setIsLoading(false);
+        abortControllerRef.current = null;
+      }
+    },
+    [messages, isLoading],
+  );
+
   const setMessagesDirectly = useCallback((newMessages: Message[]) => {
     setMessages(newMessages);
   }, []);
@@ -156,6 +258,7 @@ export function useStreamingChat() {
     input,
     handleInputChange,
     handleSubmit,
+    handleVoiceSubmit,
     isLoading,
     stop,
     setMessages: setMessagesDirectly,

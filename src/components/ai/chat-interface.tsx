@@ -8,15 +8,7 @@ import { ChatInput } from "./chat-input";
 import { Message } from "./message";
 
 export function ChatInterface() {
-  const {
-    messages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
-    stop,
-    setInput,
-  } = useStreamingChat();
+  const { messages, handleVoiceSubmit, isLoading, stop } = useStreamingChat();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -34,9 +26,7 @@ export function ChatInterface() {
       >
         <div className="mx-auto max-w-4xl">
           <h1 className="text-xl font-semibold">Voice Chat Assistant</h1>
-          <p className="text-muted-foreground text-sm">
-            Chat using voice or text input
-          </p>
+          <p className="text-muted-foreground text-sm">Transcript</p>
         </div>
       </motion.div>
 
@@ -73,8 +63,8 @@ export function ChatInterface() {
                     How can I help you today?
                   </h2>
                   <p className="text-muted-foreground max-w-md">
-                    Start a conversation by typing a message or using voice
-                    input. Click the voice button to speak your message.
+                    Start a conversation by clicking the microphone button
+                    below.
                   </p>
                 </div>
               </motion.div>
@@ -96,14 +86,7 @@ export function ChatInterface() {
       </ScrollArea>
 
       {/* Input */}
-      <ChatInput
-        input={input}
-        handleInputChange={handleInputChange}
-        handleSubmit={handleSubmit}
-        isLoading={isLoading}
-        stop={stop}
-        setInput={setInput}
-      />
+      <ChatInput onVoiceSubmit={handleVoiceSubmit} isLoading={isLoading} />
     </div>
   );
 }

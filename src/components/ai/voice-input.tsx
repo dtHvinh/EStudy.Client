@@ -27,7 +27,7 @@ export function VoiceInput({
   const [countdown, setCountdown] = useState<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
-  const SECOND_BEFORE_AUTO_SEND = 2; //
+  const SECOND_BEFORE_AUTO_SEND = 1; //
 
   const {
     transcript,
@@ -39,6 +39,21 @@ export function VoiceInput({
 
   useEffect(() => {
     setIsSupported(browserSupportsSpeechRecognition && isMicrophoneAvailable);
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "v" || event.key === "V") {
+        startListening();
+      }
+    };
+
+    if (browserSupportsSpeechRecognition && isMicrophoneAvailable) {
+      document.addEventListener("keydown", handleKeyDown);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [browserSupportsSpeechRecognition, isMicrophoneAvailable]);
 
   // Update parent component with transcript changes
@@ -278,11 +293,8 @@ export function VoiceInput({
         {!listening ? (
           <div>
             <p className="text-muted-foreground text-sm">
-              Click the microphone to start speaking
-            </p>
-            <p className="text-muted-foreground text-xs">
-              Your message will be sent automatically after{" "}
-              {SECOND_BEFORE_AUTO_SEND} seconds of silence
+              Click the microphone or press <strong>'V'</strong> to start
+              speaking
             </p>
           </div>
         ) : (

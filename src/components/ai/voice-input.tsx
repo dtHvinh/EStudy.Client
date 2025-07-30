@@ -44,6 +44,9 @@ export function VoiceInput({
       if (event.key === "v" || event.key === "V") {
         startListening();
       }
+      if (event.key === "e" || event.key === "E") {
+        stopListening();
+      }
     };
 
     if (browserSupportsSpeechRecognition && isMicrophoneAvailable) {
@@ -299,8 +302,9 @@ export function VoiceInput({
           </div>
         ) : (
           <p className="text-muted-foreground max-w-md text-xs">
-            Speak your message. It will be sent automatically when you stop
-            speaking, or click the send button to send immediately.
+            Press <strong>'E'</strong> to stop listening or click the stop
+            button. Your message will be sent automatically after{" "}
+            {SECOND_BEFORE_AUTO_SEND} second(s) of silence.
           </p>
         )}
       </motion.div>

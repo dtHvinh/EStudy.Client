@@ -3,6 +3,7 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { deleteCookie, getCookie, setCookie } from "cookies-next/client";
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+export const AI_URL = process.env.NEXT_PUBLIC_AI_URL;
 
 export const ACCESS_TOKEN_COOKIE = "accessToken";
 export const REFRESH_TOKEN_COOKIE = "refreshToken";

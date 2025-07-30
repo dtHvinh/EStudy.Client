@@ -5,7 +5,6 @@ import { API_BASE_URL } from "@/components/utils/requestUtils";
 import type React from "react";
 
 import { useCallback, useRef, useState } from "react";
-import { useTTS } from "./use-tts";
 
 export interface Message {
   id: string;
@@ -16,7 +15,6 @@ export interface Message {
 }
 
 export function useStreamingChat() {
-  const { push, flush } = useTTS();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -112,8 +110,7 @@ export function useStreamingChat() {
                 // Skip empty lines
                 if (!content) continue;
 
-                // Append to the tts stream
-                push(content);
+                console.log("About to push to TTS:", content);
 
                 assistantContent += content;
 

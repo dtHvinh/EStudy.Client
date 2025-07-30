@@ -104,9 +104,9 @@ export default function TestAttempts({ testId }: { testId: string | number }) {
               return (
                 <div
                   key={attempt.id}
-                  className={`relative rounded-lg border p-2 transition-colors ${
+                  className={`relative rounded-lg border-2 border-black p-2 transition-colors ${
                     isBestAttempt
-                      ? "border-green-200 bg-green-50"
+                      ? "border-green-200 bg-green-50 dark:text-black"
                       : "bg-background"
                   }`}
                 >

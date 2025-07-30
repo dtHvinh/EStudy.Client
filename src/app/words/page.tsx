@@ -98,7 +98,6 @@ export default function Page() {
           </div>
         </div>
       </div>
-
       <div className="px-4 lg:px-6">
         {error ? (
           <div className="text-muted-foreground mt-8 text-center">

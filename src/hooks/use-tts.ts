@@ -3,6 +3,9 @@ import { useEffect, useRef, useState } from "react";
 
 const model_id = "onnx-community/Kokoro-82M-v1.0-ONNX";
 
+/**
+ * @deprecated This hook is deprecated.
+ */
 export function useTTS() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

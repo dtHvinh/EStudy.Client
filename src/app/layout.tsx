@@ -4,7 +4,12 @@ import { ThemeProvider } from "@/components/theme-toggle";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import "@stripe/stripe-js";
 import type { Metadata } from "next";
-import { EB_Garamond, Geist, Geist_Mono } from "next/font/google";
+import {
+  EB_Garamond,
+  Geist,
+  Geist_Mono,
+  IBM_Plex_Sans,
+} from "next/font/google";
 import "regenerator-runtime/runtime";
 import "./globals.css";
 import "./prosemirror.css";
@@ -12,6 +17,12 @@ import "./prosemirror.css";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+const ibmPlexSans = IBM_Plex_Sans({
+  variable: "--font-ibm-plex-sans",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 const geistMono = Geist_Mono({
@@ -42,7 +53,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${best.className} ${geistSans.className} ${geistMono.variable} antialiased`}
+        className={`${ibmPlexSans.className}${geistSans.className} ${geistMono.variable} antialiased`}
       >
         <GoogleOAuthProvider clientId={process.env.CLIENT_ID || ""}>
           <ThemeProvider

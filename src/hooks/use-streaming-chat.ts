@@ -24,7 +24,6 @@ export function useStreamingChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const audioContext = useRef<AudioContext | null>(null);

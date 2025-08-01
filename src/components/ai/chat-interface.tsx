@@ -1,7 +1,7 @@
 "use client";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useStreamingChat } from "@/hooks/use-streaming-chat";
+import useStreamingVoiceChat from "@/hooks/use-streaming-voice-chat";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { ChatInput } from "./chat-input";
@@ -9,7 +9,7 @@ import { InitWelcomeMessage } from "./init-welcome-message";
 import { Message } from "./message";
 
 export function ChatInterface() {
-  const { messages, handleVoiceSubmit2, isLoading } = useStreamingChat();
+  const { messages, sendMessage, isProcessing } = useStreamingVoiceChat();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -41,8 +41,8 @@ export function ChatInterface() {
               <>
                 {messages.map((message, index) => (
                   <Message
-                    isLoading={isLoading}
-                    key={message.id}
+                    isLoading={isProcessing}
+                    key={index}
                     message={message}
                     isLast={index === messages.length - 1}
                   />
@@ -55,7 +55,7 @@ export function ChatInterface() {
       </ScrollArea>
 
       {/* Input */}
-      <ChatInput onVoiceSubmit={handleVoiceSubmit2} isLoading={isLoading} />
+      <ChatInput onVoiceSubmit={sendMessage} isLoading={isProcessing} />
     </div>
   );
 }

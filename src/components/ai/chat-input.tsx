@@ -18,7 +18,7 @@ export function ChatInput({ onVoiceSubmit, isLoading }: ChatInputProps) {
 
   const handleVoiceSubmit = (transcript: string) => {
     onVoiceSubmit(transcript);
-    setCurrentTranscript(""); // Clear the transcript after sending
+    setCurrentTranscript("");
   };
 
   return (

@@ -1,8 +1,16 @@
+import { uuidv4 } from "@/lib/string-utils";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+declare global {
+  interface Window {
+    webkitAudioContext: typeof AudioContext;
+  }
+}
 
 export type MessageType = {
   content: string;
   role: "user" | "assistant" | "system";
+  timestamp: Date;
 };
 
 export enum MessageSymbol {
@@ -12,6 +20,9 @@ export enum MessageSymbol {
 export default function useStreamingVoiceChat() {
   const webSocket = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const webSocketUrl = "ws://localhost:7186/ws/chat";
 
   const [messages, setMessages] = useState<MessageType[]>([]);
 
@@ -19,6 +30,18 @@ export default function useStreamingVoiceChat() {
   const audioContext = useRef<AudioContext | null>(null);
   const currentAudioBuffer = useRef<AudioBuffer | null>(null);
   const currentSource = useRef<AudioBufferSourceNode | null>(null);
+  const pendingChunks = useRef<number>(0);
+  const streamEnded = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (!audioContext.current) {
+      audioContext.current = new (window.AudioContext ||
+        window.webkitAudioContext)();
+    }
+    if (audioContext.current.state === "suspended") {
+      audioContext.current.resume();
+    }
+  }, []);
 
   const initializeAudioContext = () => {
     if (!audioContext.current) {
@@ -32,7 +55,7 @@ export default function useStreamingVoiceChat() {
   };
 
   const initializeWebSocket = () => {
-    webSocket.current = new WebSocket("ws://localhost:7186/ws/chat");
+    webSocket.current = new WebSocket(webSocketUrl + `/${uuidv4()}`);
 
     webSocket.current.onopen = () => {
       setIsConnected(true);
@@ -48,12 +71,24 @@ export default function useStreamingVoiceChat() {
       console.error("WebSocket error:", error);
     };
 
-    webSocket.current.onmessage = (event) => {
+    webSocket.current.onmessage = async (event) => {
       if (typeof event.data === "string") {
         if (event.data === MessageSymbol.VOICE_STREAM_END) {
-          playAudio();
+          console.log("Voice stream ended, checking for pending chunks...");
+          streamEnded.current = true;
+
+          // Check if there are pending chunks or if we can play immediately
+          if (pendingChunks.current === 0) {
+            await playAudio();
+          } else {
+          }
           return;
         }
+
+        streamEnded.current = false;
+        pendingChunks.current = 0;
+        stopAudio();
+        setIsProcessing(true);
         setMessages((prev) => [
           ...prev,
           {
@@ -62,35 +97,43 @@ export default function useStreamingVoiceChat() {
             timestamp: new Date(),
           },
         ]);
-      } else if (event.data instanceof ArrayBuffer) {
-        handleSingleAudioStreamData(event.data);
+        setIsProcessing(false);
+      } else if (
+        event.data instanceof ArrayBuffer ||
+        event.data instanceof Blob
+      ) {
+        console.log("Received audio chunk");
+        pendingChunks.current++;
+        await handleSingleAudioStreamData(event.data);
       }
     };
   };
 
   const initializeAudioBuffer = (data: Int16Array[]) => {
-    const totalBytes = data.reduce((sum, chunk) => sum + chunk.length, 0);
-    const combinedData = new Uint8Array(totalBytes);
+    if (!audioContext.current) return;
+
+    const totalSamples = data.reduce((sum, chunk) => sum + chunk.length, 0);
+
+    // Create a single Int16Array with all samples
+    const combinedSamples = new Int16Array(totalSamples);
     let offset = 0;
 
     for (const chunk of data) {
-      combinedData.set(chunk, offset);
+      combinedSamples.set(chunk, offset);
       offset += chunk.length;
     }
 
-    // Convert PCM to Float32Array (assuming 16-bit mono at 22050 Hz)
-    const samples = new Int16Array(combinedData.buffer);
-    const floatSamples = new Float32Array(samples.length);
-
-    for (let i = 0; i < samples.length; i++) {
-      floatSamples[i] = samples[i] / 32768.0;
+    // Convert 16-bit PCM to Float32Array
+    const floatSamples = new Float32Array(combinedSamples.length);
+    for (let i = 0; i < combinedSamples.length; i++) {
+      floatSamples[i] = combinedSamples[i] / 32768.0;
     }
 
     // Create AudioBuffer (assuming mono 22050 Hz - adjust if needed)
     const sampleRate = 22050; // Default for Piper TTS
     const channels = 1;
 
-    currentAudioBuffer.current = audioContext.current!.createBuffer(
+    currentAudioBuffer.current = audioContext.current.createBuffer(
       channels,
       floatSamples.length,
       sampleRate,
@@ -100,15 +143,42 @@ export default function useStreamingVoiceChat() {
   };
 
   const playAudio = useCallback(async () => {
-    if (!currentAudioBuffer.current || !audioContext.current) {
+    console.log(
+      "Attempting to play audio, chunks:",
+      audioChunks.current.length,
+    );
+    if (audioChunks.current.length === 0) {
+      console.log("No audio chunks to play");
+      return;
+    }
+
+    if (!currentAudioBuffer.current) {
+      console.log("Creating audio buffer...");
       initializeAudioBuffer(audioChunks.current);
     }
+
+    if (!currentAudioBuffer.current || !audioContext.current) {
+      console.log("Audio buffer or context not available");
+      return;
+    }
+
     try {
-      currentSource.current = audioContext.current!.createBufferSource();
+      // Stop any currently playing audio
+      if (currentSource.current) {
+        currentSource.current.stop();
+        currentSource.current = null;
+      }
+
+      currentSource.current = audioContext.current.createBufferSource();
       currentSource.current.buffer = currentAudioBuffer.current;
-      currentSource.current.connect(audioContext.current!.destination);
+      currentSource.current.connect(audioContext.current.destination);
       currentSource.current.start();
-      audioChunks.current = []; // Clear chunks after playback
+
+      console.log("Audio playback started successfully");
+
+      // Clear chunks and buffer after playback starts
+      audioChunks.current = [];
+      currentAudioBuffer.current = null;
     } catch (err) {
       console.error("Audio playback error:", err);
     }
@@ -116,22 +186,59 @@ export default function useStreamingVoiceChat() {
 
   const stopAudio = useCallback(() => {
     if (currentSource.current) {
-      currentSource.current.stop();
+      try {
+        currentSource.current.stop();
+      } catch (err) {
+        console.log("Audio already stopped or not playing");
+      }
       currentSource.current = null;
     }
+    // Clear audio data and reset state
+    audioChunks.current = [];
+    currentAudioBuffer.current = null;
+    pendingChunks.current = 0;
+    streamEnded.current = false;
   }, []);
 
-  const sendMessage = useCallback((messages: MessageType) => {
-    if (!webSocket.current || webSocket.current.readyState !== WebSocket.OPEN) {
-      console.error("WebSocket is not open");
-    }
+  const sendMessage = useCallback(
+    (content: string) => {
+      if (
+        !webSocket.current ||
+        webSocket.current.readyState !== WebSocket.OPEN
+      ) {
+        console.error("WebSocket is not open");
+        return;
+      }
 
-    webSocket.current?.send(
-      JSON.stringify({
-        messages: messages,
-      }),
-    );
-  }, []);
+      // Stop any current audio and clear buffers
+      stopAudio();
+
+      setIsProcessing(true);
+
+      // Add user message to local state
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "user",
+          content,
+          timestamp: new Date(),
+        },
+      ]);
+
+      // Send message to backend (expects array format)
+      webSocket.current.send(
+        JSON.stringify({
+          messages: [
+            {
+              role: "user",
+              content,
+            },
+          ],
+        }),
+      );
+    },
+    [stopAudio],
+  );
 
   useEffect(() => {
     initializeAudioContext();
@@ -142,20 +249,56 @@ export default function useStreamingVoiceChat() {
     };
   }, []);
 
-  const handleSingleAudioStreamData = (data: ArrayBuffer) => {
-    if (!audioContext.current) return;
-
-    if (audioContext.current.state === "suspended") {
-      audioContext.current.resume();
+  const handleSingleAudioStreamData = async (data: ArrayBuffer | Blob) => {
+    if (!audioContext.current) {
+      console.log("Audio context not available");
+      pendingChunks.current--;
+      return;
     }
 
-    const int16Array = new Int16Array(data);
-    audioChunks.current.push(int16Array);
+    // Resume audio context if suspended (important for user interaction requirement)
+    if (audioContext.current.state === "suspended") {
+      try {
+        await audioContext.current.resume();
+        console.log("Audio context resumed");
+      } catch (err) {
+        console.error("Failed to resume audio context:", err);
+      }
+    }
+
+    try {
+      let arrayBuffer: ArrayBuffer;
+
+      if (data instanceof Blob) {
+        arrayBuffer = await data.arrayBuffer();
+      } else {
+        arrayBuffer = data;
+      }
+
+      const int16Array = new Int16Array(arrayBuffer);
+      audioChunks.current.push(int16Array);
+      console.log(
+        `Added audio chunk, total chunks: ${audioChunks.current.length}, chunk size: ${int16Array.length}`,
+      );
+
+      // Decrement pending chunks counter
+      pendingChunks.current--;
+
+      // If stream has ended and no more chunks are pending, play audio
+      if (streamEnded.current && pendingChunks.current === 0) {
+        console.log("All chunks processed, playing audio now...");
+        await playAudio();
+      }
+    } catch (error) {
+      console.error("Error handling audio stream data:", error);
+      pendingChunks.current--;
+    }
   };
 
   return {
     messages,
     isConnected,
+    isProcessing,
     sendMessage,
     playAudio,
     stopAudio,

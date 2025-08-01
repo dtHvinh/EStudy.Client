@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import type { Message as MessageType } from "@/hooks/use-streaming-chat";
+import { MessageType } from "@/hooks/use-streaming-voice-chat";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Bot, User } from "lucide-react";

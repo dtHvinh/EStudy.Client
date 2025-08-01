@@ -9,7 +9,7 @@ import { InitWelcomeMessage } from "./init-welcome-message";
 import { Message } from "./message";
 
 export function ChatInterface() {
-  const { messages, handleVoiceSubmit, isLoading } = useStreamingChat();
+  const { messages, handleVoiceSubmit2, isLoading } = useStreamingChat();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -55,7 +55,7 @@ export function ChatInterface() {
       </ScrollArea>
 
       {/* Input */}
-      <ChatInput onVoiceSubmit={handleVoiceSubmit} isLoading={isLoading} />
+      <ChatInput onVoiceSubmit={handleVoiceSubmit2} isLoading={isLoading} />
     </div>
   );
 }

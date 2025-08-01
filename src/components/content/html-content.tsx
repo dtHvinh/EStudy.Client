@@ -26,7 +26,7 @@ export default function HTMLContent({ content }: { content: string }) {
         editorProps={{
           attributes: {
             "data-prose-no-padding": "true",
-            class: `prose just-text prose-lg dark:prose-invert  prose-headings:font-title font-default focus:outline-none max-w-full`,
+            class: `prose just-text prose-lg dark:prose-invert  prose-headings:font-title font-default focus:outline-none max-w-full `,
           },
         }}
         editable={false}
@@ -40,7 +40,7 @@ export default function HTMLContent({ content }: { content: string }) {
           shouldShow={({ editor, from, to }) => {
             return from !== to && !editor.isEmpty;
           }}
-          className="bg-background flex w-fit max-w-[90vw] overflow-hidden rounded-md border border-gray-200 shadow-xl"
+          className="bg-background flex w-fit max-w-[90vw] overflow-hidden rounded-md border border-gray-200 shadow-xl invert"
         >
           <FlashCardSaveButton />
         </EditorBubble>

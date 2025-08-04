@@ -52,11 +52,11 @@ export function Message({ message, isLast, isLoading }: MessageProps) {
           transition={{ delay: 0.1, duration: 0.2 }}
           className={cn(
             "rounded-2xl px-4 py-2 text-sm leading-relaxed break-words",
-            isUser ? "bg-mutedv rounded-br-md" : "bg-muted rounded-bl-md",
+            isUser ? "bg-muted rounded-br-md" : "bg-muted rounded-bl-md",
           )}
         >
-          {message.content.length > 0 && (
-            <HTMLContent content={message.content}></HTMLContent>
+          {message.message.length > 0 && (
+            <HTMLContent content={message.message}></HTMLContent>
           )}
           {isLast && isLoading && message.role === "assistant" && (
             <motion.span

@@ -11,6 +11,7 @@ import GlobalDragHandle from "tiptap-extension-global-drag-handle";
 import { defaultExtensions } from "../text-editor/default-extensions";
 import { slashCommand } from "../text-editor/slash-commands";
 import FlashCardSaveButton from "./html-content-tools/flash-card-save-button";
+import WordDefinitionButton from "./html-content-tools/word-definition-button";
 
 export default function HTMLContent({ content }: { content: string }) {
   return (
@@ -43,6 +44,7 @@ export default function HTMLContent({ content }: { content: string }) {
           className="bg-background flex w-fit max-w-[90vw] overflow-hidden rounded-md border border-gray-200 shadow-xl invert"
         >
           <FlashCardSaveButton />
+          <WordDefinitionButton />
         </EditorBubble>
       </EditorContent>
     </EditorRoot>

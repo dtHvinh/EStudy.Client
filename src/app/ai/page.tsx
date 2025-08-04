@@ -1,15 +1,73 @@
 "use client";
 
-import { ChatInterface } from "@/components/ai/chat-interface";
+import ConversationGrid from "@/components/ai/conversation-grid";
+import PageHeader from "@/components/ai/page-header";
 import MainLayout from "@/components/layouts/MainLayout";
+import Loading from "@/components/loading";
+import api from "@/components/utils/requestUtils";
+import type { Conversation, CreateConversationFormData } from "@/types/ai";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import useSWRInfinite from "swr/infinite";
 
 export default function Page() {
+  const getKey = (pageIndex: number, previousPageData: any) => {
+    if (previousPageData && !previousPageData.length) return null; // reached the end
+    return `/api/ai/conversations?page=${pageIndex + 1}&pageSize=15`; // API endpoint with pagination
+  };
+
+  const { data, isLoading, error, mutate, setSize } = useSWRInfinite<
+    Conversation[]
+  >(getKey, api.get);
+  const conversations = data ? data.flat() : [];
+  const router = useRouter();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  useEffect(() => {
+    if (isLoading) {
+      toast.message(<Loading />, {
+        id: "loading-toast",
+      });
+    } else {
+      toast.dismiss("loading-toast");
+    }
+  }, [isLoading, error]);
+
+  const handleCreateConversation = async (
+    formData: CreateConversationFormData,
+  ) => {
+    const newConversation = {
+      name: formData.name,
+      description: formData.description || undefined,
+      context: formData.context,
+    };
+
+    await api.post("/api/ai/conversations", newConversation);
+    mutate();
+    setIsDialogOpen(false);
+  };
+
+  const handleConversationClick = (conversation: Conversation) => {
+    router.push(`/ai/${conversation.id}`);
+  };
+
   return (
-    <MainLayout childDefaultPadding={false}>
-      <div className="h-[calc(100vh-var(--header-height))] overflow-hidden">
-        <div className="flex h-full flex-col">
-          <ChatInterface />
-        </div>
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8 lg:px-6">
+        <PageHeader
+          isDialogOpen={isDialogOpen}
+          onDialogOpenChange={setIsDialogOpen}
+          onCreateConversation={handleCreateConversation}
+        />
+
+        <ConversationGrid
+          conversations={conversations}
+          isDialogOpen={isDialogOpen}
+          onDialogOpenChange={setIsDialogOpen}
+          onCreateConversation={handleCreateConversation}
+          onConversationClick={handleConversationClick}
+        />
       </div>
     </MainLayout>
   );

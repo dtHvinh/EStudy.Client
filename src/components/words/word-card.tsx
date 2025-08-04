@@ -1,5 +1,3 @@
-import useWordDefinition from "@/hooks/use-word-definition";
-import { useState } from "react";
 import { HoverCard, HoverCardTrigger } from "../ui/hover-card";
 
 interface Word {
@@ -13,16 +11,6 @@ interface WordCardProps {
 }
 
 export default function WordCard({ word, searchQuery }: WordCardProps) {
-  const [opened, setOpen] = useState(false);
-  const { data, fetchDefinition } = useWordDefinition();
-
-  const handleOpenChange = (open: boolean) => {
-    setOpen(open);
-    if (open) {
-      fetchDefinition(word.text);
-    }
-  };
-
   const highlightText = (text: string, query: string) => {
     if (!query) return text;
 

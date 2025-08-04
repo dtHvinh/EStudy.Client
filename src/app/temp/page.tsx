@@ -65,7 +65,7 @@ export default function TempPage() {
             >
               {msg.role.toUpperCase()} - {msg.timestamp.toLocaleTimeString()}
             </div>
-            <div>{msg.content}</div>
+            <div>{msg.message}</div>
           </div>
         ))}
       </div>

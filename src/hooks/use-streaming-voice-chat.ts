@@ -1,4 +1,4 @@
-import { uuidv4 } from "@/lib/string-utils";
+import api from "@/components/utils/requestUtils";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 declare global {
@@ -8,7 +8,8 @@ declare global {
 }
 
 export type MessageType = {
-  content: string;
+  id?: string;
+  message: string;
   role: "user" | "assistant" | "system";
   timestamp: Date;
 };
@@ -17,13 +18,23 @@ export enum MessageSymbol {
   VOICE_STREAM_END = "^#^",
 }
 
-export default function useStreamingVoiceChat() {
+export default function useStreamingVoiceChat(
+  {
+    conversationId,
+    initialMessages,
+  }: {
+    initialMessages: MessageType[];
+    conversationId?: string;
+  } = {
+    initialMessages: [],
+    conversationId: "",
+  },
+) {
   const webSocket = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const webSocketUrl = "ws://localhost:7186/ws/chat";
-
+  const webSocketUrl = "ws://localhost:7186/ws/chat" + `/${conversationId}`;
   const [messages, setMessages] = useState<MessageType[]>([]);
 
   const audioChunks = useRef<Int16Array[]>([]);
@@ -55,7 +66,7 @@ export default function useStreamingVoiceChat() {
   };
 
   const initializeWebSocket = () => {
-    webSocket.current = new WebSocket(webSocketUrl + `/${uuidv4()}`);
+    webSocket.current = new WebSocket(webSocketUrl);
 
     webSocket.current.onopen = () => {
       setIsConnected(true);
@@ -93,7 +104,7 @@ export default function useStreamingVoiceChat() {
           ...prev,
           {
             role: "assistant",
-            content: event.data,
+            message: event.data,
             timestamp: new Date(),
           },
         ]);
@@ -201,7 +212,7 @@ export default function useStreamingVoiceChat() {
   }, []);
 
   const sendMessage = useCallback(
-    (content: string) => {
+    async (content: string) => {
       if (
         !webSocket.current ||
         webSocket.current.readyState !== WebSocket.OPEN
@@ -215,12 +226,18 @@ export default function useStreamingVoiceChat() {
 
       setIsProcessing(true);
 
+      await api.post(`/api/ai/conversations/${conversationId}/messages`, {
+        conversationId,
+        message: content,
+        isUserMessage: true,
+      });
+
       // Add user message to local state
       setMessages((prev) => [
         ...prev,
         {
           role: "user",
-          content,
+          message: content,
           timestamp: new Date(),
         },
       ]);
@@ -229,6 +246,7 @@ export default function useStreamingVoiceChat() {
       webSocket.current.send(
         JSON.stringify({
           messages: [
+            ...initialMessages,
             {
               role: "user",
               content,
@@ -236,6 +254,14 @@ export default function useStreamingVoiceChat() {
           ],
         }),
       );
+
+      console.log([
+        ...initialMessages,
+        {
+          role: "user",
+          content,
+        },
+      ]);
     },
     [stopAudio],
   );

@@ -120,7 +120,7 @@ const CollectionSelector = ({
   onOpenChange: (open: boolean) => void;
   onSelect?: (collectionId: string | number) => void;
 }) => {
-  const { sets, scrollNext } = useMyFlashCardSet({
+  const { sets, scrollNext, refresh } = useMyFlashCardSet({
     pageSize: 20,
     page: 1,
   });
@@ -152,6 +152,7 @@ const CollectionSelector = ({
               {set.title}
             </Button>
           ))}
+          <div className="mt-4 flex w-full justify-center [&_*]:w-full"></div>
           <div ref={ref} />
         </ScrollArea>
       </DialogContent>

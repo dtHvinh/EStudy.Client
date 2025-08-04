@@ -27,7 +27,8 @@ export function VoiceInput({
   const [countdown, setCountdown] = useState<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
-  const SECOND_BEFORE_AUTO_SEND = 1; //
+  const lastTranscriptRef = useRef<string>("");
+  const SECOND_BEFORE_AUTO_SEND = 2; // Auto-send after 2 seconds of silence
 
   const {
     transcript,
@@ -66,9 +67,17 @@ export function VoiceInput({
     }
   }, [transcript, currentTranscript, onTranscriptChange]);
 
-  // Handle auto-send timer
+  // Handle auto-send timer with improved silence detection
   useEffect(() => {
-    if (listening && transcript.trim()) {
+    // Only start timer if listening and transcript has changed (new content detected)
+    if (
+      listening &&
+      transcript.trim() &&
+      transcript !== lastTranscriptRef.current
+    ) {
+      // Update the last transcript reference
+      lastTranscriptRef.current = transcript;
+
       // Clear existing timers
       if (timerRef.current) {
         clearTimeout(timerRef.current);
@@ -77,7 +86,7 @@ export function VoiceInput({
         clearInterval(countdownRef.current);
       }
 
-      // Start SECOND_BEFORE_AUTO_SEND-second countdown
+      // Start countdown
       setCountdown(SECOND_BEFORE_AUTO_SEND);
       setAutoSendTimer(SECOND_BEFORE_AUTO_SEND);
 
@@ -110,6 +119,7 @@ export function VoiceInput({
       }
       setAutoSendTimer(null);
       setCountdown(0);
+      lastTranscriptRef.current = "";
     }
 
     return () => {
@@ -124,11 +134,12 @@ export function VoiceInput({
 
   const handleAutoSend = useCallback(() => {
     if (transcript.trim()) {
-      SpeechRecognition.stopListening();
       onSubmit(transcript.trim());
       resetTranscript();
+      onTranscriptChange("");
       setAutoSendTimer(null);
       setCountdown(0);
+      lastTranscriptRef.current = "";
 
       // Clear timers
       if (timerRef.current) {
@@ -137,12 +148,23 @@ export function VoiceInput({
       if (countdownRef.current) {
         clearInterval(countdownRef.current);
       }
+
+      // Continue listening after auto-send
+      setTimeout(() => {
+        if (!listening) {
+          SpeechRecognition.startListening({
+            continuous: true,
+            language: "en-US",
+          });
+        }
+      }, 100);
     }
-  }, [transcript, onSubmit, resetTranscript]);
+  }, [transcript, onSubmit, resetTranscript, listening]);
 
   const startListening = () => {
     resetTranscript();
     onTranscriptChange("");
+    lastTranscriptRef.current = "";
     SpeechRecognition.startListening({
       continuous: true,
       language: "en-US",
@@ -156,6 +178,7 @@ export function VoiceInput({
       resetTranscript();
       onTranscriptChange("");
     }
+    lastTranscriptRef.current = "";
   };
 
   const cancelListening = () => {
@@ -164,6 +187,7 @@ export function VoiceInput({
     onTranscriptChange("");
     setAutoSendTimer(null);
     setCountdown(0);
+    lastTranscriptRef.current = "";
 
     // Clear timers
     if (timerRef.current) {
@@ -304,7 +328,7 @@ export function VoiceInput({
           <p className="text-muted-foreground max-w-md text-xs">
             Press <strong>'E'</strong> to stop listening or click the stop
             button. Your message will be sent automatically after{" "}
-            {SECOND_BEFORE_AUTO_SEND} second(s) of silence.
+            {SECOND_BEFORE_AUTO_SEND} seconds of silence.
           </p>
         )}
       </motion.div>

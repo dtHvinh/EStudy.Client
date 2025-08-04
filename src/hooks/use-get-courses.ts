@@ -1,4 +1,5 @@
 import api from "@/components/utils/requestUtils";
+import { CourseDifficultyLevel } from "@/types/constants";
 import { PriceFilterValues } from "@/types/course-price-constants";
 import useSWRInfinite from "swr/infinite";
 
@@ -22,9 +23,11 @@ export type GetCourseType = {
 export default function useGetCourses({
   query,
   price,
+  difficulty,
 }: {
   query?: string;
   price?: PriceFilterValues;
+  difficulty?: CourseDifficultyLevel;
 }) {
   const getKey = (pageIndex: number, previousPageData: any) => {
     if (previousPageData && !previousPageData.length) return null;
@@ -35,6 +38,7 @@ export default function useGetCourses({
 
     if (query) params.append("query", query);
     if (price) params.append("price", price.toString());
+    if (difficulty) params.append("difficulty", difficulty);
 
     return `/api/courses?${params.toString()}`;
   };

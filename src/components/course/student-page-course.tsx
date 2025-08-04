@@ -1,6 +1,7 @@
 import useGetCourses from "@/hooks/use-get-courses";
 
 import { useGenericToggle } from "@/hooks/use-generic-toggle";
+import { CourseDifficultyLevel } from "@/types/constants";
 import { PriceFilterValues } from "@/types/course-price-constants";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -21,7 +22,12 @@ import CourseFilter from "./course-filter";
 export default function StudentPageCourses() {
   const [search, setSearch] = useState("");
   const [price, setPrice] = useState<PriceFilterValues>("all");
-  const { courses, isLoading, error } = useGetCourses({ query: search, price });
+  const [difficulty, setDifficulty] = useState<CourseDifficultyLevel>("All");
+  const { courses, isLoading, error } = useGetCourses({
+    query: search,
+    price,
+    difficulty,
+  });
   const { opened, openChange } = useGenericToggle();
   const [clientSecret, setClientSecret] = useState<string>();
 
@@ -75,6 +81,7 @@ export default function StudentPageCourses() {
         <CourseFilter
           onSeacrchQueryChange={setSearch}
           onPriceChange={setPrice}
+          onDifficultyChange={setDifficulty}
         />
       </div>
       <div className={`grid gap-6 md:grid-cols-2 lg:grid-cols-3`}>

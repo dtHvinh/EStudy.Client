@@ -9,7 +9,7 @@ import H3 from "@/components/ui/h3";
 import { Input } from "@/components/ui/input";
 import api from "@/components/utils/requestUtils";
 import useTestCollection from "@/hooks/use-test-collection";
-import { IconEdit } from "@tabler/icons-react";
+import { IconEdit, IconTrash } from "@tabler/icons-react";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
@@ -101,6 +101,7 @@ export const TestCollectionCard = ({
   const [editName, setEditName] = useState(name);
   const [editDescription, setEditDescription] = useState(description || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -137,6 +138,22 @@ export const TestCollectionCard = ({
       toast.error("Failed to update collection");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    setIsDeleting(true);
+    try {
+      await api.delete(`/api/tests/test-collections/${id}`);
+      toast.success("Collection deleted successfully!");
+      onUpdate?.();
+    } catch (error) {
+      toast.error("Failed to delete collection");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -188,14 +205,25 @@ export const TestCollectionCard = ({
 
   return (
     <div className="group relative flex h-32 items-center justify-center rounded-lg border border-dashed border-gray-300 bg-white p-4 shadow-sm hover:border-gray-400">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleEdit}
-        className="absolute top-2 right-2 h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100"
-      >
-        <IconEdit className="h-3 w-3" />
-      </Button>
+      <div className="absolute top-2 right-2 flex gap-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleEdit}
+          className="h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100"
+        >
+          <IconEdit className="h-3 w-3" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-100 hover:text-red-600"
+        >
+          <IconTrash className="h-3 w-3" />
+        </Button>
+      </div>
       <div className="text-center">
         <RelativeLink key={id} href={`${id}`}>
           <p className="text-lg font-semibold text-gray-800 hover:underline">

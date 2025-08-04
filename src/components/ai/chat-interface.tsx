@@ -7,6 +7,7 @@ import useStreamingVoiceChat from "@/hooks/use-streaming-voice-chat";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
+import NavigateBack from "../navigate-back";
 import { ChatInput } from "./chat-input";
 import { InitWelcomeMessage } from "./init-welcome-message";
 import { Message } from "./message";
@@ -31,7 +32,15 @@ export function ChatInterface({ conversationId }: { conversationId: string }) {
   });
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 500);
+  }, [messagesEndRef]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 500);
   }, [messages]);
 
   return (
@@ -42,6 +51,7 @@ export function ChatInterface({ conversationId }: { conversationId: string }) {
         animate={{ y: 0, opacity: 1 }}
         className="bg-background/95 supports-[backdrop-filter]:bg-background/60 flex-shrink-0 border-b p-4 backdrop-blur"
       >
+        <NavigateBack fallbackUrl="/ai" />
         <div className="mx-auto max-w-4xl">
           <h1 className="text-xl font-semibold">
             {details?.name || "Untitled Conversation"}

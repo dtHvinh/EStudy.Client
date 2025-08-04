@@ -32,6 +32,8 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
+import { ChangeEvent } from "react";
+import { useDebouncedCallback } from "use-debounce";
 
 interface Answer {
   id: string;
@@ -99,6 +101,13 @@ export function QuestionCard({
     question.type === "single-choice" && correctAnswersCount !== 1;
   const multipleChoiceHasCorrect =
     question.type === "multiple-choice" && correctAnswersCount > 0;
+
+  const handleQuestionTextChange = useDebouncedCallback(
+    (e: ChangeEvent<HTMLTextAreaElement>) => {
+      onUpdateQuestion(sectionId, question.id, "text", e.target.value);
+    },
+    200,
+  );
 
   return (
     <Card
@@ -221,14 +230,17 @@ export function QuestionCard({
 
         <div className="space-y-4">
           <div className="space-y-2">
+            <Label className="text-sm font-medium">Question Audio</Label>
+            <Input type="file" accept="audio/*" />
+          </div>
+
+          <div className="space-y-2">
             <Label className="text-sm font-medium">Question Text</Label>
             <Textarea
               spellCheck="false"
               placeholder="Enter your question here..."
-              value={question.text}
-              onChange={(e) =>
-                onUpdateQuestion(sectionId, question.id, "text", e.target.value)
-              }
+              defaultValue={question.text}
+              onChange={handleQuestionTextChange}
               className="min-h-[80px] resize-none"
             />
           </div>
@@ -260,6 +272,7 @@ export function QuestionCard({
               </div>
             </div>
 
+            {/* Render answers */}
             {question.type === "single-choice" ? (
               <RadioGroup
                 value={question.answers.find((a) => a.isCorrect)?.id || ""}

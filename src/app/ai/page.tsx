@@ -54,7 +54,7 @@ export default function Page() {
 
   return (
     <MainLayout>
-      <div className="container mx-auto px-4 py-8 lg:px-6">
+      <div className="container mx-auto px-4 lg:px-6">
         <PageHeader
           isDialogOpen={isDialogOpen}
           onDialogOpenChange={setIsDialogOpen}

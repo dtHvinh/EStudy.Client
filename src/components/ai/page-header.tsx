@@ -1,6 +1,7 @@
 "use client";
 
 import type { CreateConversationFormData } from "@/types/ai";
+import H3 from "../ui/h3";
 import CreateConversationDialog from "./create-conversation-dialog";
 
 interface PageHeaderProps {
@@ -17,9 +18,7 @@ export default function PageHeader({
   return (
     <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-          Conversation History
-        </h1>
+        <H3>Conversation History</H3>
         <p className="mt-2 text-slate-600 dark:text-slate-400">
           Manage and review your AI conversations
         </p>

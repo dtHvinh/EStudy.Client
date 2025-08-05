@@ -26,6 +26,7 @@ export interface TestTakingQuestion {
   text: string;
   points: number;
   explanation?: string;
+  audioUrl?: string;
   answers: TestTakingAnswer[];
 }
 

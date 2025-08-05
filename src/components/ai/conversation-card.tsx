@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import type { Conversation } from "@/types/ai";
 import dayjs from "dayjs";
+import TextContent from "../content/text-content";
 
 interface ConversationCardProps {
   conversation: Conversation;
@@ -48,9 +49,10 @@ export default function ConversationCard({
             <p className="mb-1 text-sm font-medium text-slate-700 dark:text-slate-300">
               Context:
             </p>
-            <p className="line-clamp-3 text-sm text-slate-600 dark:text-slate-400">
-              {conversation.context}
-            </p>
+            <TextContent
+              text={conversation.context}
+              className="line-clamp-3 text-sm text-slate-600 dark:text-slate-400"
+            />
           </div>
         </div>
       </CardContent>

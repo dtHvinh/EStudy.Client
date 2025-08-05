@@ -12,7 +12,7 @@ import {
 import H3 from "../ui/h3";
 
 export default function DashboardNewestTests() {
-  const { tests, scrollNext, isTestLoading, getTestError } = useTests({
+  const { tests, scrollNext, isTestLoading, getTestError, refresh } = useTests({
     pageSize: 6,
   });
 
@@ -34,7 +34,7 @@ export default function DashboardNewestTests() {
       <CardContent>
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {tests.map((item) => (
-            <TestCard key={item.id} {...item} />
+            <TestCard key={item.id} {...item} onTestDeleted={refresh} />
           ))}
           {tests.length === 0 && (
             <div className="col-span-full">

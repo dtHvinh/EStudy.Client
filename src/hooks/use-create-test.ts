@@ -16,6 +16,7 @@ export interface Question {
   answers: Answer[];
   points: number;
   explanation?: string;
+  audioUrl?: string;
 }
 
 export interface Section {

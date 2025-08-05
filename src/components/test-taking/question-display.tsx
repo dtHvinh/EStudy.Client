@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import useStorageV2 from "@/hooks/use-storage-v2";
 import { TestTakingQuestion, UserAnswer } from "@/hooks/use-test-taking";
 import { cn } from "@/lib/utils";
 import { CheckSquare, Circle } from "lucide-react";
@@ -32,7 +33,7 @@ export function QuestionDisplay({
   onUnmarkQuestion,
 }: QuestionDisplayProps) {
   const selectedAnswerIds = userAnswer?.selectedAnswerIds || [];
-
+  const { getFileUrl } = useStorageV2();
   const handleSingleChoiceChange = (answerId: string) => {
     onAnswerChange(question.id, [parseInt(answerId)]);
   };
@@ -134,6 +135,11 @@ export function QuestionDisplay({
             <CardTitle className="text-lg leading-relaxed">
               {question.text}
             </CardTitle>
+            {question.audioUrl && (
+              <audio className="mt-5 w-full" controls>
+                <source src={getFileUrl(question.audioUrl)} type="audio/mpeg" />
+              </audio>
+            )}
           </div>
           <div className="flex flex-shrink-0 items-center gap-2">
             <Badge variant="secondary" className="text-xs">

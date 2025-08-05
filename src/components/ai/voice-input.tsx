@@ -27,8 +27,10 @@ export function VoiceInput({
   const [countdown, setCountdown] = useState<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
-  const lastTranscriptRef = useRef<string>("");
-  const SECOND_BEFORE_AUTO_SEND = 2; // Auto-send after 2 seconds of silence
+
+  const SECOND_BEFORE_AUTO_SEND = 3; //
+  const START_SPEAKING_KEY = "/";
+  const STOP_SPEAKING_KEY = "\\";
 
   const {
     transcript,
@@ -42,10 +44,16 @@ export function VoiceInput({
     setIsSupported(browserSupportsSpeechRecognition && isMicrophoneAvailable);
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "v" || event.key === "V") {
+      if (
+        event.key === START_SPEAKING_KEY ||
+        event.key === START_SPEAKING_KEY.toLowerCase()
+      ) {
         startListening();
       }
-      if (event.key === "e" || event.key === "E") {
+      if (
+        event.key === STOP_SPEAKING_KEY ||
+        event.key === STOP_SPEAKING_KEY.toLowerCase()
+      ) {
         stopListening();
       }
     };
@@ -67,17 +75,9 @@ export function VoiceInput({
     }
   }, [transcript, currentTranscript, onTranscriptChange]);
 
-  // Handle auto-send timer with improved silence detection
+  // Handle auto-send timer
   useEffect(() => {
-    // Only start timer if listening and transcript has changed (new content detected)
-    if (
-      listening &&
-      transcript.trim() &&
-      transcript !== lastTranscriptRef.current
-    ) {
-      // Update the last transcript reference
-      lastTranscriptRef.current = transcript;
-
+    if (listening && transcript.trim()) {
       // Clear existing timers
       if (timerRef.current) {
         clearTimeout(timerRef.current);
@@ -86,7 +86,7 @@ export function VoiceInput({
         clearInterval(countdownRef.current);
       }
 
-      // Start countdown
+      // Start SECOND_BEFORE_AUTO_SEND-second countdown
       setCountdown(SECOND_BEFORE_AUTO_SEND);
       setAutoSendTimer(SECOND_BEFORE_AUTO_SEND);
 
@@ -119,7 +119,6 @@ export function VoiceInput({
       }
       setAutoSendTimer(null);
       setCountdown(0);
-      lastTranscriptRef.current = "";
     }
 
     return () => {
@@ -134,12 +133,11 @@ export function VoiceInput({
 
   const handleAutoSend = useCallback(() => {
     if (transcript.trim()) {
+      SpeechRecognition.stopListening();
       onSubmit(transcript.trim());
       resetTranscript();
-      onTranscriptChange("");
       setAutoSendTimer(null);
       setCountdown(0);
-      lastTranscriptRef.current = "";
 
       // Clear timers
       if (timerRef.current) {
@@ -148,23 +146,12 @@ export function VoiceInput({
       if (countdownRef.current) {
         clearInterval(countdownRef.current);
       }
-
-      // Continue listening after auto-send
-      setTimeout(() => {
-        if (!listening) {
-          SpeechRecognition.startListening({
-            continuous: true,
-            language: "en-US",
-          });
-        }
-      }, 100);
     }
-  }, [transcript, onSubmit, resetTranscript, listening]);
+  }, [transcript, onSubmit, resetTranscript]);
 
   const startListening = () => {
     resetTranscript();
     onTranscriptChange("");
-    lastTranscriptRef.current = "";
     SpeechRecognition.startListening({
       continuous: true,
       language: "en-US",
@@ -178,7 +165,6 @@ export function VoiceInput({
       resetTranscript();
       onTranscriptChange("");
     }
-    lastTranscriptRef.current = "";
   };
 
   const cancelListening = () => {
@@ -187,7 +173,6 @@ export function VoiceInput({
     onTranscriptChange("");
     setAutoSendTimer(null);
     setCountdown(0);
-    lastTranscriptRef.current = "";
 
     // Clear timers
     if (timerRef.current) {
@@ -320,15 +305,13 @@ export function VoiceInput({
         {!listening ? (
           <div>
             <p className="text-muted-foreground text-sm">
-              Click the microphone or press <strong>'V'</strong> to start
-              speaking
+              Click the microphone or press{" "}
+              <strong>'{START_SPEAKING_KEY}'</strong> to start speaking
             </p>
           </div>
         ) : (
           <p className="text-muted-foreground max-w-md text-xs">
-            Press <strong>'E'</strong> to stop listening or click the stop
-            button. Your message will be sent automatically after{" "}
-            {SECOND_BEFORE_AUTO_SEND} seconds of silence.
+            Press <strong>'{STOP_SPEAKING_KEY}'</strong> to stop listening
           </p>
         )}
       </motion.div>

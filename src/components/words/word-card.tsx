@@ -1,4 +1,7 @@
-import { HoverCard, HoverCardTrigger } from "../ui/hover-card";
+import useWordDefinition from "@/hooks/use-word-definition";
+import { useState } from "react";
+import { Button } from "../ui/button";
+import { WordDefinitionDialog } from "../word-definition-dialog";
 
 interface Word {
   id: number | string;
@@ -11,6 +14,22 @@ interface WordCardProps {
 }
 
 export default function WordCard({ word, searchQuery }: WordCardProps) {
+  const { definition, fetchDefinition } = useWordDefinition();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const open = async (term: string) => {
+    setIsLoading(true);
+    setIsDialogOpen(true);
+    try {
+      await fetchDefinition(term);
+    } catch (error) {
+      console.error("Failed to fetch definition:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const highlightText = (text: string, query: string) => {
     if (!query) return text;
 
@@ -32,21 +51,25 @@ export default function WordCard({ word, searchQuery }: WordCardProps) {
   };
 
   return (
-    <HoverCard>
-      <HoverCardTrigger asChild>
-        <div className="group/word bg-card hover:border-primary/50 relative overflow-hidden rounded-lg border p-4 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-md">
-          <div className="from-primary/5 absolute inset-0 bg-gradient-to-br to-transparent opacity-0 transition-opacity duration-200 group-hover/word:opacity-100"></div>
-          <div className="relative">
-            <p className="text-foreground font-medium break-words">
-              {highlightText(word.text, searchQuery)}
-            </p>
-            <div className="from-primary/20 mt-2 h-px bg-gradient-to-r to-transparent opacity-0 transition-opacity duration-200 group-hover/word:opacity-100"></div>
-          </div>
+    <>
+      <Button
+        variant={"ghost"}
+        className="w-full p-6"
+        onClick={() => open(word.text)}
+      >
+        <div className=""></div>
+        <div className="relative">
+          <p className="w-full text-left font-medium break-words">
+            {highlightText(word.text, searchQuery)}
+          </p>
         </div>
-      </HoverCardTrigger>
-      {/* <HoverCardContent className="w-80 flex-wrap invert">
-        <Markdown>{data?.definition}</Markdown>
-      </HoverCardContent> */}
-    </HoverCard>
+      </Button>
+      <WordDefinitionDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        definition={definition}
+        loading={isLoading}
+      />
+    </>
   );
 }

@@ -2,7 +2,6 @@
 
 import {
   IconAffiliate,
-  IconApi,
   IconBallpen,
   IconBook2,
   IconBrandParsinta,
@@ -80,11 +79,6 @@ const data = {
       title: "Admin",
       url: "admin",
       icon: IconAffiliate,
-    },
-    {
-      title: "API",
-      url: "api",
-      icon: IconApi,
     },
   ],
 };

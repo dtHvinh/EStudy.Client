@@ -53,7 +53,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${ibmPlexSans.className}${geistSans.className} ${geistMono.variable} antialiased`}
+        className={`${best.className} ${geistSans.className}- ${geistMono.variable}- antialiased`}
       >
         <GoogleOAuthProvider clientId={process.env.CLIENT_ID || ""}>
           <ThemeProvider

@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import {
   EditorBubble,
   EditorContent,
@@ -13,7 +14,13 @@ import { slashCommand } from "../text-editor/slash-commands";
 import FlashCardSaveButton from "./html-content-tools/flash-card-save-button";
 import WordDefinitionButton from "./html-content-tools/word-definition-button";
 
-export default function HTMLContent({ content }: { content: string }) {
+export default function HTMLContent({
+  content,
+  className,
+}: {
+  content: string;
+  className?: string;
+}) {
   return (
     <EditorRoot>
       <EditorContent
@@ -27,7 +34,10 @@ export default function HTMLContent({ content }: { content: string }) {
         editorProps={{
           attributes: {
             "data-prose-no-padding": "true",
-            class: `prose just-text prose-lg dark:prose-invert  prose-headings:font-title font-default focus:outline-none max-w-full `,
+            class: cn(
+              `prose just-text prose-lg dark:prose-invert  prose-headings:font-title font-default focus:outline-none max-w-full`,
+              className,
+            ),
           },
         }}
         editable={false}

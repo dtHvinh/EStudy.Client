@@ -30,7 +30,7 @@ import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 
 export default function Page() {
-  const { tests, scrollNext, isTestLoading, getTestError } = useTests({
+  const { tests, scrollNext, isTestLoading, getTestError, refresh } = useTests({
     pageSize: 15,
   });
   const { collections, mutate } = useTestCollection({
@@ -68,9 +68,9 @@ export default function Page() {
             </div>
           </div>
           <div className="space-y-5">
-            <div className="grid grid-cols-2 gap-x-5 gap-y-8 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <div className="grid grid-cols-2 gap-x-5 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
               {tests.map((item) => (
-                <TestCard key={item.id} {...item} />
+                <TestCard onTestDeleted={refresh} key={item.id} {...item} />
               ))}
               {tests.length === 0 && (
                 <div className="col-span-full">

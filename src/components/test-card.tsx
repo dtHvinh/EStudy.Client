@@ -1,14 +1,25 @@
 import { CreateTestCollectionButton } from "@/app/tests/page";
 import { GetTestResponseType } from "@/hooks/use-tests";
 import { cn } from "@/lib/utils";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { IconLibraryPlusFilled } from "@tabler/icons-react";
-import { Clock, MessageCircle, Users } from "lucide-react";
+import { Clock, MessageCircle, Trash2, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 import useSWRInfinite from "swr/infinite";
+import RoleBaseComponent from "./role-base-component";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./ui/alert-dialog";
 import { Button } from "./ui/button";
 import {
   Card,
@@ -28,12 +39,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import { ScrollArea } from "./ui/scroll-area";
 import api from "./utils/requestUtils";
 
 export default function TestCard({
+  onTestDeleted,
   className,
   ...props
-}: { className?: string } & GetTestResponseType) {
+}: { className?: string; onTestDeleted?: () => void } & GetTestResponseType) {
   return (
     <Card
       className={cn("transition-all duration-200 hover:shadow-md", className)}
@@ -103,10 +116,64 @@ export default function TestCard({
           </Button>
         </Link>
         <AddToCollectionButton testId={props.id} />
+        <RoleBaseComponent requireRoles={["Admin", "Instructor"]}>
+          <DeleteTestButton onTestDeleted={onTestDeleted} testId={props.id} />
+        </RoleBaseComponent>
       </CardAction>
     </Card>
   );
 }
+
+const DeleteTestButton = ({
+  testId,
+  onTestDeleted,
+}: {
+  testId: string | number;
+  onTestDeleted?: () => void;
+}) => {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant={"destructive"} size="icon">
+          <Trash2 />
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete Test</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete this test? This action cannot be
+            undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            asChild
+            onClick={async () => {
+              try {
+                await api.delete(`/api/tests/${testId}`);
+                toast.success("Test deleted successfully!", {
+                  duration: 750,
+                  position: "bottom-right",
+                });
+                onTestDeleted?.();
+              } catch (error) {
+                console.error("Error deleting test:", error);
+                toast.error("Failed to delete test.", {
+                  duration: 750,
+                  position: "bottom-right",
+                });
+              }
+            }}
+          >
+            <Button variant="destructive">Delete</Button>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
 
 const AddToCollectionButton = ({ testId }: { testId: string | number }) => {
   const getKey = (pageIndex: number, previousPageData: any) => {

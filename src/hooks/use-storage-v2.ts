@@ -16,6 +16,21 @@ export default function useStorageV2() {
     }
   };
 
+  const uploadAudio = async (file: File) => {
+    try {
+      const response = await api.postWithFormData<{ audioUrl: string }>(
+        "/api/storage/upload/audio",
+        {
+          file,
+        },
+      );
+      return response.audioUrl;
+    } catch (error) {
+      console.error("Error uploading audio:", error);
+      throw error;
+    }
+  };
+
   const uploadFiles = async (files: File[]) => {
     const formData = new FormData();
     files.forEach((file) => {
@@ -72,6 +87,17 @@ export default function useStorageV2() {
     }
   };
 
+  const removeAudio = async (filePath: string) => {
+    try {
+      await api.delete(
+        `/api/storage/remove/audio/` + encodeURIComponent(filePath),
+      );
+    } catch (error) {
+      console.error("Error deleting audio:", error);
+      throw error;
+    }
+  };
+
   const downloadBlob = async (filePath: string) => {
     try {
       const response = await api.post(`/api/storage/download/file`, {
@@ -115,8 +141,10 @@ export default function useStorageV2() {
   };
 
   return {
+    uploadAudio,
     uploadVideo,
     removeVideo,
+    removeAudio,
     getFileUrl,
     getFileRelativeUrl,
     uploadFiles,

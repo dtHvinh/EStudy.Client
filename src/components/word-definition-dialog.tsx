@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { DictionaryEntry } from "@/hooks/use-word-definition";
 import { Volume2Icon } from "lucide-react";
+import { speakUK } from "./utils/utilss";
 
 interface WordDefinitionDialogProps {
   open: boolean;
@@ -25,10 +26,11 @@ export function WordDefinitionDialog({
   loading = false,
 }: WordDefinitionDialogProps) {
   const handlePlayPronunciation = () => {
-    if (definition?.pronunciation) {
-      const utterance = new SpeechSynthesisUtterance(definition.word);
-      speechSynthesis.speak(utterance);
-    }
+    // if (definition?.pronunciation) {
+    //   const utterance = new SpeechSynthesisUtterance(definition.word);
+    //   speechSynthesis.speak(utterance);
+    // }
+    speakUK(definition?.word || "");
   };
 
   return (

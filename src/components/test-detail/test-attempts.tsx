@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import useMyTestAttempts, { TestAttempt } from "@/hooks/use-my-test-attempts";
-import { IconList, IconStarsFilled } from "@tabler/icons-react";
+import { IconList, IconStarsFilled, IconTrophy } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { Clock, Trophy } from "lucide-react";
 import Link from "next/link";
@@ -88,7 +88,7 @@ export default function TestAttempts({ testId }: { testId: string | number }) {
           </div>
         ) : !attempts || attempts.length === 0 ? (
           <div className="py-6 text-center">
-            <Trophy className="text-muted-foreground/50 mx-auto h-8 w-8" />
+            <IconTrophy className="text-muted-foreground/50 mx-auto h-8 w-8" />
             <p className="text-muted-foreground mt-2 text-sm">
               No attempts yet.
             </p>

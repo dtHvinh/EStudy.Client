@@ -37,7 +37,7 @@ export default function useTests({ pageSize = 10 }: { pageSize?: number }) {
     setSearchQuery(query);
   };
 
-  const { data, isLoading, error, setSize } =
+  const { data, isLoading, error, setSize, mutate } =
     useSWRInfinite<GetTestResponseType>(getKey, api.get);
 
   const scrollNext = () => {
@@ -50,5 +50,6 @@ export default function useTests({ pageSize = 10 }: { pageSize?: number }) {
     getTestError: error,
     search,
     scrollNext,
+    refresh: mutate,
   };
 }

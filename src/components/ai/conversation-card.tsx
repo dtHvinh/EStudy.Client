@@ -10,31 +10,59 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { Conversation } from "@/types/ai";
+import { IconTrash } from "@tabler/icons-react";
 import dayjs from "dayjs";
+import { toast } from "sonner";
 import TextContent from "../content/text-content";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
+import { Button } from "../ui/button";
+import api from "../utils/requestUtils";
 
 interface ConversationCardProps {
   conversation: Conversation;
   onClick?: (conversation: Conversation) => void;
+  onDelete?: () => void;
 }
 
 export default function ConversationCard({
   conversation,
   onClick,
+  onDelete,
 }: ConversationCardProps) {
+  const handleDelete = async (id: string) => {
+    try {
+      await api.delete(`/api/ai/conversations/${id}`);
+      toast.success("Conversation deleted successfully");
+      onDelete?.();
+    } catch (error) {
+      toast.error("Failed to delete conversation");
+    }
+  };
+
   return (
-    <Card
-      className="cursor-pointer transition-shadow hover:shadow-lg"
-      onClick={() => onClick?.(conversation)}
-    >
+    <Card className="transition-shadow hover:shadow-lg">
       <CardHeader>
         <div className="flex items-start justify-between">
-          <CardTitle className="line-clamp-2 text-lg">
+          <CardTitle
+            onClick={() => onClick?.(conversation)}
+            className="line-clamp-2 cursor-pointer text-lg hover:underline"
+          >
             {conversation.name}
           </CardTitle>
-          <Badge variant="secondary" className="ml-2 shrink-0">
-            {conversation.messageCount} messages
-          </Badge>
+          <div className="flex items-center justify-center gap-2">
+            <Badge variant="secondary" className="ml-2 shrink-0">
+              {conversation.messageCount} messages
+            </Badge>
+            <DeleteButton onClick={() => handleDelete(conversation.id)} />
+          </div>
         </div>
         {conversation.description && (
           <CardDescription className="line-clamp-2">
@@ -64,3 +92,30 @@ export default function ConversationCard({
     </Card>
   );
 }
+
+const DeleteButton = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button size={"icon"} variant="ghost">
+          <IconTrash />
+        </Button>
+      </AlertDialogTrigger>
+
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete Conversation</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete this conversation?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <Button variant="outline">Cancel</Button>
+          <Button onClick={onClick} variant="destructive">
+            Delete
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};

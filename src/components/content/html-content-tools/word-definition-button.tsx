@@ -14,6 +14,13 @@ export default function WordDefinitionButton() {
   const { editor } = useEditor();
   const [currentTerm, setCurrentTerm] = useState<string>();
 
+  const shouldRender =
+    editor &&
+    editor.state.doc
+      .textBetween(editor.state.selection.from, editor.state.selection.to)
+      .trim()
+      .indexOf(" ") === -1;
+
   useEffect(() => {
     const handleSelectionUpdate = () => {
       if (!editor) return;
@@ -47,15 +54,17 @@ export default function WordDefinitionButton() {
   };
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button onClick={handleClick} size={"icon"} variant="ghost">
-          <IconBook2 />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        <span>Dictionary</span>
-      </TooltipContent>
-    </Tooltip>
+    shouldRender && (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button onClick={handleClick} size={"icon"} variant="ghost">
+            <IconBook2 />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <span>Dictionary</span>
+        </TooltipContent>
+      </Tooltip>
+    )
   );
 }

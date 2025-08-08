@@ -13,6 +13,7 @@ interface ConversationGridProps {
   onDialogOpenChange: (open: boolean) => void;
   onCreateConversation: (data: CreateConversationFormData) => Promise<void>;
   onConversationClick?: (conversation: Conversation) => void;
+  onConversationDelete?: () => void;
 }
 
 export default function ConversationGrid({
@@ -21,6 +22,7 @@ export default function ConversationGrid({
   onDialogOpenChange,
   onCreateConversation,
   onConversationClick,
+  onConversationDelete,
 }: ConversationGridProps) {
   if (conversations.length === 0) {
     return (
@@ -51,6 +53,7 @@ export default function ConversationGrid({
           key={conversation.id}
           conversation={conversation}
           onClick={onConversationClick}
+          onDelete={onConversationDelete}
         />
       ))}
     </div>

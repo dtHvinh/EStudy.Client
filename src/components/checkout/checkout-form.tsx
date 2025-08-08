@@ -56,7 +56,11 @@ function PaymentForm() {
   return (
     <form id="payment-form" onSubmit={handleSubmit}>
       <PaymentElement id="payment-element" options={paymentElementOptions} />
-      <Button disabled={isLoading || !stripe || !elements} id="submit">
+      <Button
+        disabled={isLoading || !stripe || !elements}
+        id="submit"
+        className="mt-4 w-full"
+      >
         <span id="button-text">
           {isLoading ? <div className="spinner" id="spinner"></div> : "Pay now"}
         </span>

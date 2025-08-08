@@ -7,15 +7,27 @@ import { ErrorCard } from "@/components/error-card";
 import MainLayout from "@/components/layouts/MainLayout";
 import NavigateBack from "@/components/navigate-back";
 import TailwindEditor from "@/components/text-editor/text-editor";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import H3 from "@/components/ui/h3";
+import api from "@/components/utils/requestUtils";
 import useAdminActions from "@/hooks/use-admin-actions";
 import useBlogDetail from "@/hooks/use-blog-detail";
-import { IconAlertTriangle } from "@tabler/icons-react";
+import { IconAlertTriangle, IconTrash } from "@tabler/icons-react";
 import { Loader2Icon } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { JSONContent } from "novel";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function Page() {
   const params = useParams();
@@ -61,7 +73,12 @@ export default function Page() {
       {blog &&
         (!blog.isReadOnly ? (
           <>
-            <Title blogId={id} title={title} isHidden={blog.isHidden} />
+            <Title
+              blogId={id}
+              title={title}
+              isHidden={blog.isHidden}
+              isReadonly={blog.isReadOnly}
+            />
             <div spellCheck={false} className="pb-9 md:px-20">
               <TailwindEditor
                 autoFocus
@@ -72,7 +89,12 @@ export default function Page() {
           </>
         ) : (
           <>
-            <Title blogId={id} title={title} isHidden={blog.isHidden} />
+            <Title
+              blogId={id}
+              title={title}
+              isHidden={blog.isHidden}
+              isReadonly={blog.isReadOnly}
+            />
             <div spellCheck={false} className="pb-9 md:px-20">
               <HTMLContent content={blog.content} />
             </div>
@@ -86,12 +108,15 @@ const Title = ({
   title,
   blogId,
   isHidden,
+  isReadonly,
 }: {
   title: string;
   isLock?: boolean;
   blogId: string;
   isHidden: boolean;
+  isReadonly?: boolean;
 }) => {
+  const router = useRouter();
   const { openReport } = useReportForm();
   const { changeBlogVisibility } = useAdminActions();
   const showBlog = async () => {
@@ -99,6 +124,12 @@ const Title = ({
   };
   const hideBlog = async () => {
     await changeBlogVisibility(blogId, false);
+  };
+
+  const deleteBlog = async () => {
+    await api.delete(`/api/blogs/${blogId}`);
+    toast.success("Blog deleted successfully");
+    router.push("/blogs");
   };
 
   useEffect(() => {
@@ -113,18 +144,45 @@ const Title = ({
       </div>
       <div className="flex items-center gap-2">
         <AdminAction onHideContent={hideBlog} onShowContent={showBlog} />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            openReport({
-              type: "blog",
-              targetId: blogId,
-            })
-          }
-        >
-          <IconAlertTriangle />
-        </Button>
+        {isReadonly && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              openReport({
+                type: "blog",
+                targetId: blogId,
+              })
+            }
+          >
+            <IconAlertTriangle />
+          </Button>
+        )}
+        {!isReadonly && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                <IconTrash />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogTitle>Delete Blog</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this blog?
+              </AlertDialogDescription>
+              <AlertDialogFooter>
+                <AlertDialogAction asChild>
+                  <Button variant="destructive" onClick={deleteBlog}>
+                    Delete
+                  </Button>
+                </AlertDialogAction>
+                <AlertDialogCancel asChild>
+                  <Button variant="outline">Cancel</Button>
+                </AlertDialogCancel>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
     </div>
   );

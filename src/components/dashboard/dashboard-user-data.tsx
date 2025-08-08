@@ -1,11 +1,15 @@
 import { UserInfoResponseType } from "@/hooks/use-user-info";
-import { IconStar } from "@tabler/icons-react";
+import { IconCancel, IconCheck, IconEdit, IconStar } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import Link from "next/link";
+import { useState } from "react";
 import DataErrorAlert from "../data-error-alert";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
-import { buttonVariants } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
+import { Input } from "../ui/input";
+import api from "../utils/requestUtils";
+import getInitials from "../utils/utilss";
 
 export default function DashboardUserData({
   user,
@@ -23,14 +27,11 @@ export default function DashboardUserData({
           <Avatar className="h-20 w-20">
             <AvatarImage src={user.profilePicture} alt={user.name} />
             <AvatarFallback className="text-lg">
-              {user.name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")}
+              {getInitials(user.name)}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold">{user.name}</h1>
+            <UserName user={user} />
             <p className="text-muted-foreground">{user.email}</p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <Badge variant="outline">
@@ -40,7 +41,7 @@ export default function DashboardUserData({
           </div>
           {!user.isOnBoarded && (
             <Link
-              href="/onboarding/"
+              href="/onboarding"
               className={buttonVariants({ variant: "outline" })}
             >
               <IconStar className="text-muted-foreground" />
@@ -52,3 +53,64 @@ export default function DashboardUserData({
     </div>
   );
 }
+
+const UserName = ({ user }: { user: UserInfoResponseType | undefined }) => {
+  const [userName, setUserName] = useState(user?.name);
+  const [isDirty, setIsDirty] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleUpdate = async () => {
+    if (!isDirty) {
+      setIsEditing(false);
+      return;
+    }
+
+    await api.put(`/api/user/me`, {
+      name: userName,
+    });
+
+    setIsDirty(false);
+    setIsEditing(false);
+  };
+
+  if (!isEditing) {
+    return (
+      <div className="flex items-center gap-2">
+        <h1 className="text-2xl font-bold">{userName}</h1>
+        <Button
+          size={"icon"}
+          variant={"ghost"}
+          onClick={() => setIsEditing(true)}
+        >
+          <IconEdit className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  } else {
+    return (
+      <div className="flex gap-1">
+        <Input
+          value={userName}
+          autoFocus
+          spellCheck={false}
+          onChange={(e) => {
+            setUserName(e.target.value);
+            setIsDirty(true);
+          }}
+        />
+        <div className="flex items-center gap-1">
+          <Button
+            size={"icon"}
+            variant={"ghost"}
+            onClick={() => setIsEditing(false)}
+          >
+            <IconCancel className="h-4 w-4" />
+          </Button>
+          <Button size={"icon"} variant={"ghost"} onClick={handleUpdate}>
+            <IconCheck className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+};

@@ -25,6 +25,13 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import HTMLContent from "../content/html-content";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../ui/accordion";
+import { Separator } from "../ui/separator";
 import MessageTranslationButton from "./message-translation-button";
 import { SentenceDiff } from "./sentence-diff";
 
@@ -38,6 +45,7 @@ interface MessageProps {
 export function Message({ message, isLast, isLoading, context }: MessageProps) {
   const isUser = message.role === "user";
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
+  const [translatedText, setTranslatedText] = useState<string>();
 
   // Only fetch feedback for user messages when dialog is opened
   const {
@@ -53,6 +61,10 @@ export function Message({ message, isLast, isLoading, context }: MessageProps) {
     if (!feedback && !feedbackLoading) {
       refresh();
     }
+  };
+
+  const handleTranslate = (translatedText: string) => {
+    setTranslatedText(translatedText);
   };
 
   return (
@@ -100,6 +112,19 @@ export function Message({ message, isLast, isLoading, context }: MessageProps) {
           {message.message.length > 0 && (
             <HTMLContent content={message.message} className="text-sm" />
           )}
+          {translatedText && (
+            <>
+              <Separator className="my-2" />
+              <Accordion type="single" collapsible>
+                <AccordionItem value="item-1">
+                  <AccordionTrigger>Translation</AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    {translatedText}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </>
+          )}
           {isLast && isLoading && message.role === "assistant" && (
             <motion.span
               animate={{ opacity: [0, 1, 0] }}
@@ -111,7 +136,11 @@ export function Message({ message, isLast, isLoading, context }: MessageProps) {
           )}
         </motion.div>
         {!isUser && (
-          <MessageTranslationButton text={message.message} context={context} />
+          <MessageTranslationButton
+            text={message.message}
+            context={context}
+            onTranslated={handleTranslate}
+          />
         )}
 
         {/* Feedback Button for User Messages */}

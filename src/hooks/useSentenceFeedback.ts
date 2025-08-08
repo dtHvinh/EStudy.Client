@@ -47,7 +47,7 @@ export function useSentenceFeedback(sentence?: string) {
       fetchFeedback();
     }
   }, [sentence]);
-  console.log(data);
+
   return {
     feedback: data,
     isLoading,

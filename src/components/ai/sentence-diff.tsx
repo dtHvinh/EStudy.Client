@@ -13,7 +13,7 @@ export function SentenceDiff({ original, modified }: SentenceDiffProps) {
 
   return (
     <div>
-      <Separator />
+      <Separator className="my-4" />
       <h4 className="mb-2 flex items-center gap-2 text-sm font-medium">
         <MessageSquareDiff className="h-4 w-4 text-blue-500" />
         Sentence Comparison

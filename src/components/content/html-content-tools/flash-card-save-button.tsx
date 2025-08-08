@@ -14,6 +14,7 @@ export default function FlashCardSaveButton() {
   const { setInitialTerm, initialTerm, clearInitialTerm, onOpenChange } =
     useAddCard();
 
+  // If the initial term doesn't contain a space, then we can render the button
   const shouldRender = editor && initialTerm.indexOf(" ") === -1;
 
   useEffect(() => {

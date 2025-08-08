@@ -8,6 +8,7 @@ import api from "@/components/utils/requestUtils";
 import type { Conversation, CreateConversationFormData } from "@/types/ai";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 import useSWRInfinite from "swr/infinite";
 
@@ -16,6 +17,14 @@ export default function Page() {
     if (previousPageData && !previousPageData.length) return null; // reached the end
     return `/api/ai/conversations?page=${pageIndex + 1}&pageSize=15`; // API endpoint with pagination
   };
+
+  const { ref } = useInView({
+    onChange: (inView) => {
+      if (inView) {
+        setSize((prev) => prev + 1);
+      }
+    },
+  });
 
   const { data, isLoading, error, mutate, setSize } = useSWRInfinite<
     Conversation[]
@@ -67,7 +76,9 @@ export default function Page() {
           onDialogOpenChange={setIsDialogOpen}
           onCreateConversation={handleCreateConversation}
           onConversationClick={handleConversationClick}
+          onConversationDelete={mutate}
         />
+        <div className="h-2" ref={ref}></div>
       </div>
     </MainLayout>
   );

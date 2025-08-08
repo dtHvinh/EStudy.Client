@@ -30,6 +30,7 @@ export default function HTMLContent({
           GlobalDragHandle,
           AutoJoiner,
         ]}
+        immediatelyRender={false}
         initialContent={content as unknown as JSONContent}
         editorProps={{
           attributes: {

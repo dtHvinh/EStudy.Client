@@ -108,7 +108,7 @@ export default function StudentPageCourses() {
               Complete your payment to enroll in the course.
             </DialogDescription>
           </DialogHeader>
-          <div>
+          <div className="max-h-[700px] overflow-y-scroll">
             {clientSecret && <CheckoutForm clientSecret={clientSecret} />}
           </div>
         </DialogContent>

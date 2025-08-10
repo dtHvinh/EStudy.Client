@@ -25,7 +25,6 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import ReportDetailsButton from "./report-details-button";
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -109,10 +108,6 @@ export default function ReportRow({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <ReportDetailsButton
-              onReportProcessSuccess={onReportProcessSuccess}
-              report={report}
-            />
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem onClick={resolveReport}>
               <CheckCircle className="mr-2 h-4 w-4" />

@@ -79,7 +79,7 @@ export function RegisterForm({
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
       });
-      router.push("/way");
+      router.push("/onboarding");
     } catch (error) {
       setFormErrors(error, form.setError);
     } finally {
@@ -101,7 +101,7 @@ export function RegisterForm({
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="flex flex-col gap-4">
                 {form.formState.errors.root && (
-                  <div className="text-sm text-destructive">
+                  <div className="text-destructive text-sm">
                     {form.formState.errors.root.message}
                   </div>
                 )}

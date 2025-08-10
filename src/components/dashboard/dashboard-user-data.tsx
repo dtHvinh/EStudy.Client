@@ -3,6 +3,7 @@ import { IconCancel, IconCheck, IconEdit, IconStar } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 import DataErrorAlert from "../data-error-alert";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
@@ -62,6 +63,11 @@ const UserName = ({ user }: { user: UserInfoResponseType | undefined }) => {
   const handleUpdate = async () => {
     if (!isDirty) {
       setIsEditing(false);
+      return;
+    }
+
+    if (userName?.trim().length === 0) {
+      toast.error("Name cannot be empty");
       return;
     }
 

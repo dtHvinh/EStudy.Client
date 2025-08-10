@@ -278,6 +278,7 @@ export function LessonTreeItem({
                         previews={lesson.attachedFileUrls}
                         getFileUrlFn={getFileUrl}
                         getFileRelativeUrlFn={getFileRelativeUrl}
+                        notVideo={true}
                       />
                     </div>
                   </div>
@@ -293,6 +294,7 @@ export function LessonTreeItem({
                         previews={lesson.videoUrl ? [lesson.videoUrl] : []}
                         getFileUrlFn={getFileUrl}
                         getFileRelativeUrlFn={getFileRelativeUrl}
+                        notVideo={false}
                       />
                     </div>
 

@@ -4,7 +4,7 @@ import { useGenericToggle } from "@/hooks/use-generic-toggle";
 import { cn } from "@/lib/utils";
 import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import dayjs from "dayjs";
-import { Calendar, Edit3, EditIcon, Trash } from "lucide-react";
+import { Calendar, Edit3, Trash } from "lucide-react";
 import Link from "next/link";
 import {
   AlertDialog,
@@ -57,12 +57,6 @@ export function BlogCard({ ...props }: BlogPostCardProps) {
           <BlogCardDisplay {...props} />
         </ContextMenuTrigger>
         <ContextMenuContent className="w-52">
-          <ContextMenuItem inset>
-            Edit
-            <ContextMenuShortcut>
-              <EditIcon />
-            </ContextMenuShortcut>
-          </ContextMenuItem>
           <ContextMenuItem variant="destructive" onClick={deleteOpen} inset>
             <span>Delete</span>
             <ContextMenuShortcut>

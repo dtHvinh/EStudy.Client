@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import TextContent from "../content/text-content";
 import {
   AlertDialog,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -110,7 +111,7 @@ const DeleteButton = ({ onClick }: { onClick: () => void }) => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <Button variant="outline">Cancel</Button>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <Button onClick={onClick} variant="destructive">
             Delete
           </Button>

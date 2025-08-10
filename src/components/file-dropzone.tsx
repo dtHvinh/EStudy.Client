@@ -16,7 +16,7 @@ type FileDropzoneProps = {
   getFileUrlFn: (url: string) => string;
 };
 
-const FileDropzone: React.FC<FileDropzoneProps> = ({
+const FileDropzone: React.FC<FileDropzoneProps & { notVideo: boolean }> = ({
   onFilesSelected,
   onFilesRemoved,
   accept = {
@@ -32,6 +32,7 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
   isLoading = false,
   getFileRelativeUrlFn: getFileRelativeUrl,
   getFileUrlFn: getFileUrl,
+  notVideo,
 }) => {
   const onDrop = useCallback(
     (acceptedFiles: FileWithPath[]) => {
@@ -46,8 +47,13 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
     maxFiles,
     disabled: isLoading,
     onDropRejected: (_, event) => {
-      toast.error("You can only upload up to " + maxFiles + " files.");
+      toast.error(
+        "You can only upload up to " +
+          maxFiles +
+          " files. And each file must be smaller than 10MB.",
+      );
     },
+    maxSize: notVideo ? 10 * 1024 * 1024 : undefined,
   });
 
   const handleRemoveAllFiles = () => {

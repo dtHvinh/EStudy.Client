@@ -62,7 +62,7 @@ export default function Page() {
 
   return (
     <MainLayout>
-      <div className="flex flex-col overflow-hidden md:h-[calc(100vh-3*var(--header-height))]">
+      <div className="flex flex-col overflow-hidden md:h-[calc(100vh-2*var(--header-height))]">
         <div className="flex items-center justify-between px-4">
           <div className="block">
             <NavigateBack />

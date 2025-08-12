@@ -19,6 +19,7 @@ export function ChatInterface({ conversationId }: { conversationId: string }) {
     conversationId,
     initialMessages,
   });
+
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 

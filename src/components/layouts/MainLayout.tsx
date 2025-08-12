@@ -49,7 +49,7 @@ export default function MainLayout({
                       <div
                         className={cn(
                           "flex flex-col gap-4 md:gap-6",
-                          childDefaultPadding && "pt-4 md:pt-6",
+                          childDefaultPadding && "py-4 md:py-6",
                         )}
                       >
                         {children}

@@ -14,7 +14,6 @@ export default function useConversationMessage(
   );
 
   const scrollNext = () => setSize((prev) => prev + 1);
-  const messages = data ? data.flat() : [];
-
+  const messages = data ? data.flat().reverse() : [];
   return { messages, error, isLoading, scrollNext };
 }

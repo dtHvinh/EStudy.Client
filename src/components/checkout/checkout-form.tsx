@@ -8,13 +8,13 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
 
 function PaymentForm() {
   const stripe = useStripe();
   const elements = useElements();
 
-  const [message, setMessage] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,9 +41,9 @@ function PaymentForm() {
     // be redirected to an intermediate site first to authorize the payment, then
     // redirected to the `return_url`.
     if (error.type === "card_error" || error.type === "validation_error") {
-      setMessage(error.message);
+      toast.error(error.message);
     } else {
-      setMessage("An unexpected error occurred.");
+      toast.error("Unexpected error");
     }
 
     setIsLoading(false);
@@ -66,7 +66,6 @@ function PaymentForm() {
         </span>
       </Button>
       {/* Show any error or success messages */}
-      {message && <div id="payment-message">{message}</div>}
     </form>
   );
 }

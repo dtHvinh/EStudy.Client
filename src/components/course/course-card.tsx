@@ -193,9 +193,9 @@ export function CourseCard({
       </CardContent>
 
       {showActions && (
-        <>
+        <div className="mt-auto">
           <Separator />
-          <CardFooter className="px-5 pt-0">
+          <CardFooter className="mt-4 px-5">
             <div className="flex w-full gap-2">
               {onViewDetails ? (
                 <Button
@@ -252,7 +252,7 @@ export function CourseCard({
               )}
             </div>
           </CardFooter>
-        </>
+        </div>
       )}
     </Card>
   );

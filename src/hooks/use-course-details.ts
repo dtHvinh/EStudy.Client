@@ -22,6 +22,8 @@ export type GetCourseDetailsType = {
   averageRating: number;
 
   instructor?: InstructorDataResponse;
+
+  isEnrolled: boolean;
 };
 export interface InstructorDataResponse {
   id: number;

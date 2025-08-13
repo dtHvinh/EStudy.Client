@@ -3,6 +3,7 @@ import useGetCourses from "@/hooks/use-get-courses";
 import { useGenericToggle } from "@/hooks/use-generic-toggle";
 import { CourseDifficultyLevel } from "@/types/constants";
 import { PriceFilterValues } from "@/types/course-price-constants";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import CheckoutForm from "../checkout/checkout-form";
@@ -20,6 +21,7 @@ import { CourseCard } from "./course-card";
 import CourseFilter from "./course-filter";
 
 export default function StudentPageCourses() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [price, setPrice] = useState<PriceFilterValues>("all");
   const [difficulty, setDifficulty] = useState<CourseDifficultyLevel>("All");
@@ -36,6 +38,14 @@ export default function StudentPageCourses() {
     if (!course) {
       toast.error("Course not found");
       return;
+    }
+    if (course.price == 0) {
+      try {
+        await api.post(`/api/courses/${courseId}/enroll-free`, {});
+        toast.success("Enrolled in course successfully");
+        router.push(`/courses/${courseId}/learn`);
+        return;
+      } catch (error) {}
     }
     try {
       const { clientSecret } = await api.post<{ clientSecret: string }>(
@@ -108,7 +118,7 @@ export default function StudentPageCourses() {
               Complete your payment to enroll in the course.
             </DialogDescription>
           </DialogHeader>
-          <div className="max-h-[700px] overflow-y-scroll">
+          <div className="max-h-[400px] overflow-x-hidden overflow-y-scroll">
             {clientSecret && <CheckoutForm clientSecret={clientSecret} />}
           </div>
         </DialogContent>

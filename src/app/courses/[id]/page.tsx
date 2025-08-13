@@ -1,22 +1,70 @@
 "use client";
+import CheckoutForm from "@/components/checkout/checkout-form";
 import MainLayout from "@/components/layouts/MainLayout";
 import RoleBaseComponent from "@/components/role-base-component";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import api from "@/components/utils/requestUtils";
 import getInitials from "@/components/utils/utilss";
 import useCourseDetails, {
   GetCourseDetailsType,
 } from "@/hooks/use-course-details";
+import { useGenericToggle } from "@/hooks/use-generic-toggle";
 import useStorageV2 from "@/hooks/use-storage-v2";
+
 import { IconPencil } from "@tabler/icons-react";
 import { Award, Clock, Globe, PlayCircle, Star, Users } from "lucide-react";
-import { use } from "react";
+import Link from "next/link";
+import router from "next/router";
+import { use, useState } from "react";
+import { toast } from "sonner";
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { course } = useCourseDetails(id);
   const { getFileUrl } = useStorageV2();
+
+  //For payment
+  const { opened, openChange } = useGenericToggle();
+  const [clientSecret, setClientSecret] = useState<string>();
+
+  const handleEnroll = async () => {
+    if (!course) {
+      toast.error("Course not found");
+      return;
+    }
+    if (course.price == 0) {
+      try {
+        await api.post(`/api/courses/${course.id}/enroll-free`, {});
+        toast.success("Enrolled in course successfully");
+        router.push(`/courses/${course.id}/learn`);
+        return;
+      } catch (error) {}
+    }
+    try {
+      const { clientSecret } = await api.post<{ clientSecret: string }>(
+        `/api/courses/create-payment-intent`,
+        {
+          id: course.id,
+        },
+      );
+
+      setClientSecret(clientSecret);
+    } catch (error) {
+      toast.error("Failed to load checkout");
+      return;
+    }
+    openChange(true);
+  };
+
   return (
     <MainLayout>
       {course && (
@@ -81,12 +129,21 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     </div>
                     <div className="flex flex-col gap-4 sm:flex-row">
                       <RoleBaseComponent requireRoles={["Student"]}>
-                        <Button
-                          size="lg"
-                          className="bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-primary/30 transform px-8 py-3 font-semibold shadow-lg transition-all duration-200 hover:-translate-y-0.5"
-                        >
-                          Enroll Now - ${course.price}
-                        </Button>
+                        {course.isEnrolled ? (
+                          <Button asChild>
+                            <Link href={`/courses/${course.id}/learn`}>
+                              Continue
+                            </Link>
+                          </Button>
+                        ) : (
+                          <Button
+                            size="lg"
+                            onClick={handleEnroll}
+                            className="bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-primary/30 transform px-8 py-3 font-semibold shadow-lg transition-all duration-200 hover:-translate-y-0.5"
+                          >
+                            Enroll Now - ${course.price}
+                          </Button>
+                        )}
                       </RoleBaseComponent>
                       <RoleBaseComponent requireRoles={["Instructor", "Admin"]}>
                         <Button
@@ -118,6 +175,20 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             </section>
 
             <CourseInfo course={course} />
+
+            <Dialog open={opened} onOpenChange={openChange}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Payment Portal</DialogTitle>
+                  <DialogDescription>
+                    Complete your payment to enroll in the course.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="max-h-[400px] overflow-x-hidden overflow-y-scroll">
+                  {clientSecret && <CheckoutForm clientSecret={clientSecret} />}
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </>
       )}

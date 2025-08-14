@@ -57,7 +57,7 @@ export default function CourseRevenue({ monthRange }: { monthRange: number }) {
     <div>
       <Card>
         <CardHeader>
-          <CardTitle>Course revenue</CardTitle>
+          <CardTitle>Course Revenue</CardTitle>
           <CardDescription>
             Showing total revenue for the last {monthRange} months
           </CardDescription>

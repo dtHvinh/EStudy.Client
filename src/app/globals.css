@@ -198,3 +198,8 @@ html {
   -ms-user-select: none; /* IE 10 and IE 11 */
   user-select: none; /* Standard syntax */
 }
+
+/*Hide error overlay*/
+nextjs-portal {
+  display: none;
+}

@@ -1,5 +1,6 @@
 import { FlashCardResponseType } from "@/hooks/use-set-cards";
 import { useSpeechSynthesis } from "@/hooks/use-speech-synthesis";
+import useStorageV2 from "@/hooks/use-storage-v2";
 import { IconLoaderQuarter, IconVolume } from "@tabler/icons-react";
 import ButtonIcon from "./button-icon";
 import MediaRenderer from "./resources/media-renderer";
@@ -7,6 +8,7 @@ import { AspectRatio } from "./ui/aspect-ratio";
 import { Badge } from "./ui/badge";
 
 export default function FlashCardDetail({ ...props }: FlashCardResponseType) {
+  const { getFileUrl } = useStorageV2();
   return (
     <>
       <div className="flex items-start justify-between gap-3">
@@ -64,7 +66,7 @@ export default function FlashCardDetail({ ...props }: FlashCardResponseType) {
           className="overflow-hidden rounded-lg border"
         >
           <MediaRenderer
-            url={props.imageUrl}
+            url={getFileUrl(props.imageUrl)}
             className="h-full w-full object-cover"
           />
         </AspectRatio>

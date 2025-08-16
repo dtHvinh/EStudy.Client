@@ -218,6 +218,7 @@ export default function useStreamingVoiceChat(
         webSocket.current.readyState !== WebSocket.OPEN
       ) {
         console.error("WebSocket is not open");
+        initializeWebSocket();
         return;
       }
 
@@ -242,7 +243,6 @@ export default function useStreamingVoiceChat(
         },
       ]);
 
-      // Send message to backend (expects array format)
       webSocket.current.send(
         JSON.stringify({
           messages: [
@@ -254,14 +254,6 @@ export default function useStreamingVoiceChat(
           ],
         }),
       );
-
-      console.log([
-        ...initialMessages,
-        {
-          role: "user",
-          content,
-        },
-      ]);
     },
     [stopAudio],
   );

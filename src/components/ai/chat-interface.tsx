@@ -25,6 +25,7 @@ export function ChatInterface({ conversationId }: { conversationId: string }) {
 
   const { ref } = useInView({
     onChange: (inView) => {
+      if (initialMessages.length < 5) return;
       if (inView) {
         scrollNext();
       }
@@ -78,15 +79,20 @@ export function ChatInterface({ conversationId }: { conversationId: string }) {
                       isLast={index === messages.length - 1}
                     />
                   ))}
-                  {messages.map((message, index) => (
-                    <Message
-                      context={details?.context}
-                      isLoading={isProcessing}
-                      key={index}
-                      message={message}
-                      isLast={index === messages.length - 1}
-                    />
-                  ))}
+                  {messages
+                    .filter(
+                      (msg) =>
+                        !initialMessages.map((e) => e.id).includes(msg.id),
+                    )
+                    .map((message, index) => (
+                      <Message
+                        context={details?.context}
+                        isLoading={isProcessing}
+                        key={index}
+                        message={message}
+                        isLast={index === messages.length - 1}
+                      />
+                    ))}
                 </>
               )}
             </AnimatePresence>

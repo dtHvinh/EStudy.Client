@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 import useSWR from "swr";
 import DataErrorAlert from "../data-error-alert";
 import api from "../utils/requestUtils";
@@ -27,18 +28,20 @@ export function RelatedTests({ testId }: { testId?: string | number }) {
       </CardHeader>
       <CardContent className="grid grid-cols-1 gap-4">
         {relatedTestsData?.map((test) => (
-          <div
-            key={test.id}
-            className="hover:bg-muted/50 cursor-pointer rounded-lg border p-4 transition-colors"
-          >
-            <h4 className="mb-1 font-medium">{test.title}</h4>
-            <p className="text-muted-foreground line-clamp-1 text-sm">
-              {test.description || "No description available"}
-            </p>
-            <p className="text-muted-foreground">
-              {test.questionCount} questions • {test.duration} min
-            </p>
-          </div>
+          <Link href={`/tests/${test.id}`}>
+            <div
+              key={test.id}
+              className="hover:bg-muted/50 cursor-pointer rounded-lg border p-4 transition-colors"
+            >
+              <h4 className="mb-1 font-medium">{test.title}</h4>
+              <p className="text-muted-foreground line-clamp-1 text-sm">
+                {test.description || "No description available"}
+              </p>
+              <p className="text-muted-foreground">
+                {test.questionCount} questions • {test.duration} min
+              </p>
+            </div>
+          </Link>
         ))}
         {isLoading && <p className="text-muted-foreground">Loading...</p>}
         {error && <DataErrorAlert title="Failed to load related tests" />}

@@ -120,7 +120,7 @@ export default function CourseRatings({
                   <StarRating
                     rating={myRating.value}
                     interactive={false}
-                    size="w-6 h-6"
+                    size="w-6 h-6 mx-auto"
                   />
                   <div className="text-muted-foreground text-sm">
                     {myRating.review || "No review provided"}

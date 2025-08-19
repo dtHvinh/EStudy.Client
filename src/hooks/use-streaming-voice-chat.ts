@@ -85,7 +85,6 @@ export default function useStreamingVoiceChat(
     webSocket.current.onmessage = async (event) => {
       if (typeof event.data === "string") {
         if (event.data === MessageSymbol.VOICE_STREAM_END) {
-          console.log("Voice stream ended, checking for pending chunks...");
           streamEnded.current = true;
 
           // Check if there are pending chunks or if we can play immediately

@@ -86,7 +86,7 @@ export default function ConversationCard({
         </div>
       </CardContent>
 
-      <CardFooter className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+      <CardFooter className="mt-auto flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
         <span>Created {dayjs(conversation.creationDate).fromNow()}</span>
         <span>Active {dayjs(conversation.lastActive).fromNow()}</span>
       </CardFooter>

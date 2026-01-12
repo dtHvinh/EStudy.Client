@@ -29,32 +29,32 @@ export default function Page() {
       <div className="container mx-auto p-6">
         <h1 className="text-3xl font-bold mb-4">User Profile</h1>
         {userProfile && (
-          <div className="space-y-4">
+          <dl className="space-y-4">
             <div>
-              <label className="font-semibold">Name:</label>
-              <p>{userProfile.name}</p>
+              <dt className="font-semibold">Name:</dt>
+              <dd>{userProfile.name}</dd>
             </div>
             <div>
-              <label className="font-semibold">Username:</label>
-              <p>{userProfile.userName}</p>
+              <dt className="font-semibold">Username:</dt>
+              <dd>{userProfile.userName}</dd>
             </div>
             <div>
-              <label className="font-semibold">Email:</label>
-              <p>{userProfile.email}</p>
+              <dt className="font-semibold">Email:</dt>
+              <dd>{userProfile.email}</dd>
             </div>
             {userProfile.phoneNumber && (
               <div>
-                <label className="font-semibold">Phone:</label>
-                <p>{userProfile.phoneNumber}</p>
+                <dt className="font-semibold">Phone:</dt>
+                <dd>{userProfile.phoneNumber}</dd>
               </div>
             )}
             {userProfile.bio && (
               <div>
-                <label className="font-semibold">Bio:</label>
-                <p>{userProfile.bio}</p>
+                <dt className="font-semibold">Bio:</dt>
+                <dd>{userProfile.bio}</dd>
               </div>
             )}
-          </div>
+          </dl>
         )}
       </div>
     </MainLayout>

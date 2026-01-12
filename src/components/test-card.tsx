@@ -1,4 +1,4 @@
-import { CreateTestCollectionButton } from "@/app/tests/page";
+import { CreateTestCollectionButton } from "@/components/create-test-collection-button";
 import { GetTestResponseType } from "@/hooks/use-tests";
 import { cn } from "@/lib/utils";
 import { IconLibraryPlusFilled } from "@tabler/icons-react";

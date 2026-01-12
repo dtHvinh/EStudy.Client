@@ -11,7 +11,7 @@ import { ChangeEvent, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 import { useDebouncedCallback } from "use-debounce";
-import { CreateTestCollectionButton } from "../tests/page";
+import { CreateTestCollectionButton } from "@/components/create-test-collection-button";
 
 export default function Page() {
   const { inView, ref } = useInView();

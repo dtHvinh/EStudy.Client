@@ -37,6 +37,7 @@ export const CreateTestCollectionButton = ({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const res = await api.post<TestCollectionType>(
         "/api/tests/test-collections",

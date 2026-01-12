@@ -116,34 +116,12 @@ export function playSound(url: string) {
 }
 
 function makeid(length: number): string {
-  var result = "";
-  var characters =
+  let result = "";
+  let characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  var charactersLength = characters.length;
-  for (var i = 0; i < length; i++) {
+  let charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   return result;
-}
-
-export function generateFileName(originalName: string): string {
-  const extension = originalName.includes(".")
-    ? "." + originalName.split(".").pop()
-    : "";
-
-  const baseName = originalName.replace(/\.[^/.]+$/, "");
-
-  const safeBase = baseName
-    .toLowerCase()
-    .normalize("NFD") // remove accents
-    .replace(/[\u0300-\u036f]/g, "") // remove diacritics
-    .replace(/[^a-z0-9\-]+/g, "-") // replace unsafe chars with "-"
-    .replace(/-+/g, "-") // remove repeated dashes
-    .replace(/^-|-$/g, ""); // trim dashes
-
-  const randomstring = require("randomstring");
-
-  const random = randomstring.generate(7);
-
-  return `${random}-${safeBase}${extension}`;
 }
